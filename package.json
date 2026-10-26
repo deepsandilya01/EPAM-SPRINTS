@@ -1,0 +1,13 @@
+{
+  "name": "epam-sprints",
+  "version": "1.0.0",
+  "private": true,
+  "description": "IntelliTwin — Enterprise Supply Chain Graph & Scenario Generator (Team PHOTON)",
+  "scripts": {
+    "dev": "npm --prefix frontend run dev",
+    "build": "npm --prefix frontend run build",
+    "test": "npm --prefix frontend run test",
+    "lint": "npm --prefix frontend run lint",
+    "format": "npm --prefix frontend run format"
+  }
+}
