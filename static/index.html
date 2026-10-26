@@ -1,0 +1,1620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Photon Sprint 1 — Supply-Chain Graph</title>
+  <meta name="description" content="Interactive supply-chain dependency graph for Team Photon Sprint 1. Visualise suppliers, parts, products, and customer orders." />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+
+  <!-- D3.js -->
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+
+  <style>
+    /* ───────────────── Reset & Tokens ───────────────── */
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      /* palette — matches the reference image */
+      --col-supplier:    #D6436E;
+      --col-part:        #F5A623;
+      --col-product:     #1AABB8;
+      --col-order:       #2C5F8A;
+      --col-order-dim:   #B0B8C1;
+
+      --bg-body:         #0F1117;
+      --bg-panel:        rgba(22, 25, 37, 0.82);
+      --bg-card:         rgba(30, 34, 50, 0.90);
+      --border-glass:    rgba(255,255,255,0.08);
+      --text-primary:    #E8ECF2;
+      --text-secondary:  #8A92A6;
+      --accent-glow:     rgba(26,171,184,0.35);
+
+      --font: 'Inter', system-ui, -apple-system, sans-serif;
+      --radius: 14px;
+      --shadow: 0 8px 32px rgba(0,0,0,0.45);
+    }
+
+    html, body { height: 100%; }
+    body {
+      font-family: var(--font);
+      background: var(--bg-body);
+      color: var(--text-primary);
+      overflow: hidden;
+    }
+
+    /* ───────────────── Layout ───────────────── */
+    #app {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    /* Top bar */
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 28px;
+      background: var(--bg-panel);
+      backdrop-filter: blur(18px);
+      border-bottom: 1px solid var(--border-glass);
+      z-index: 10;
+    }
+    header h1 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+      background: linear-gradient(135deg, var(--col-product), #7dd3fc);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    header .subtitle {
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+      margin-left: 14px;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 18px;
+      border: 1px solid var(--border-glass);
+      border-radius: 10px;
+      background: var(--bg-card);
+      color: var(--text-primary);
+      font-family: var(--font);
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      backdrop-filter: blur(8px);
+    }
+    .btn:hover { background: rgba(26,171,184,0.15); border-color: var(--col-product); }
+    .btn:disabled { opacity: 0.35; cursor: not-allowed; }
+    .btn:disabled:hover { background: var(--bg-card); border-color: var(--border-glass); }
+    .btn svg { width: 15px; height: 15px; }
+
+    .btn--danger { border-color: rgba(214,67,110,0.3); }
+    .btn--danger:hover { background: rgba(214,67,110,0.18); border-color: var(--col-supplier); }
+
+    .btn--reset { border-color: rgba(245,166,35,0.3); }
+    .btn--reset:hover { background: rgba(245,166,35,0.15); border-color: var(--col-part); }
+
+    /* Canvas area */
+    #graph-container {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+    }
+    #graph-container svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    /* ───────────────── Bottom Output Panel ("What happens when you delete a node") ───────────────── */
+    #bottom-output-panel {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 195px;
+      background: rgba(15, 18, 28, 0.95);
+      backdrop-filter: blur(24px);
+      border-top: 1px solid var(--border-glass);
+      z-index: 40;
+      box-shadow: 0 -8px 32px rgba(0,0,0,0.5);
+      display: flex;
+      flex-direction: column;
+      transition: height 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    #bottom-output-panel.minimized {
+      height: 40px;
+    }
+    #bottom-output-panel .panel-dock-header {
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      background: rgba(22, 27, 42, 0.9);
+      border-bottom: 1px solid var(--border-glass);
+      flex-shrink: 0;
+    }
+    #bottom-output-panel .dock-title {
+      font-size: 0.76rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-primary);
+    }
+    #bottom-output-panel .dock-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--col-product);
+      box-shadow: 0 0 8px var(--col-product);
+      animation: pulseDot 2s infinite ease-in-out;
+    }
+    @keyframes pulseDot {
+      0%, 100% { opacity: 0.6; transform: scale(0.9); }
+      50% { opacity: 1; transform: scale(1.15); }
+    }
+
+    /* Embedded Legend in dock header */
+    .dock-legend {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      font-size: 0.70rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+    .dock-legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .dock-legend-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .dock-legend-line {
+      width: 20px;
+      height: 2px;
+      background: var(--text-secondary);
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+
+    .dock-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-dock {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid var(--border-glass);
+      color: var(--text-secondary);
+      font-size: 0.68rem;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .btn-dock:hover {
+      background: rgba(255,255,255,0.12);
+      color: var(--text-primary);
+    }
+
+    #bottom-output-panel .panel-dock-body {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+    }
+
+    /* Column 1: Impact Preview */
+    .dock-col-impact {
+      flex: 1.35;
+      padding: 12px 20px;
+      border-right: 1px solid var(--border-glass);
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .impact-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .impact-title {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--col-supplier);
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .impact-target-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      background: rgba(255,255,255,0.08);
+      color: var(--text-primary);
+    }
+
+    .impact-content {
+      font-size: 0.74rem;
+      line-height: 1.55;
+      color: var(--text-secondary);
+    }
+    .impact-card-empty {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      background: rgba(255,255,255,0.03);
+      border-radius: 8px;
+      border: 1px dashed rgba(255,255,255,0.1);
+      font-size: 0.74rem;
+      color: var(--text-secondary);
+    }
+    .impact-card-empty strong { color: var(--text-primary); }
+    .impact-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 8px;
+    }
+    .impact-box {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 8px;
+      padding: 6px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .impact-box-label {
+      font-size: 0.64rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-secondary);
+      font-weight: 600;
+    }
+    .impact-box-val {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex-wrap: wrap;
+    }
+    .impact-pill {
+      display: inline-block;
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-size: 0.65rem;
+      font-weight: 600;
+      background: rgba(255,255,255,0.08);
+      color: var(--text-primary);
+    }
+    .complexity-tag {
+      background: linear-gradient(135deg, rgba(26,171,184,0.25), rgba(44,95,138,0.3));
+      border: 1px solid rgba(26,171,184,0.4);
+      color: #7dd3fc;
+      padding: 2px 7px;
+      border-radius: 5px;
+      font-family: monospace;
+      font-weight: 800;
+      font-size: 0.72rem;
+    }
+
+    /* Column 2: Log History */
+    .dock-col-log {
+      flex: 1;
+      padding: 12px 20px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .log-title {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--col-product);
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .log-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .log-item {
+      padding: 6px 10px;
+      background: rgba(255,255,255,0.03);
+      border-left: 3px solid rgba(255,255,255,0.2);
+      border-radius: 0 6px 6px 0;
+      font-size: 0.71rem;
+      line-height: 1.45;
+    }
+    .log-item.delete { border-left-color: var(--col-supplier); }
+    .log-item.undo { border-left-color: var(--col-product); }
+    .log-item.reset { border-left-color: var(--col-part); }
+    .log-item-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 2px;
+    }
+    .log-item-action { font-weight: 700; }
+    .log-item-time { font-size: 0.63rem; color: rgba(138,146,166,0.6); }
+
+    /* ───────────────── Small Undo Timing Popup (5 Seconds) ───────────────── */
+    #undo-timing-popup {
+      position: fixed;
+      top: 80px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-24px);
+      width: 480px;
+      max-width: 92vw;
+      background: rgba(18, 22, 34, 0.95);
+      backdrop-filter: blur(28px);
+      border: 1px solid rgba(26,171,184,0.4);
+      border-radius: 14px;
+      box-shadow: 0 16px 48px rgba(0,0,0,0.6), 0 0 40px rgba(26,171,184,0.18);
+      z-index: 500;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    #undo-timing-popup.visible {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateX(-50%) translateY(0);
+    }
+    .undo-popup-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 18px 10px;
+      border-bottom: 1px solid var(--border-glass);
+      background: linear-gradient(90deg, rgba(26,171,184,0.12), transparent);
+    }
+    .undo-popup-head-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .undo-popup-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: rgba(26,171,184,0.22);
+      border: 1px solid rgba(26,171,184,0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--col-product);
+    }
+    .undo-popup-icon svg { width: 17px; height: 17px; }
+    .undo-popup-title {
+      font-size: 0.88rem;
+      font-weight: 800;
+      color: var(--text-primary);
+    }
+    .undo-popup-subtitle {
+      font-size: 0.68rem;
+      color: var(--text-secondary);
+    }
+    .undo-timer-tag {
+      font-size: 0.70rem;
+      font-weight: 700;
+      color: #7dd3fc;
+      background: rgba(26,171,184,0.18);
+      border: 1px solid rgba(26,171,184,0.3);
+      padding: 3px 9px;
+      border-radius: 20px;
+      font-family: monospace;
+    }
+    .undo-popup-body {
+      padding: 14px 18px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .undo-stat-card {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 8px;
+      padding: 8px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .undo-stat-card.featured {
+      grid-column: span 2;
+      background: linear-gradient(135deg, rgba(26,171,184,0.1), rgba(44,95,138,0.15));
+      border-color: rgba(26,171,184,0.3);
+    }
+    .undo-stat-title {
+      font-size: 0.65rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: var(--text-secondary);
+    }
+    .undo-stat-value {
+      font-size: 0.96rem;
+      font-weight: 800;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .undo-stat-value.highlight-cyan {
+      color: #7dd3fc;
+    }
+    .undo-stat-value.highlight-supplier {
+      color: var(--col-supplier);
+    }
+    .undo-stat-desc {
+      font-size: 0.68rem;
+      color: var(--text-secondary);
+      line-height: 1.35;
+    }
+    .undo-bar-container {
+      width: 100%;
+      height: 3px;
+      background: rgba(255,255,255,0.06);
+      overflow: hidden;
+    }
+    .undo-progress-bar {
+      height: 100%;
+      width: 100%;
+      background: linear-gradient(90deg, var(--col-product), #7dd3fc);
+      animation: undoProgressShrink 5s linear forwards;
+    }
+    @keyframes undoProgressShrink {
+      from { width: 100%; }
+      to   { width: 0%; }
+    }
+
+    /* ───────────────── Column Headers ───────────────── */
+    .column-headers {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      display: flex;
+      justify-content: space-around;
+      padding: 18px 50px 10px;
+      pointer-events: none;
+      z-index: 5;
+    }
+    .column-headers span {
+      font-size: 0.82rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+    }
+    .col-sup  { color: var(--col-supplier); }
+    .col-part { color: var(--col-part); }
+    .col-prod { color: var(--col-product); }
+    .col-ord  { color: var(--col-order); }
+
+    /* ───────────────── Legend ───────────────── */
+    .legend {
+      position: absolute;
+      bottom: 14px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 24px;
+      padding: 10px 28px;
+      background: var(--bg-panel);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--border-glass);
+      border-radius: 12px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      z-index: 5;
+      color: var(--text-secondary);
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+    .legend-dot {
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .legend-line {
+      width: 26px;
+      height: 2px;
+      background: var(--text-secondary);
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+
+    /* ───────────────── Tooltip ───────────────── */
+    #tooltip {
+      position: fixed;
+      pointer-events: none;
+      padding: 14px 18px;
+      background: var(--bg-card);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--border-glass);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      max-width: 320px;
+      font-size: 0.78rem;
+      line-height: 1.55;
+      z-index: 100;
+      opacity: 0;
+      transition: opacity 0.15s ease;
+    }
+    #tooltip.visible { opacity: 1; }
+    #tooltip .tt-title {
+      font-weight: 700;
+      font-size: 0.88rem;
+      margin-bottom: 6px;
+      color: var(--text-primary);
+    }
+    #tooltip .tt-kind {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 8px;
+    }
+    #tooltip .tt-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 2px 0;
+    }
+    #tooltip .tt-label { color: var(--text-secondary); }
+    #tooltip .tt-value { color: var(--text-primary); font-weight: 600; text-align: right; }
+
+    /* ───────────────── Toast ───────────────── */
+    #toast-container {
+      position: fixed;
+      bottom: 70px;
+      right: 24px;
+      z-index: 200;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .toast {
+      padding: 10px 20px;
+      background: var(--bg-card);
+      backdrop-filter: blur(14px);
+      border: 1px solid var(--border-glass);
+      border-radius: 10px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      box-shadow: var(--shadow);
+      animation: toastIn 0.3s ease, toastOut 0.3s ease 2.4s forwards;
+    }
+    @keyframes toastIn  { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes toastOut { from { opacity: 1; } to { opacity: 0; transform: translateY(-8px); } }
+
+    /* ───────────────── Confirm Modal ───────────────── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.55);
+      backdrop-filter: blur(6px);
+      z-index: 300;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: fadeIn 0.18s ease;
+    }
+    .modal-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border-glass);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+      max-width: 400px;
+      width: 90%;
+      box-shadow: 0 12px 48px rgba(0,0,0,0.6);
+    }
+    .modal-box h3 {
+      font-size: 1rem;
+      margin-bottom: 10px;
+    }
+    .modal-box p {
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      margin-bottom: 20px;
+    }
+    .modal-box .modal-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+    /* ───────────────── Info Panel (selected node) ───────────────── */
+    #info-panel {
+      position: absolute;
+      top: 60px;
+      right: 20px;
+      width: 280px;
+      background: var(--bg-panel);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--border-glass);
+      border-radius: var(--radius);
+      padding: 20px;
+      z-index: 50;
+      box-shadow: var(--shadow);
+      transform: translateX(320px);
+      transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    #info-panel.open {
+      transform: translateX(0);
+    }
+    #info-panel .panel-close {
+      position: absolute;
+      top: 10px;
+      right: 12px;
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: color 0.15s;
+    }
+    #info-panel .panel-close:hover { color: var(--text-primary); }
+    #info-panel .panel-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    #info-panel .panel-kind {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 12px;
+    }
+    #info-panel .panel-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 4px 0;
+      font-size: 0.78rem;
+      border-bottom: 1px solid var(--border-glass);
+    }
+    #info-panel .panel-row:last-child { border-bottom: none; }
+    #info-panel .panel-label { color: var(--text-secondary); }
+    #info-panel .panel-value { font-weight: 600; }
+    #info-panel .panel-actions { margin-top: 14px; display: flex; gap: 8px; }
+
+    /* ───────────────── SVG node/edge styles ───────────────── */
+    .edge-line {
+      fill: none;
+      stroke: rgba(255,255,255,0.12);
+      stroke-width: 1.8;
+      transition: stroke 0.3s, stroke-width 0.3s, opacity 0.3s;
+    }
+    .edge-line.highlighted {
+      stroke-width: 3;
+      filter: drop-shadow(0 0 6px currentColor);
+    }
+    .edge-line.dimmed { opacity: 0.06; }
+
+    .arrow-marker { fill: rgba(255,255,255,0.12); }
+    .arrow-marker.highlighted { fill: currentColor; }
+
+    .node-group { cursor: pointer; }
+    .node-circle {
+      transition: r 0.25s ease, filter 0.25s ease, opacity 0.3s;
+    }
+    .node-circle.dimmed { opacity: 0.12; }
+    .node-circle:not(.dimmed):hover {
+      filter: drop-shadow(0 0 12px currentColor) brightness(1.15);
+    }
+    .node-label {
+      font-family: 'Inter', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      fill: #fff;
+      text-anchor: middle;
+      pointer-events: none;
+      transition: opacity 0.3s;
+    }
+    .node-label.dimmed { opacity: 0.12; }
+
+    .node-glow {
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .node-group:hover .node-glow { opacity: 0.5; }
+    .node-glow.active { opacity: 0.7; }
+  </style>
+</head>
+
+<body>
+  <div id="app">
+    <!-- ─── Header ─── -->
+    <header>
+      <div style="display:flex;align-items:center;">
+        <h1>Photon Sprint 1 — Supply-Chain Graph</h1>
+        <span class="subtitle" id="graph-subtitle">Loading…</span>
+      </div>
+      <div class="header-actions">
+        <button class="btn" id="btn-undo" disabled title="Undo last delete">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+          Undo
+        </button>
+        <button class="btn btn--reset" id="btn-reset" title="Reset to original graph">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6"/><path d="M2.5 22v-6h6"/><path d="M2.91 13.12a10 10 0 0 1 17.68-4.53L21.5 8"/><path d="M21.09 10.88a10 10 0 0 1-17.68 4.53L2.5 16"/></svg>
+          Reset
+        </button>
+      </div>
+    </header>
+
+    <!-- ─── Graph SVG ─── -->
+    <div id="graph-container">
+      <div class="column-headers">
+        <span class="col-sup">Suppliers</span>
+        <span class="col-part">BOM Parts</span>
+        <span class="col-prod">Finished Products</span>
+        <span class="col-ord">Customer Orders</span>
+      </div>
+      <svg id="graph-svg"></svg>
+    </div>
+
+    <!-- Side panel (selected node details) -->
+    <div id="info-panel">
+      <button class="panel-close" id="panel-close-btn">&times;</button>
+      <div id="panel-content"></div>
+    </div>
+
+    <!-- ─── Bottom Output Panel ("What will happen when you delete a node") ─── -->
+    <div id="bottom-output-panel">
+      <div class="panel-dock-header">
+        <div class="dock-title">
+          <div class="dock-dot"></div>
+          <span>OUTPUT TERMINAL — DELETION IMPACT &amp; EXECUTION</span>
+        </div>
+
+        <!-- Integrated Legend -->
+        <div class="dock-legend">
+          <div class="dock-legend-item"><div class="dock-legend-dot" style="background:var(--col-supplier)"></div>Suppliers</div>
+          <div class="dock-legend-item"><div class="dock-legend-dot" style="background:var(--col-part)"></div>BOM Parts</div>
+          <div class="dock-legend-item"><div class="dock-legend-dot" style="background:var(--col-product)"></div>Finished Products</div>
+          <div class="dock-legend-item"><div class="dock-legend-dot" style="background:var(--col-order)"></div>Customer Orders</div>
+          <div class="dock-legend-item"><div class="dock-legend-line"></div>SUPPLIES / USED_IN / FULFILLS</div>
+        </div>
+
+        <div class="dock-actions">
+          <button class="btn-dock" id="btn-dock-clear" title="Clear log entries">Clear Log</button>
+          <button class="btn-dock" id="btn-dock-toggle" title="Minimize / Expand bottom panel">
+            <span id="dock-toggle-icon">−</span> <span id="dock-toggle-text">Minimize</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="panel-dock-body">
+        <!-- Col 1: Impact Preview (What will happen when you delete a node) -->
+        <div class="dock-col-impact">
+          <div class="impact-header">
+            <div class="impact-title">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+              <span>What Happens When You Delete A Node</span>
+            </div>
+            <div id="impact-target-badge" style="display:none;"></div>
+          </div>
+          <div id="impact-preview-body" class="impact-content">
+            <!-- Populated dynamically via JS -->
+          </div>
+        </div>
+
+        <!-- Col 2: Action & Timing Log -->
+        <div class="dock-col-log">
+          <div class="log-title">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <span>Operation &amp; Timing Log</span>
+          </div>
+          <div id="dock-log-list" class="log-list">
+            <!-- Dynamic log entries -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tooltip -->
+  <div id="tooltip"></div>
+
+  <!-- ─── Small Undo Timing Popup (Shows for 5 seconds on Undo) ─── -->
+  <div id="undo-timing-popup">
+    <div class="undo-popup-head">
+      <div class="undo-popup-head-left">
+        <div class="undo-popup-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+        </div>
+        <div>
+          <div class="undo-popup-title">Undo Successful — Node Restored</div>
+          <div class="undo-popup-subtitle">Graph reverted to previous state</div>
+        </div>
+      </div>
+      <div class="undo-timer-tag" id="undo-timer-countdown">5.0s</div>
+    </div>
+
+    <div class="undo-popup-body">
+      <!-- Restored node -->
+      <div class="undo-stat-card">
+        <span class="undo-stat-title">Restored Node</span>
+        <div class="undo-stat-value" id="undo-stat-node">—</div>
+      </div>
+
+      <!-- Time taken to delete that node -->
+      <div class="undo-stat-card">
+        <span class="undo-stat-title">Time Taken To Delete That Node</span>
+        <div class="undo-stat-value highlight-cyan" id="undo-stat-delete-time">0.000 ms</div>
+      </div>
+
+      <!-- Time complexity -->
+      <div class="undo-stat-card featured">
+        <span class="undo-stat-title">Time Complexity</span>
+        <div class="undo-stat-value highlight-cyan">
+          <span class="complexity-tag" id="undo-stat-complexity">O(V + E)</span>
+        </div>
+        <span class="undo-stat-desc" id="undo-stat-complexity-desc">NetworkX Breadth-First Search (BFS) graph traversal &amp; cascading deletion</span>
+      </div>
+
+      <!-- Undo restoration time -->
+      <div class="undo-stat-card">
+        <span class="undo-stat-title">Undo Restoration Time</span>
+        <div class="undo-stat-value" id="undo-stat-undo-time">0.000 ms</div>
+      </div>
+
+      <!-- Entities restored -->
+      <div class="undo-stat-card">
+        <span class="undo-stat-title">Entities Restored</span>
+        <div class="undo-stat-value" id="undo-stat-count">0 nodes, 0 edges</div>
+      </div>
+    </div>
+
+    <div class="undo-bar-container">
+      <div class="undo-progress-bar" id="undo-progress-bar"></div>
+    </div>
+  </div>
+
+  <!-- Toast container -->
+  <div id="toast-container"></div>
+
+  <script>
+  /* ═══════════════════════════════════════════════
+     Constants & colour mapping
+     ═══════════════════════════════════════════════ */
+  const COLOR = {
+    supplier: '#D6436E',
+    part:     '#F5A623',
+    product:  '#1AABB8',
+    order:    '#2C5F8A',
+  };
+  const RADIUS = {
+    supplier: 26,
+    part:     22,
+    product:  28,
+    order:    20,
+  };
+  const COLUMN_X = { supplier: 0, part: 1, product: 2, order: 3 };
+  const COLUMNS = 4;
+
+  let graphData   = { nodes: [], edges: [] };
+  let selectedNode = null;
+  let highlightedIds = new Set();
+
+  /* ═══════════════════════════════════════════════
+     Fetch graph data
+     ═══════════════════════════════════════════════ */
+  async function fetchGraph() {
+    const res = await fetch('/api/graph');
+    graphData = await res.json();
+    render();
+  }
+
+  /* ═══════════════════════════════════════════════
+     Layout — deterministic column-based positioning
+     ═══════════════════════════════════════════════ */
+  function computeLayout(nodes, width, height) {
+    const isDockMinimized = document.getElementById('bottom-output-panel')?.classList.contains('minimized');
+    const bottomPad = isDockMinimized ? 65 : 225;
+    const pad = { top: 55, bottom: bottomPad, left: 100, right: 100 };
+    const usableW = width - pad.left - pad.right;
+    const usableH = height - pad.top - pad.bottom;
+    const colWidth = usableW / (COLUMNS - 1);
+
+    // Group by kind
+    const groups = { supplier: [], part: [], product: [], order: [] };
+    nodes.forEach(n => groups[n.kind]?.push(n));
+
+    const positions = {};
+    for (const [kind, list] of Object.entries(groups)) {
+      const col = COLUMN_X[kind];
+      const x = pad.left + col * colWidth;
+      const gap = usableH / (list.length + 1);
+      list.forEach((n, i) => {
+        positions[n.id] = { x, y: pad.top + gap * (i + 1) };
+      });
+    }
+    return positions;
+  }
+
+  /* ═══════════════════════════════════════════════
+     Render
+     ═══════════════════════════════════════════════ */
+  function render() {
+    const svg = d3.select('#graph-svg');
+    svg.selectAll('*').remove();
+
+    const container = document.getElementById('graph-container');
+    const width  = container.clientWidth;
+    const height = container.clientHeight;
+    svg.attr('viewBox', `0 0 ${width} ${height}`);
+
+    const positions = computeLayout(graphData.nodes, width, height);
+
+    // ── Defs: arrowheads & glow filter ──
+    const defs = svg.append('defs');
+
+    // Per-kind arrow markers
+    for (const [kind, col] of Object.entries(COLOR)) {
+      defs.append('marker')
+        .attr('id', `arrow-${kind}`)
+        .attr('viewBox', '0 0 10 10')
+        .attr('refX', 28).attr('refY', 5)
+        .attr('markerWidth', 7).attr('markerHeight', 7)
+        .attr('orient', 'auto')
+        .append('path')
+        .attr('d', 'M0,0 L10,5 L0,10 Z')
+        .attr('fill', col);
+    }
+
+    // Default dim arrow
+    defs.append('marker')
+      .attr('id', 'arrow-dim')
+      .attr('viewBox', '0 0 10 10')
+      .attr('refX', 28).attr('refY', 5)
+      .attr('markerWidth', 7).attr('markerHeight', 7)
+      .attr('orient', 'auto')
+      .append('path')
+      .attr('d', 'M0,0 L10,5 L0,10 Z')
+      .attr('fill', 'rgba(255,255,255,0.12)');
+
+    // Glow filter
+    const filter = defs.append('filter').attr('id', 'glow').attr('x', '-50%').attr('y', '-50%').attr('width', '200%').attr('height', '200%');
+    filter.append('feGaussianBlur').attr('stdDeviation', '6').attr('result', 'blur');
+    filter.append('feMerge').selectAll('feMergeNode').data(['blur', 'SourceGraphic']).enter().append('feMergeNode').attr('in', d => d);
+
+    // ── Edge group ──
+    const edgeG = svg.append('g').attr('class', 'edges-layer');
+
+    const edgeEls = edgeG.selectAll('.edge-line')
+      .data(graphData.edges)
+      .enter()
+      .append('path')
+      .attr('class', 'edge-line')
+      .attr('d', d => {
+        const s = positions[d.source];
+        const t = positions[d.target];
+        if (!s || !t) return '';
+        const dx = t.x - s.x;
+        return `M${s.x},${s.y} C${s.x + dx * 0.45},${s.y} ${t.x - dx * 0.45},${t.y} ${t.x},${t.y}`;
+      })
+      .attr('marker-end', 'url(#arrow-dim)')
+      .each(function(d) { d._el = this; });
+
+    // ── Node group ──
+    const nodeG = svg.append('g').attr('class', 'nodes-layer');
+
+    const nodeGroups = nodeG.selectAll('.node-group')
+      .data(graphData.nodes.filter(n => positions[n.id]))
+      .enter()
+      .append('g')
+      .attr('class', 'node-group')
+      .attr('transform', d => `translate(${positions[d.id].x}, ${positions[d.id].y})`)
+      .each(function(d) { d._el = this; });
+
+    // Outer glow circle
+    nodeGroups.append('circle')
+      .attr('class', 'node-glow')
+      .attr('r', d => RADIUS[d.kind] + 10)
+      .attr('fill', d => COLOR[d.kind])
+      .attr('opacity', 0);
+
+    // Main circle
+    nodeGroups.append('circle')
+      .attr('class', 'node-circle')
+      .attr('r', d => RADIUS[d.kind])
+      .attr('fill', d => COLOR[d.kind])
+      .style('color', d => COLOR[d.kind]);
+
+    // Label
+    nodeGroups.append('text')
+      .attr('class', 'node-label')
+      .attr('dy', '0.35em')
+      .text(d => d.id);
+
+    // ── Interactions ──
+    nodeGroups
+      .on('mouseenter', function(event, d) { showTooltip(event, d); })
+      .on('mousemove',  function(event)    { moveTooltip(event); })
+      .on('mouseleave', function()         { hideTooltip(); })
+      .on('click', function(event, d)      { handleNodeClick(d, positions); event.stopPropagation(); });
+
+    svg.on('click', () => clearSelection());
+
+    updateSubtitle();
+    updateUndoBtn();
+  }
+
+  /* ═══════════════════════════════════════════════
+     Tooltip
+     ═══════════════════════════════════════════════ */
+  const tooltip = document.getElementById('tooltip');
+
+  function showTooltip(event, d) {
+    const kindColors = { supplier: COLOR.supplier, part: COLOR.part, product: COLOR.product, order: COLOR.order };
+    const kindBg     = { supplier: 'rgba(214,67,110,0.18)', part: 'rgba(245,166,35,0.18)', product: 'rgba(26,171,184,0.18)', order: 'rgba(44,95,138,0.18)' };
+
+    let rows = '';
+    const skip = new Set(['id', 'kind', 'label', '_el']);
+    for (const [k, v] of Object.entries(d)) {
+      if (skip.has(k)) continue;
+      const label = k.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+      rows += `<div class="tt-row"><span class="tt-label">${label}</span><span class="tt-value">${v}</span></div>`;
+    }
+
+    tooltip.innerHTML = `
+      <div class="tt-title">${d.label || d.id}</div>
+      <span class="tt-kind" style="background:${kindBg[d.kind]};color:${kindColors[d.kind]}">${d.kind}</span>
+      ${rows}
+    `;
+    tooltip.classList.add('visible');
+    moveTooltip(event);
+  }
+  function moveTooltip(event) {
+    const pad = 16;
+    let x = event.clientX + pad;
+    let y = event.clientY + pad;
+    if (x + 320 > window.innerWidth)  x = event.clientX - 330;
+    if (y + 260 > window.innerHeight) y = event.clientY - 270;
+    tooltip.style.left = x + 'px';
+    tooltip.style.top  = y + 'px';
+  }
+  function hideTooltip() { tooltip.classList.remove('visible'); }
+
+  /* ═══════════════════════════════════════════════
+     Node Click → highlight downstream & update Bottom Output Box
+     ═══════════════════════════════════════════════ */
+  async function handleNodeClick(d, positions) {
+    selectedNode = d;
+
+    // Fetch downstream from server (computed by NetworkX)
+    const res = await fetch(`/api/downstream/${d.id}`);
+    const data = await res.json();
+
+    highlightedIds = new Set([d.id, ...data.downstream]);
+
+    // Dim everything, then highlight
+    d3.selectAll('.node-circle').classed('dimmed', n => !highlightedIds.has(n.id));
+    d3.selectAll('.node-label').classed('dimmed', n => !highlightedIds.has(n.id));
+    d3.selectAll('.node-glow').classed('active', n => highlightedIds.has(n.id));
+
+    d3.selectAll('.edge-line')
+      .classed('dimmed', e => !highlightedIds.has(e.source) && !highlightedIds.has(e.target))
+      .classed('highlighted', e => highlightedIds.has(e.source) && highlightedIds.has(e.target))
+      .each(function(e) {
+        const isHl = highlightedIds.has(e.source) && highlightedIds.has(e.target);
+        if (isHl) {
+          // Figure out the target kind to pick arrow color
+          const targetNode = graphData.nodes.find(n => n.id === e.target);
+          const kind = targetNode ? targetNode.kind : 'dim';
+          d3.select(this)
+            .attr('stroke', COLOR[kind] || 'rgba(255,255,255,0.12)')
+            .attr('marker-end', `url(#arrow-${kind})`);
+        } else {
+          d3.select(this)
+            .attr('stroke', null)
+            .attr('marker-end', 'url(#arrow-dim)');
+        }
+      });
+
+    openInfoPanel(d, data.downstream);
+    updateImpactPreview(d, data.downstream);
+  }
+
+  function clearSelection() {
+    selectedNode = null;
+    highlightedIds.clear();
+    d3.selectAll('.node-circle').classed('dimmed', false);
+    d3.selectAll('.node-label').classed('dimmed', false);
+    d3.selectAll('.node-glow').classed('active', false);
+    d3.selectAll('.edge-line')
+      .classed('dimmed', false)
+      .classed('highlighted', false)
+      .attr('stroke', null)
+      .attr('marker-end', 'url(#arrow-dim)');
+    closeInfoPanel();
+    initDefaultImpactPreview();
+  }
+
+  /* ═══════════════════════════════════════════════
+     Bottom Output Box — Impact Preview Logic
+     ═══════════════════════════════════════════════ */
+  function initDefaultImpactPreview() {
+    const badge = document.getElementById('impact-target-badge');
+    if (badge) badge.style.display = 'none';
+
+    const container = document.getElementById('impact-preview-body');
+    if (!container) return;
+    container.innerHTML = `
+      <div class="impact-card-empty">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--col-product);flex-shrink:0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        <div>
+          <div><strong>Select any node</strong> in the graph above to preview what will happen if it is deleted.</div>
+          <div style="font-size:0.69rem;color:var(--text-secondary);margin-top:3px;">
+            In this supply chain, deleting an entity removes it and cuts its consecutive connected edges. Downstream dependencies cascade in <span class="complexity-tag">O(V + E)</span> time.
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function updateImpactPreview(d, downstreamIds) {
+    const badge = document.getElementById('impact-target-badge');
+    const container = document.getElementById('impact-preview-body');
+    if (!container) return;
+
+    const kindColors = { supplier: COLOR.supplier, part: COLOR.part, product: COLOR.product, order: COLOR.order };
+    const kindBg     = { supplier: 'rgba(214,67,110,0.18)', part: 'rgba(245,166,35,0.18)', product: 'rgba(26,171,184,0.18)', order: 'rgba(44,95,138,0.18)' };
+
+    if (badge) {
+      badge.style.display = 'inline-flex';
+      badge.innerHTML = `Selected: <span style="color:${kindColors[d.kind]}">${d.id} (${d.label || d.id})</span>`;
+    }
+
+    // Direct consecutive edges
+    const outgoing = graphData.edges.filter(e => e.source === d.id);
+    const incoming = graphData.edges.filter(e => e.target === d.id);
+    const consecutiveEdges = [...outgoing, ...incoming];
+
+    // Downstream entities
+    const downstreamNodes = graphData.nodes.filter(n => downstreamIds.includes(n.id) && n.id !== d.id);
+    const byKind = { supplier: [], part: [], product: [], order: [] };
+    downstreamNodes.forEach(n => byKind[n.kind]?.push(n));
+
+    let edgePills = outgoing.map(e => `<span class="impact-pill" style="border-left:2px solid ${COLOR[d.kind]}">${e.source} ➔ ${e.target}</span>`).join(' ');
+    if (incoming.length) {
+      edgePills += ' ' + incoming.map(e => `<span class="impact-pill" style="opacity:0.8">${e.source} ➔ ${e.target}</span>`).join(' ');
+    }
+    if (!edgePills) edgePills = '<span style="color:var(--text-secondary);font-size:0.68rem">No connected edges</span>';
+
+    let affectedPills = '';
+    ['part', 'product', 'order'].forEach(k => {
+      if (byKind[k]?.length) {
+        affectedPills += byKind[k].map(n => `<span class="impact-pill" style="color:${COLOR[k]};background:rgba(255,255,255,0.06)">${n.id}</span>`).join(' ') + ' ';
+      }
+    });
+    if (!affectedPills) affectedPills = '<span style="color:var(--text-secondary);font-size:0.68rem">None (Leaf node)</span>';
+
+    const totalNodesAffected = 1 + downstreamNodes.length;
+    const totalEdgesAffected = consecutiveEdges.length;
+
+    container.innerHTML = `
+      <div class="impact-grid">
+        <div class="impact-box">
+          <span class="impact-box-label">Target Entity Deletion</span>
+          <div class="impact-box-val">
+            <span class="impact-pill" style="background:${kindBg[d.kind]};color:${kindColors[d.kind]}">${d.kind.toUpperCase()}</span>
+            <span>${d.id} — ${d.label || d.id}</span>
+          </div>
+          <span style="font-size:0.65rem;color:var(--text-secondary)">This node will be permanently excised from NetworkX.</span>
+        </div>
+
+        <div class="impact-box">
+          <span class="impact-box-label">Consecutive Connected Edges (${consecutiveEdges.length})</span>
+          <div class="impact-box-val">${edgePills}</div>
+          <span style="font-size:0.65rem;color:var(--text-secondary)">Incident edges will be severed immediately.</span>
+        </div>
+
+        <div class="impact-box">
+          <span class="impact-box-label">Downstream Affected Cascade (${downstreamNodes.length})</span>
+          <div class="impact-box-val">${affectedPills}</div>
+          <span style="font-size:0.65rem;color:var(--text-secondary)">Dependent parts, products, and customer orders disrupted.</span>
+        </div>
+
+        <div class="impact-box" style="border-color:rgba(26,171,184,0.3);background:rgba(26,171,184,0.04)">
+          <span class="impact-box-label" style="color:#7dd3fc">Algorithmic Time Complexity</span>
+          <div class="impact-box-val">
+            <span class="complexity-tag">O(V + E)</span>
+            <span style="font-size:0.68rem;color:var(--text-secondary)">Linear DAG Traversal</span>
+          </div>
+          <span style="font-size:0.65rem;color:var(--text-secondary)">Visits ${totalNodesAffected} vertices and ${totalEdgesAffected} incident edges.</span>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:2px;">
+        <span style="font-size:0.68rem;color:var(--text-secondary)">Ready to delete this supply-chain branch?</span>
+        <button class="btn btn--danger btn--sm" id="btn-dock-quick-delete" style="padding:4px 12px;font-size:0.72rem">
+          Delete Node ${d.id}
+        </button>
+      </div>
+    `;
+
+    document.getElementById('btn-dock-quick-delete')?.addEventListener('click', () => confirmDelete(d));
+  }
+
+  /* ═══════════════════════════════════════════════
+     Info Panel (Right sidebar)
+     ═══════════════════════════════════════════════ */
+  function openInfoPanel(d, downstream) {
+    const panel = document.getElementById('info-panel');
+    const content = document.getElementById('panel-content');
+    const kindColors = { supplier: COLOR.supplier, part: COLOR.part, product: COLOR.product, order: COLOR.order };
+    const kindBg     = { supplier: 'rgba(214,67,110,0.18)', part: 'rgba(245,166,35,0.18)', product: 'rgba(26,171,184,0.18)', order: 'rgba(44,95,138,0.18)' };
+
+    let rows = '';
+    const skip = new Set(['id', 'kind', 'label', '_el']);
+    for (const [k, v] of Object.entries(d)) {
+      if (skip.has(k)) continue;
+      const label = k.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+      rows += `<div class="panel-row"><span class="panel-label">${label}</span><span class="panel-value">${v}</span></div>`;
+    }
+
+    const downstreamCount = downstream.length;
+
+    content.innerHTML = `
+      <div class="panel-title">${d.label || d.id}</div>
+      <span class="panel-kind" style="background:${kindBg[d.kind]};color:${kindColors[d.kind]}">${d.kind}</span>
+      ${rows}
+      <div class="panel-row" style="margin-top:8px;border-top:1px solid var(--border-glass);padding-top:8px;">
+        <span class="panel-label">Downstream nodes</span>
+        <span class="panel-value">${downstreamCount}</span>
+      </div>
+      <div class="panel-actions">
+        <button class="btn btn--danger" id="btn-delete-node" title="Delete this node and all downstream">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+          Delete node
+        </button>
+      </div>
+    `;
+
+    document.getElementById('btn-delete-node').addEventListener('click', () => confirmDelete(d));
+    panel.classList.add('open');
+  }
+
+  function closeInfoPanel() {
+    document.getElementById('info-panel').classList.remove('open');
+  }
+  document.getElementById('panel-close-btn').addEventListener('click', () => { closeInfoPanel(); clearSelection(); });
+
+  /* ═══════════════════════════════════════════════
+     Delete with confirmation
+     ═══════════════════════════════════════════════ */
+  function confirmDelete(d) {
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay';
+    overlay.innerHTML = `
+      <div class="modal-box">
+        <h3>Delete "${d.label || d.id}"?</h3>
+        <p>This will permanently remove the node <strong>${d.id}</strong> and <em>all consecutive connected edges &amp; downstream dependencies</em> from the NetworkX graph. You can undo this action.</p>
+        <div class="modal-actions">
+          <button class="btn" id="modal-cancel">Cancel</button>
+          <button class="btn btn--danger" id="modal-confirm">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+            Delete
+          </button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+
+    document.getElementById('modal-cancel').addEventListener('click', () => overlay.remove());
+    overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+
+    document.getElementById('modal-confirm').addEventListener('click', async () => {
+      overlay.remove();
+      const res = await fetch(`/api/node/${d.id}`, { method: 'DELETE' });
+      const result = await res.json();
+      if (result.error) { showToast(`Error: ${result.error}`); return; }
+      graphData = result.graph;
+      closeInfoPanel();
+      clearSelection();
+      render();
+      showToast(`Deleted ${result.deleted.length} node(s)`);
+
+      // Add to dock operation log
+      addLogEntry('delete', {
+        id: d.id,
+        label: d.label || d.id,
+        kind: d.kind,
+        nodeCount: result.deleted.length,
+        edgeCount: result.edges_removed,
+        elapsed_ms: result.elapsed_ms,
+        complexity: result.time_complexity || 'O(V + E)'
+      });
+    });
+  }
+
+  /* ═══════════════════════════════════════════════
+     Undo — Displays 5-second popup with Time Complexity and Deletion Timing
+     ═══════════════════════════════════════════════ */
+  document.getElementById('btn-undo').addEventListener('click', async () => {
+    const res = await fetch('/api/undo', { method: 'POST' });
+    const data = await res.json();
+    if (data.error) { showToast(data.error); return; }
+    graphData = data.graph;
+    closeInfoPanel();
+    clearSelection();
+    render();
+    showToast('Undo successful — Node restored');
+
+    // Add to dock operation log
+    addLogEntry('undo', {
+      id: data.restored_node_id || 'Node',
+      label: data.restored_label || '',
+      undo_elapsed_ms: data.undo_elapsed_ms,
+      delete_elapsed_ms: data.delete_elapsed_ms,
+      complexity: data.time_complexity || 'O(V + E)'
+    });
+
+    // 5-SECOND POPUP SHOWING TIME COMPLEXITY & HOW MUCH TIME WAS TAKEN TO DELETE THAT NODE
+    showUndoTimingPopup(data);
+  });
+
+  /* ═══════════════════════════════════════════════
+     Reset
+     ═══════════════════════════════════════════════ */
+  document.getElementById('btn-reset').addEventListener('click', async () => {
+    const res = await fetch('/api/reset', { method: 'POST' });
+    const data = await res.json();
+    graphData = data.graph;
+    closeInfoPanel();
+    clearSelection();
+    render();
+    showToast('Graph reset to original 19 nodes');
+    addLogEntry('reset', { nodeCount: graphData.nodes.length });
+  });
+
+  /* ═══════════════════════════════════════════════
+     Toast notifications
+     ═══════════════════════════════════════════════ */
+  function showToast(msg) {
+    const container = document.getElementById('toast-container');
+    const el = document.createElement('div');
+    el.className = 'toast';
+    el.textContent = msg;
+    container.appendChild(el);
+    setTimeout(() => el.remove(), 2800);
+  }
+
+  /* ═══════════════════════════════════════════════
+     Subtitle counts
+     ═══════════════════════════════════════════════ */
+  function updateSubtitle() {
+    const counts = { supplier: 0, part: 0, product: 0, order: 0 };
+    graphData.nodes.forEach(n => counts[n.kind]++);
+    document.getElementById('graph-subtitle').textContent =
+      `${graphData.nodes.length} entities  ·  ${counts.supplier} suppliers  ·  ${counts.part} parts  ·  ${counts.product} products  ·  ${counts.order} orders  ·  ${graphData.edges.length} edges`;
+  }
+
+  function updateUndoBtn() {
+    document.getElementById('btn-undo').disabled = false;
+  }
+
+  /* ═══════════════════════════════════════════════
+     Resize handler
+     ═══════════════════════════════════════════════ */
+  window.addEventListener('resize', () => { if (graphData.nodes.length) render(); });
+
+  /* ═══════════════════════════════════════════════
+     Dock Log History
+     ═══════════════════════════════════════════════ */
+  const logList = document.getElementById('dock-log-list');
+
+  function addLogEntry(action, details) {
+    if (!logList) return;
+    const item = document.createElement('div');
+    const now = new Date().toLocaleTimeString();
+
+    if (action === 'delete') {
+      item.className = 'log-item delete';
+      item.innerHTML = `
+        <div class="log-item-header">
+          <span class="log-item-action" style="color:var(--col-supplier)">✕ DELETED: ${details.id} (${details.label})</span>
+          <span class="log-item-time">${now}</span>
+        </div>
+        <div style="font-size:0.69rem;color:var(--text-secondary);margin-top:2px;">
+          Removed <strong>${details.nodeCount}</strong> nodes &amp; <strong>${details.edgeCount}</strong> edges in <strong style="color:#7dd3fc">${details.elapsed_ms.toFixed(3)} ms</strong> · <span class="complexity-tag">${details.complexity}</span>
+        </div>
+      `;
+    } else if (action === 'undo') {
+      item.className = 'log-item undo';
+      item.innerHTML = `
+        <div class="log-item-header">
+          <span class="log-item-action" style="color:var(--col-product)">↺ UNDO: Restored ${details.id} (${details.label})</span>
+          <span class="log-item-time">${now}</span>
+        </div>
+        <div style="font-size:0.69rem;color:var(--text-secondary);margin-top:2px;">
+          Restored in <strong style="color:#7dd3fc">${details.undo_elapsed_ms.toFixed(3)} ms</strong> · Original delete took <strong style="color:var(--col-supplier)">${details.delete_elapsed_ms.toFixed(3)} ms</strong> · <span class="complexity-tag">${details.complexity}</span>
+        </div>
+      `;
+    } else if (action === 'reset') {
+      item.className = 'log-item reset';
+      item.innerHTML = `
+        <div class="log-item-header">
+          <span class="log-item-action" style="color:var(--col-part)">⟳ RESET: All 19 Entities Restored</span>
+          <span class="log-item-time">${now}</span>
+        </div>
+        <div style="font-size:0.69rem;color:var(--text-secondary);margin-top:2px;">
+          Graph re-initialized to default state with 19 nodes and 18 edges.
+        </div>
+      `;
+    }
+
+    logList.prepend(item);
+  }
+
+  document.getElementById('btn-dock-clear')?.addEventListener('click', () => {
+    if (logList) logList.innerHTML = '<div style="font-size:0.7rem;color:var(--text-secondary);padding:6px 0;">Log cleared.</div>';
+  });
+
+  // Dock Minimize/Expand button
+  const dockPanel = document.getElementById('bottom-output-panel');
+  const dockToggleBtn = document.getElementById('btn-dock-toggle');
+  dockToggleBtn?.addEventListener('click', () => {
+    dockPanel.classList.toggle('minimized');
+    const isMin = dockPanel.classList.contains('minimized');
+    document.getElementById('dock-toggle-icon').textContent = isMin ? '+' : '−';
+    document.getElementById('dock-toggle-text').textContent = isMin ? 'Expand' : 'Minimize';
+    render();
+  });
+
+  /* ═══════════════════════════════════════════════
+     5-SECOND UNDO TIMING & COMPLEXITY POPUP
+     ═══════════════════════════════════════════════ */
+  let undoPopupTimer = null;
+  let undoCountdownInterval = null;
+
+  function showUndoTimingPopup(data) {
+    const popup = document.getElementById('undo-timing-popup');
+    if (!popup) return;
+
+    // 1. Restored node details
+    const nodeEl = document.getElementById('undo-stat-node');
+    if (nodeEl) {
+      const label = data.restored_label || data.restored_node_id || 'Node';
+      const id = data.restored_node_id || '';
+      nodeEl.innerHTML = `<span class="impact-pill" style="color:var(--col-product);background:rgba(26,171,184,0.15)">${id}</span> ${label}`;
+    }
+
+    // 2. How much time was taken to delete that node
+    const deleteTimeEl = document.getElementById('undo-stat-delete-time');
+    if (deleteTimeEl) {
+      const deleteMs = (data.delete_elapsed_ms || 0).toFixed(3);
+      deleteTimeEl.textContent = `${deleteMs} ms`;
+    }
+
+    // 3. Time complexity
+    const complexityEl = document.getElementById('undo-stat-complexity');
+    if (complexityEl) {
+      complexityEl.textContent = data.time_complexity || 'O(V + E)';
+    }
+    const complexityDescEl = document.getElementById('undo-stat-complexity-desc');
+    if (complexityDescEl) {
+      complexityDescEl.textContent = data.time_complexity_details || 'NetworkX BFS graph traversal & cascading deletion';
+    }
+
+    // 4. Undo restoration time
+    const undoTimeEl = document.getElementById('undo-stat-undo-time');
+    if (undoTimeEl) {
+      const undoMs = (data.undo_elapsed_ms || 0).toFixed(3);
+      undoTimeEl.textContent = `${undoMs} ms`;
+    }
+
+    // 5. Entities restored count
+    const countEl = document.getElementById('undo-stat-count');
+    if (countEl) {
+      const n = data.deleted_details ? data.deleted_details.length : 1;
+      const e = data.edges_removed || 0;
+      countEl.textContent = `${n} node(s), ${e} edge(s)`;
+    }
+
+    // Restart progress bar animation
+    const bar = document.getElementById('undo-progress-bar');
+    if (bar) {
+      bar.style.animation = 'none';
+      bar.offsetHeight; // force reflow
+      bar.style.animation = 'undoProgressShrink 5s linear forwards';
+    }
+
+    // 5-second countdown ticker
+    const timerTag = document.getElementById('undo-timer-countdown');
+    let timeLeft = 5.0;
+    if (timerTag) timerTag.textContent = '5.0s';
+
+    if (undoCountdownInterval) clearInterval(undoCountdownInterval);
+    undoCountdownInterval = setInterval(() => {
+      timeLeft = Math.max(0, timeLeft - 0.1);
+      if (timerTag) timerTag.textContent = `${timeLeft.toFixed(1)}s`;
+      if (timeLeft <= 0) {
+        clearInterval(undoCountdownInterval);
+        undoCountdownInterval = null;
+      }
+    }, 100);
+
+    // Make visible
+    popup.classList.add('visible');
+
+    // Auto-dismiss after EXACTLY 5 seconds (5000 ms)
+    if (undoPopupTimer) clearTimeout(undoPopupTimer);
+    undoPopupTimer = setTimeout(() => {
+      popup.classList.remove('visible');
+      undoPopupTimer = null;
+      if (undoCountdownInterval) {
+        clearInterval(undoCountdownInterval);
+        undoCountdownInterval = null;
+      }
+    }, 5000);
+  }
+
+  /* ═══════════════════════════════════════════════
+     Init
+     ═══════════════════════════════════════════════ */
+  initDefaultImpactPreview();
+  fetchGraph();
+  </script>
+</body>
+</html>
