@@ -1,0 +1,2 @@
+# Graph Schema
+Node categories in `nodes`: `suppliers` (supplier), `parts` (part), `products` (product), `orders` (order). Relationship categories in `edges`: `supplies` (supplier→part), `used_in` (part→product), `fulfills` (product→order). Baseline counts: nodes 2/5/2/10 and edges 6/5/10. The model is directed and declared a DAG. Node/edge required fields are defined in `graph_validation/schema.py` based on the supplied JSON fields.

@@ -1,0 +1,33 @@
+Execution evidence captured in this environment
+===============================================
+pytest: 0
+========================[0m
+
+Coverage command exit code: 0
+22 items
+
+tests/test_validation.py [32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[33ms[0m[32m.[0m[33ms[0m[33ms[0m[33ms[0m[32m                          [100%][0m
+
+================================ tests coverage ================================
+_______________ coverage: platform linux, python 3.13.5-final-0 ________________
+
+Name                            Stmts   Miss  Cover   Missing
+-------------------------------------------------------------
+graph_validation/__init__.py        2      0   100%
+graph_validation/schema.py         12      0   100%
+graph_validation/tracing.py         8      0   100%
+graph_validation/validator.py     106     17    84%   22-23, 28-29, 32, 39, 43, 48, 51, 61, 83-87, 100, 107, 109
+-------------------------------------------------------------
+TOTAL                             128     17    87%
+[36m[1m=========================== short test summary info ============================[0m
+[33mSKIPPED[0m [1] tests/test_validation.py:33: Flask is not installed in this execution environment
+[33mSKIPPED[0m [1] tests/test_validation.py:39: Flask is not installed in this execution environment
+[33mSKIPPED[0m [1] tests/test_validation.py:41: Flask is not installed in this execution environment
+[33mSKIPPED[0m [1] tests/test_validation.py:47: Flask is not installed in this execution environment
+[32m======================== [32m[1m18 passed[0m, [33m4 skipped[0m[32m in 0.42s[0m[32m =========================[0m
+
+
+compileall exit code: 0
+
+Benchmark: reports/tracing_benchmark_report.json
+Environment lacks Flask; pip installation was attempted but blocked by DNS/network restrictions. Therefore Flask integration tests were skipped, and app route execution/browser verification remain BLOCKED.

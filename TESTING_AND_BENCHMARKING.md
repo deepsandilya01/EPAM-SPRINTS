@@ -1,0 +1,2 @@
+# Testing and Benchmarking
+Run `python -m pytest -v`; optional coverage: `python -m pytest --cov=graph_validation --cov-report=term-missing`. Run `python -m benchmarks.benchmark_tracing` to produce `reports/tracing_benchmark_report.json`. Benchmark includes environment, NetworkX/Python versions, graph size, source, warmups, iterations, mean/median/min/max/p95, and explicit threshold comparisons. Timing is traversal-only and excludes app request/render time.

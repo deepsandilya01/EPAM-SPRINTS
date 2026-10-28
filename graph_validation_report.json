@@ -1,0 +1,74 @@
+{
+  "valid": true,
+  "graph_name": "Team Photon - Sprint 1",
+  "summary": {
+    "node_count": 19,
+    "edge_count": 21,
+    "supplier_count": 2,
+    "part_count": 5,
+    "product_count": 2,
+    "order_count": 10,
+    "supplies_count": 6,
+    "used_in_count": 5,
+    "fulfills_count": 10
+  },
+  "checks": [
+    {
+      "check_id": "NODE_COUNT_SUPPLIER",
+      "status": "PASS",
+      "message": "supplier count: expected 2, found 2."
+    },
+    {
+      "check_id": "NODE_COUNT_PART",
+      "status": "PASS",
+      "message": "part count: expected 5, found 5."
+    },
+    {
+      "check_id": "NODE_COUNT_PRODUCT",
+      "status": "PASS",
+      "message": "product count: expected 2, found 2."
+    },
+    {
+      "check_id": "NODE_COUNT_ORDER",
+      "status": "PASS",
+      "message": "order count: expected 10, found 10."
+    },
+    {
+      "check_id": "TOTAL_NODE_COUNT",
+      "status": "PASS",
+      "message": "Total nodes: expected 19, found 19."
+    },
+    {
+      "check_id": "TOTAL_EDGE_COUNT",
+      "status": "PASS",
+      "message": "Total edges: expected 21, found 21."
+    },
+    {
+      "check_id": "EDGE_COUNT_SUPPLIES",
+      "status": "PASS",
+      "message": "supplies edges: expected 6, found 6."
+    },
+    {
+      "check_id": "EDGE_COUNT_USED_IN",
+      "status": "PASS",
+      "message": "used_in edges: expected 5, found 5."
+    },
+    {
+      "check_id": "EDGE_COUNT_FULFILLS",
+      "status": "PASS",
+      "message": "fulfills edges: expected 10, found 10."
+    },
+    {
+      "check_id": "ACYCLICITY",
+      "status": "PASS",
+      "message": "Graph is acyclic."
+    }
+  ],
+  "errors": [],
+  "warnings": [],
+  "policy": {
+    "directed": true,
+    "require_acyclic": true,
+    "check_baseline_counts": true
+  }
+}
