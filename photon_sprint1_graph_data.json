@@ -1,0 +1,399 @@
+{
+  "metadata": {
+    "project": "Team Photon - Sprint 1",
+    "description": "Supply-chain dependency graph aligned with canonical photon Sprint1 Dataset",
+    "graph_type": "Directed Acyclic Graph (DAG)",
+    "summary": {
+      "total_nodes": 19,
+      "total_edges": 21,
+      "node_counts": {
+        "suppliers": 2,
+        "parts": 5,
+        "products": 2,
+        "orders": 10
+      },
+      "edge_counts": {
+        "supplies": 6,
+        "used_in": 5,
+        "fulfills": 10
+      }
+    },
+    "object_types": {
+      "supplier": "Tier-1 component & raw material vendors",
+      "part": "Bill of Materials (BOM) components with stock & daily consumption rates",
+      "product": "Finished manufactured assemblies",
+      "order": "Customer purchase orders with quantity and deadline"
+    }
+  },
+  "nodes": {
+    "suppliers": [
+      {
+        "id": "SUP-01",
+        "kind": "supplier",
+        "label": "Apex Components",
+        "supplier_id": "SUP-01",
+        "name": "Apex Components",
+        "location": "Pune",
+        "note": "Primary supplier, electronics"
+      },
+      {
+        "id": "SUP-02",
+        "kind": "supplier",
+        "label": "Bharat Precision Parts",
+        "supplier_id": "SUP-02",
+        "name": "Bharat Precision Parts",
+        "location": "Indore",
+        "note": "Primary supplier, mechanical"
+      }
+    ],
+    "parts": [
+      {
+        "id": "PART-01",
+        "kind": "part",
+        "label": "Control Board",
+        "part_id": "PART-01",
+        "name": "Control Board",
+        "stock_on_hand": 120,
+        "daily_consumption": 20,
+        "days_of_supply": 6.0
+      },
+      {
+        "id": "PART-02",
+        "kind": "part",
+        "label": "Battery Cell Pack",
+        "part_id": "PART-02",
+        "name": "Battery Cell Pack",
+        "stock_on_hand": 200,
+        "daily_consumption": 25,
+        "days_of_supply": 8.0
+      },
+      {
+        "id": "PART-03",
+        "kind": "part",
+        "label": "Motor Assembly",
+        "part_id": "PART-03",
+        "name": "Motor Assembly",
+        "stock_on_hand": 80,
+        "daily_consumption": 10,
+        "days_of_supply": 8.0
+      },
+      {
+        "id": "PART-04",
+        "kind": "part",
+        "label": "Casing",
+        "part_id": "PART-04",
+        "name": "Casing",
+        "stock_on_hand": 150,
+        "daily_consumption": 15,
+        "days_of_supply": 10.0
+      },
+      {
+        "id": "PART-05",
+        "kind": "part",
+        "label": "Wiring Harness",
+        "part_id": "PART-05",
+        "name": "Wiring Harness",
+        "stock_on_hand": 60,
+        "daily_consumption": 30,
+        "days_of_supply": 2.0
+      }
+    ],
+    "products": [
+      {
+        "id": "PROD-01",
+        "kind": "product",
+        "label": "Smart Controller Unit",
+        "product_id": "PROD-01",
+        "name": "Smart Controller Unit",
+        "parts_needed": "PART-01 x1, PART-02 x1, PART-05 x2"
+      },
+      {
+        "id": "PROD-02",
+        "kind": "product",
+        "label": "Motor Drive Unit",
+        "product_id": "PROD-02",
+        "name": "Motor Drive Unit",
+        "parts_needed": "PART-03 x1, PART-04 x1"
+      }
+    ],
+    "orders": [
+      {
+        "id": "ORD-01",
+        "kind": "order",
+        "label": "Order ORD-01 (Meridian Retail)",
+        "order_id": "ORD-01",
+        "customer": "Meridian Retail",
+        "product_id": "PROD-01",
+        "quantity": 40,
+        "deadline": "2026-11-05"
+      },
+      {
+        "id": "ORD-02",
+        "kind": "order",
+        "label": "Order ORD-02 (Zenith Electronics)",
+        "order_id": "ORD-02",
+        "customer": "Zenith Electronics",
+        "product_id": "PROD-01",
+        "quantity": 25,
+        "deadline": "2026-11-07"
+      },
+      {
+        "id": "ORD-03",
+        "kind": "order",
+        "label": "Order ORD-03 (Northwind Traders)",
+        "order_id": "ORD-03",
+        "customer": "Northwind Traders",
+        "product_id": "PROD-01",
+        "quantity": 60,
+        "deadline": "2026-11-10"
+      },
+      {
+        "id": "ORD-04",
+        "kind": "order",
+        "label": "Order ORD-04 (Orbit Logistics)",
+        "order_id": "ORD-04",
+        "customer": "Orbit Logistics",
+        "product_id": "PROD-01",
+        "quantity": 15,
+        "deadline": "2026-11-12"
+      },
+      {
+        "id": "ORD-05",
+        "kind": "order",
+        "label": "Order ORD-05 (Meridian Retail)",
+        "order_id": "ORD-05",
+        "customer": "Meridian Retail",
+        "product_id": "PROD-01",
+        "quantity": 30,
+        "deadline": "2026-11-15"
+      },
+      {
+        "id": "ORD-06",
+        "kind": "order",
+        "label": "Order ORD-06 (Lumen Systems)",
+        "order_id": "ORD-06",
+        "customer": "Lumen Systems",
+        "product_id": "PROD-01",
+        "quantity": 50,
+        "deadline": "2026-11-20"
+      },
+      {
+        "id": "ORD-07",
+        "kind": "order",
+        "label": "Order ORD-07 (Atlas Industries)",
+        "order_id": "ORD-07",
+        "customer": "Atlas Industries",
+        "product_id": "PROD-02",
+        "quantity": 20,
+        "deadline": "2026-11-06"
+      },
+      {
+        "id": "ORD-08",
+        "kind": "order",
+        "label": "Order ORD-08 (Kestrel Automation)",
+        "order_id": "ORD-08",
+        "customer": "Kestrel Automation",
+        "product_id": "PROD-02",
+        "quantity": 35,
+        "deadline": "2026-11-09"
+      },
+      {
+        "id": "ORD-09",
+        "kind": "order",
+        "label": "Order ORD-09 (Northwind Traders)",
+        "order_id": "ORD-09",
+        "customer": "Northwind Traders",
+        "product_id": "PROD-02",
+        "quantity": 10,
+        "deadline": "2026-11-14"
+      },
+      {
+        "id": "ORD-10",
+        "kind": "order",
+        "label": "Order ORD-10 (Orbit Logistics)",
+        "order_id": "ORD-10",
+        "customer": "Orbit Logistics",
+        "product_id": "PROD-02",
+        "quantity": 25,
+        "deadline": "2026-11-18"
+      }
+    ]
+  },
+  "edges": {
+    "supplies": [
+      {
+        "relation": "SUPPLIES",
+        "source": "SUP-01",
+        "target": "PART-01",
+        "from_supplier": "SUP-01",
+        "to_part": "PART-01",
+        "lead_time_hours": 24,
+        "max_capacity_units_per_day": 100
+      },
+      {
+        "relation": "SUPPLIES",
+        "source": "SUP-01",
+        "target": "PART-02",
+        "from_supplier": "SUP-01",
+        "to_part": "PART-02",
+        "lead_time_hours": 24,
+        "max_capacity_units_per_day": 150
+      },
+      {
+        "relation": "SUPPLIES",
+        "source": "SUP-01",
+        "target": "PART-05",
+        "from_supplier": "SUP-01",
+        "to_part": "PART-05",
+        "lead_time_hours": 18,
+        "max_capacity_units_per_day": 200
+      },
+      {
+        "relation": "SUPPLIES",
+        "source": "SUP-02",
+        "target": "PART-03",
+        "from_supplier": "SUP-02",
+        "to_part": "PART-03",
+        "lead_time_hours": 36,
+        "max_capacity_units_per_day": 80
+      },
+      {
+        "relation": "SUPPLIES",
+        "source": "SUP-02",
+        "target": "PART-04",
+        "from_supplier": "SUP-02",
+        "to_part": "PART-04",
+        "lead_time_hours": 30,
+        "max_capacity_units_per_day": 120
+      },
+      {
+        "relation": "SUPPLIES",
+        "source": "SUP-02",
+        "target": "PART-05",
+        "from_supplier": "SUP-02",
+        "to_part": "PART-05",
+        "lead_time_hours": 36,
+        "max_capacity_units_per_day": 120
+      }
+    ],
+    "used_in": [
+      {
+        "relation": "USED_IN",
+        "source": "PART-01",
+        "target": "PROD-01",
+        "from_part": "PART-01",
+        "to_product": "PROD-01",
+        "quantity_per_unit": 1,
+        "quantity_per_product": 1
+      },
+      {
+        "relation": "USED_IN",
+        "source": "PART-02",
+        "target": "PROD-01",
+        "from_part": "PART-02",
+        "to_product": "PROD-01",
+        "quantity_per_unit": 1,
+        "quantity_per_product": 1
+      },
+      {
+        "relation": "USED_IN",
+        "source": "PART-05",
+        "target": "PROD-01",
+        "from_part": "PART-05",
+        "to_product": "PROD-01",
+        "quantity_per_unit": 2,
+        "quantity_per_product": 2
+      },
+      {
+        "relation": "USED_IN",
+        "source": "PART-03",
+        "target": "PROD-02",
+        "from_part": "PART-03",
+        "to_product": "PROD-02",
+        "quantity_per_unit": 1,
+        "quantity_per_product": 1
+      },
+      {
+        "relation": "USED_IN",
+        "source": "PART-04",
+        "target": "PROD-02",
+        "from_part": "PART-04",
+        "to_product": "PROD-02",
+        "quantity_per_unit": 1,
+        "quantity_per_product": 1
+      }
+    ],
+    "fulfills": [
+      {
+        "relation": "FULFILLS",
+        "source": "PROD-01",
+        "target": "ORD-01",
+        "from_product": "PROD-01",
+        "to_order": "ORD-01"
+      },
+      {
+        "relation": "FULFILLS",
+        "source": "PROD-01",
+        "target": "ORD-02",
+        "from_product": "PROD-01",
+        "to_order": "ORD-02"
+      },
+      {
+        "relation": "FULFILLS",
+        "source": "PROD-01",
+        "target": "ORD-03",
+        "from_product": "PROD-01",
+        "to_order": "ORD-03"
+      },
+      {
+        "relation": "FULFILLS",
+        "source": "PROD-01",
+        "target": "ORD-04",
+        "from_product": "PROD-01",
+        "to_order": "ORD-04"
+      },
+      {
+        "relation": "FULFILLS",
+        "source": "PROD-01",
+        "target": "ORD-05",
+        "from_product": "PROD-01",
+        "to_order": "ORD-05"
+      },
+      {
+        "relation": "FULFILLS",
+        "source": "PROD-01",
+        "target": "ORD-06",
+        "from_product": "PROD-01",
+        "to_order": "ORD-06"
+      },
+      {
+        "relation": "FULFILLS",
+        "source": "PROD-02",
+        "target": "ORD-07",
+        "from_product": "PROD-02",
+        "to_order": "ORD-07"
+      },
+      {
+        "relation": "FULFILLS",
+        "source": "PROD-02",
+        "target": "ORD-08",
+        "from_product": "PROD-02",
+        "to_order": "ORD-08"
+      },
+      {
+        "relation": "FULFILLS",
+        "source": "PROD-02",
+        "target": "ORD-09",
+        "from_product": "PROD-02",
+        "to_order": "ORD-09"
+      },
+      {
+        "relation": "FULFILLS",
+        "source": "PROD-02",
+        "target": "ORD-10",
+        "from_product": "PROD-02",
+        "to_order": "ORD-10"
+      }
+    ]
+  }
+}
