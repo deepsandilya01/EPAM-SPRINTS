@@ -1,0 +1,45 @@
+{
+  "SUP-01": {
+    "parts": [
+      "PART-01",
+      "PART-02",
+      "PART-05"
+    ],
+    "products": [
+      "PROD-01"
+    ],
+    "orders": [
+      "ORD-01",
+      "ORD-02",
+      "ORD-03",
+      "ORD-04",
+      "ORD-05",
+      "ORD-06"
+    ],
+    "order_count": 6
+  },
+  "SUP-02": {
+    "parts": [
+      "PART-03",
+      "PART-04",
+      "PART-05"
+    ],
+    "products": [
+      "PROD-01",
+      "PROD-02"
+    ],
+    "orders": [
+      "ORD-01",
+      "ORD-02",
+      "ORD-03",
+      "ORD-04",
+      "ORD-05",
+      "ORD-06",
+      "ORD-07",
+      "ORD-08",
+      "ORD-09",
+      "ORD-10"
+    ],
+    "order_count": 10
+  }
+}

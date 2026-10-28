@@ -1,0 +1,7 @@
+from_supplier,to_part,lead_time_hours,max_capacity_units_per_day
+SUP-01,PART-01,24,100
+SUP-01,PART-02,24,150
+SUP-01,PART-05,18,200
+SUP-02,PART-03,36,80
+SUP-02,PART-04,30,120
+SUP-02,PART-05,36,120

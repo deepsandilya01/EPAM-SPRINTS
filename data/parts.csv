@@ -1,0 +1,6 @@
+part_id,name,stock_on_hand,daily_consumption
+PART-01,Control Board,120,20
+PART-02,Battery Cell Pack,200,25
+PART-03,Motor Assembly,80,10
+PART-04,Casing,150,15
+PART-05,Wiring Harness,60,30

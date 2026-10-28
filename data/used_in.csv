@@ -1,0 +1,6 @@
+from_part,to_product,quantity_per_unit
+PART-01,PROD-01,1
+PART-02,PROD-01,1
+PART-05,PROD-01,2
+PART-03,PROD-02,1
+PART-04,PROD-02,1

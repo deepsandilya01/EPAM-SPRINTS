@@ -1,0 +1,11 @@
+order_id,customer,product_id,quantity,deadline
+ORD-01,Meridian Retail,PROD-01,40,2026-11-05
+ORD-02,Zenith Electronics,PROD-01,25,2026-11-07
+ORD-03,Northwind Traders,PROD-01,60,2026-11-10
+ORD-04,Orbit Logistics,PROD-01,15,2026-11-12
+ORD-05,Meridian Retail,PROD-01,30,2026-11-15
+ORD-06,Lumen Systems,PROD-01,50,2026-11-20
+ORD-07,Atlas Industries,PROD-02,20,2026-11-06
+ORD-08,Kestrel Automation,PROD-02,35,2026-11-09
+ORD-09,Northwind Traders,PROD-02,10,2026-11-14
+ORD-10,Orbit Logistics,PROD-02,25,2026-11-18

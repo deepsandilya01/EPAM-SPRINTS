@@ -1,0 +1,341 @@
+{
+  "dataset_name": "photon Sprint1 Dataset.xlsx",
+  "status": "proposed canonical dataset; team confirmation required before formal approval",
+  "nodes": [
+    {
+      "id": "SUP-01",
+      "kind": "supplier",
+      "attributes": {
+        "name": "Apex Components",
+        "location": "Pune",
+        "note": "Primary supplier, electronics"
+      }
+    },
+    {
+      "id": "SUP-02",
+      "kind": "supplier",
+      "attributes": {
+        "name": "Bharat Precision Parts",
+        "location": "Indore",
+        "note": "Primary supplier, mechanical"
+      }
+    },
+    {
+      "id": "PART-01",
+      "kind": "part",
+      "attributes": {
+        "name": "Control Board",
+        "stock_on_hand": 120,
+        "daily_consumption": 20
+      }
+    },
+    {
+      "id": "PART-02",
+      "kind": "part",
+      "attributes": {
+        "name": "Battery Cell Pack",
+        "stock_on_hand": 200,
+        "daily_consumption": 25
+      }
+    },
+    {
+      "id": "PART-03",
+      "kind": "part",
+      "attributes": {
+        "name": "Motor Assembly",
+        "stock_on_hand": 80,
+        "daily_consumption": 10
+      }
+    },
+    {
+      "id": "PART-04",
+      "kind": "part",
+      "attributes": {
+        "name": "Casing",
+        "stock_on_hand": 150,
+        "daily_consumption": 15
+      }
+    },
+    {
+      "id": "PART-05",
+      "kind": "part",
+      "attributes": {
+        "name": "Wiring Harness",
+        "stock_on_hand": 60,
+        "daily_consumption": 30
+      }
+    },
+    {
+      "id": "PROD-01",
+      "kind": "product",
+      "attributes": {
+        "name": "Smart Controller Unit",
+        "parts_needed": "PART-01 x1, PART-02 x1, PART-05 x2"
+      }
+    },
+    {
+      "id": "PROD-02",
+      "kind": "product",
+      "attributes": {
+        "name": "Motor Drive Unit",
+        "parts_needed": "PART-03 x1, PART-04 x1"
+      }
+    },
+    {
+      "id": "ORD-01",
+      "kind": "order",
+      "attributes": {
+        "customer": "Meridian Retail",
+        "product_id": "PROD-01",
+        "quantity": 40,
+        "deadline": "2026-11-05"
+      }
+    },
+    {
+      "id": "ORD-02",
+      "kind": "order",
+      "attributes": {
+        "customer": "Zenith Electronics",
+        "product_id": "PROD-01",
+        "quantity": 25,
+        "deadline": "2026-11-07"
+      }
+    },
+    {
+      "id": "ORD-03",
+      "kind": "order",
+      "attributes": {
+        "customer": "Northwind Traders",
+        "product_id": "PROD-01",
+        "quantity": 60,
+        "deadline": "2026-11-10"
+      }
+    },
+    {
+      "id": "ORD-04",
+      "kind": "order",
+      "attributes": {
+        "customer": "Orbit Logistics",
+        "product_id": "PROD-01",
+        "quantity": 15,
+        "deadline": "2026-11-12"
+      }
+    },
+    {
+      "id": "ORD-05",
+      "kind": "order",
+      "attributes": {
+        "customer": "Meridian Retail",
+        "product_id": "PROD-01",
+        "quantity": 30,
+        "deadline": "2026-11-15"
+      }
+    },
+    {
+      "id": "ORD-06",
+      "kind": "order",
+      "attributes": {
+        "customer": "Lumen Systems",
+        "product_id": "PROD-01",
+        "quantity": 50,
+        "deadline": "2026-11-20"
+      }
+    },
+    {
+      "id": "ORD-07",
+      "kind": "order",
+      "attributes": {
+        "customer": "Atlas Industries",
+        "product_id": "PROD-02",
+        "quantity": 20,
+        "deadline": "2026-11-06"
+      }
+    },
+    {
+      "id": "ORD-08",
+      "kind": "order",
+      "attributes": {
+        "customer": "Kestrel Automation",
+        "product_id": "PROD-02",
+        "quantity": 35,
+        "deadline": "2026-11-09"
+      }
+    },
+    {
+      "id": "ORD-09",
+      "kind": "order",
+      "attributes": {
+        "customer": "Northwind Traders",
+        "product_id": "PROD-02",
+        "quantity": 10,
+        "deadline": "2026-11-14"
+      }
+    },
+    {
+      "id": "ORD-10",
+      "kind": "order",
+      "attributes": {
+        "customer": "Orbit Logistics",
+        "product_id": "PROD-02",
+        "quantity": 25,
+        "deadline": "2026-11-18"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "source": "SUP-01",
+      "target": "PART-01",
+      "relation": "SUPPLIES",
+      "attributes": {
+        "lead_time_hours": 24,
+        "max_capacity_units_per_day": 100
+      }
+    },
+    {
+      "source": "SUP-01",
+      "target": "PART-02",
+      "relation": "SUPPLIES",
+      "attributes": {
+        "lead_time_hours": 24,
+        "max_capacity_units_per_day": 150
+      }
+    },
+    {
+      "source": "SUP-01",
+      "target": "PART-05",
+      "relation": "SUPPLIES",
+      "attributes": {
+        "lead_time_hours": 18,
+        "max_capacity_units_per_day": 200
+      }
+    },
+    {
+      "source": "SUP-02",
+      "target": "PART-03",
+      "relation": "SUPPLIES",
+      "attributes": {
+        "lead_time_hours": 36,
+        "max_capacity_units_per_day": 80
+      }
+    },
+    {
+      "source": "SUP-02",
+      "target": "PART-04",
+      "relation": "SUPPLIES",
+      "attributes": {
+        "lead_time_hours": 30,
+        "max_capacity_units_per_day": 120
+      }
+    },
+    {
+      "source": "SUP-02",
+      "target": "PART-05",
+      "relation": "SUPPLIES",
+      "attributes": {
+        "lead_time_hours": 36,
+        "max_capacity_units_per_day": 120
+      }
+    },
+    {
+      "source": "PART-01",
+      "target": "PROD-01",
+      "relation": "USED_IN",
+      "attributes": {
+        "quantity_per_product": 1
+      }
+    },
+    {
+      "source": "PART-02",
+      "target": "PROD-01",
+      "relation": "USED_IN",
+      "attributes": {
+        "quantity_per_product": 1
+      }
+    },
+    {
+      "source": "PART-05",
+      "target": "PROD-01",
+      "relation": "USED_IN",
+      "attributes": {
+        "quantity_per_product": 2
+      }
+    },
+    {
+      "source": "PART-03",
+      "target": "PROD-02",
+      "relation": "USED_IN",
+      "attributes": {
+        "quantity_per_product": 1
+      }
+    },
+    {
+      "source": "PART-04",
+      "target": "PROD-02",
+      "relation": "USED_IN",
+      "attributes": {
+        "quantity_per_product": 1
+      }
+    },
+    {
+      "source": "PROD-01",
+      "target": "ORD-01",
+      "relation": "FULFILLS",
+      "attributes": {}
+    },
+    {
+      "source": "PROD-01",
+      "target": "ORD-02",
+      "relation": "FULFILLS",
+      "attributes": {}
+    },
+    {
+      "source": "PROD-01",
+      "target": "ORD-03",
+      "relation": "FULFILLS",
+      "attributes": {}
+    },
+    {
+      "source": "PROD-01",
+      "target": "ORD-04",
+      "relation": "FULFILLS",
+      "attributes": {}
+    },
+    {
+      "source": "PROD-01",
+      "target": "ORD-05",
+      "relation": "FULFILLS",
+      "attributes": {}
+    },
+    {
+      "source": "PROD-01",
+      "target": "ORD-06",
+      "relation": "FULFILLS",
+      "attributes": {}
+    },
+    {
+      "source": "PROD-02",
+      "target": "ORD-07",
+      "relation": "FULFILLS",
+      "attributes": {}
+    },
+    {
+      "source": "PROD-02",
+      "target": "ORD-08",
+      "relation": "FULFILLS",
+      "attributes": {}
+    },
+    {
+      "source": "PROD-02",
+      "target": "ORD-09",
+      "relation": "FULFILLS",
+      "attributes": {}
+    },
+    {
+      "source": "PROD-02",
+      "target": "ORD-10",
+      "relation": "FULFILLS",
+      "attributes": {}
+    }
+  ]
+}
