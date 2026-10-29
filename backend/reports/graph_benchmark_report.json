@@ -1,0 +1,84 @@
+{
+  "timestamp": "2026-10-29T16:18:44.886599+00:00",
+  "environment": {
+    "python_version": "3.9.6",
+    "python_implementation": "CPython",
+    "os_system": "Darwin",
+    "os_release": "27.2.0",
+    "os_version": "Darwin Kernel Version 27.2.0: Wed Oct 14 23:48:06 PDT 2026; root:xnu-13432.41.4~25/RELEASE_ARM64_T8142",
+    "machine": "arm64",
+    "processor": "arm",
+    "networkx_version": "3.2.1"
+  },
+  "workload": {
+    "graph_nodes": 19,
+    "graph_edges": 21,
+    "target_nodes": [
+      "SUP-01",
+      "SUP-02"
+    ],
+    "warmup_runs": 50,
+    "measured_runs_per_node": 1000,
+    "total_measured_runs": 2000,
+    "acceptance_criterion": "p95 latency <= 10.0 ms",
+    "threshold_ms": 10.0
+  },
+  "aggregate_metrics": {
+    "min_ms": 0.003,
+    "max_ms": 0.014334,
+    "mean_ms": 0.00359,
+    "median_ms": 0.003875,
+    "p90_ms": 0.004,
+    "p95_ms": 0.004083,
+    "p99_ms": 0.004291
+  },
+  "node_benchmarks": {
+    "SUP-01": {
+      "node_id": "SUP-01",
+      "downstream_count": 10,
+      "downstream_sample": [
+        "ORD-01",
+        "ORD-02",
+        "ORD-03",
+        "ORD-04",
+        "ORD-05",
+        "ORD-06"
+      ],
+      "iterations": 1000,
+      "min_ms": 0.003,
+      "max_ms": 0.014334,
+      "mean_ms": 0.003188,
+      "median_ms": 0.003125,
+      "p90_ms": 0.003292,
+      "p95_ms": 0.003375,
+      "p99_ms": 0.004125,
+      "std_dev_ms": 0.000501,
+      "threshold_ms": 10.0,
+      "passed_threshold": true
+    },
+    "SUP-02": {
+      "node_id": "SUP-02",
+      "downstream_count": 15,
+      "downstream_sample": [
+        "ORD-01",
+        "ORD-02",
+        "ORD-03",
+        "ORD-04",
+        "ORD-05",
+        "ORD-06"
+      ],
+      "iterations": 1000,
+      "min_ms": 0.003833,
+      "max_ms": 0.012,
+      "mean_ms": 0.003992,
+      "median_ms": 0.003958,
+      "p90_ms": 0.004042,
+      "p95_ms": 0.004167,
+      "p99_ms": 0.004459,
+      "std_dev_ms": 0.000356,
+      "threshold_ms": 10.0,
+      "passed_threshold": true
+    }
+  },
+  "overall_status": "PASS"
+}

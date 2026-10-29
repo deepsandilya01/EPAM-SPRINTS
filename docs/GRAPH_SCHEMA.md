@@ -18,7 +18,7 @@ $$\text{Tier 0: Supplier} \xrightarrow{\text{supplies}} \text{Tier 1: Part} \xri
 
 ## 2. Canonical Baseline Metrics
 
-The canonical dataset ([`photon_sprint1_graph_data.json`](file:///d:/EPAM%20MVP-1/EPAM-SPRINTS-main/DynamicGraph/photon_sprint1_graph_data.json)) defines the following verified baseline counts:
+The canonical dataset ([`photon_sprint1_graph_data.json`](../backend/data/photon_sprint1_graph_data.json)) defines the following verified baseline counts:
 
 ### Node Counts by Entity Type
 | Entity Category | Node Kind | Key in JSON | Baseline Count | ID Prefix / Pattern |
@@ -232,7 +232,7 @@ Connects a finished `product` assembly to a customer purchase `order`.
 
 - **Check ID**: `NODE_DUPLICATES`
 - **Error Code**: `ERR_DUPLICATE_NODE_ID`
-- **Tested In**: [`tests/test_duplicate_ids.py::test_networkx_silent_collapse_proof`](file:///d:/EPAM%20MVP-1/EPAM-SPRINTS-main/DynamicGraph/tests/test_duplicate_ids.py)
+- **Tested In**: [`tests/test_duplicate_ids.py::test_networkx_silent_collapse_proof`](../backend/tests/test_duplicate_ids.py)
 
 ### 5.2 Edge Reference & Direction Rules
 - **Non-Existent Endpoints**: Every edge `source` and `target` must resolve to a valid node defined in `nodes`. Violations trigger `ERR_NONEXISTENT_SOURCE_NODE` or `ERR_NONEXISTENT_TARGET_NODE`.
@@ -250,7 +250,7 @@ $$\text{Downstream}(\text{SUP-01}) = \{\text{PART-01}, \text{PART-02}, \text{PAR
 $$\text{Downstream}(\text{SUP-02}) = \{\text{PART-03}, \text{PART-04}, \text{PART-05}, \text{PROD-01}, \text{PROD-02}, \text{ORD-01}, \dots, \text{ORD-10}\} \quad (\mathbf{15} \text{ nodes})$$
 
 ### 5.4 Cycle & DAG Policy
-The validator implements three configurable acyclicity policies via [`AcyclicityPolicy`](file:///d:/EPAM%20MVP-1/EPAM-SPRINTS-main/DynamicGraph/graph_validation/schema.py#L13):
+The validator implements three configurable acyclicity policies via [`AcyclicityPolicy`](../backend/graph_validation/schema.py#L13):
 1. **`REQUIRE_DAG`** (Default): Graph must be strictly acyclic (`nx.is_directed_acyclic_graph(G) == True`). Any cycle raises `ERR_CYCLE_DETECTED`.
 2. **`ALLOW_CYCLES`**: Cycles are permitted without error for scenarios modeling reverse logistics or recycling loops.
 3. **`UNSPECIFIED`**: Emits a non-fatal warning (`WARN_ACYCLICITY_POLICY_UNDEFINED`) reminding operators that cycle enforcement is not explicitly configured.

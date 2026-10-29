@@ -43,11 +43,11 @@ The system architecture cleanly separates graph data storage, core validation, h
 
 | Component | Path | Primary Responsibilities | Status |
 |---|---|---|---|
-| **Flask API Server** | [`app.py`](file:///d:/EPAM%20MVP-1/EPAM-SPRINTS-main/DynamicGraph/app.py) | Exposes graph data, handles downstream BFS tracing, cascades node deletion with undo snapshots, provides reset, validation, and tracing benchmark endpoints. | **Implemented & Verified** |
-| **Validation Package** | [`graph_validation/`](file:///d:/EPAM%20MVP-1/EPAM-SPRINTS-main/DynamicGraph/graph_validation/) | Standalone module providing schema models, policy configurations, pre-construction raw JSON validation, NetworkX structural validation, and high-resolution latency timers. | **Implemented & Verified** |
-| **Benchmark Engine** | [`benchmarks/benchmark_tracing.py`](file:///d:/EPAM%20MVP-1/EPAM-SPRINTS-main/DynamicGraph/benchmarks/benchmark_tracing.py) | CLI statistical benchmarking tool (warm-up + 1000 runs per target) measuring pure graph traversal latencies against the 10 ms SLA. | **Implemented & Verified** |
-| **Canonical Dataset** | [`photon_sprint1_graph_data.json`](file:///d:/EPAM%20MVP-1/EPAM-SPRINTS-main/DynamicGraph/photon_sprint1_graph_data.json) | Ground-truth baseline dataset (19 nodes, 21 edges) detailing suppliers, parts, products, orders, and their relationships. | **Implemented & Verified** |
-| **Interactive Frontend** | [`static/index.html`](file:///d:/EPAM%20MVP-1/EPAM-SPRINTS-main/DynamicGraph/static/index.html) | D3.js v7 canvas rendering 4-column supply-chain tiers, drag mechanics, downstream cascade highlighting, impact preview panel, undo countdown toast, and deletion logs. | **Implemented & Verified** |
+| **Flask API Server** | [`app.py`](../backend/app.py) | Exposes graph data, handles downstream BFS tracing, cascades node deletion with undo snapshots, provides reset, validation, and tracing benchmark endpoints. | **Implemented & Verified** |
+| **Validation Package** | [`graph_validation/`](../backend/graph_validation/) | Standalone module providing schema models, policy configurations, pre-construction raw JSON validation, NetworkX structural validation, and high-resolution latency timers. | **Implemented & Verified** |
+| **Benchmark Engine** | [`benchmarks/benchmark_tracing.py`](../backend/benchmarks/benchmark_tracing.py) | CLI statistical benchmarking tool (warm-up + 1000 runs per target) measuring pure graph traversal latencies against the 10 ms SLA. | **Implemented & Verified** |
+| **Canonical Dataset** | [`photon_sprint1_graph_data.json`](../backend/data/photon_sprint1_graph_data.json) | Ground-truth baseline dataset (19 nodes, 21 edges) detailing suppliers, parts, products, orders, and their relationships. | **Implemented & Verified** |
+| **Interactive Frontend** | [`static/index.html`](../backend/static/index.html) | D3.js v7 canvas rendering 4-column supply-chain tiers, drag mechanics, downstream cascade highlighting, impact preview panel, undo countdown toast, and deletion logs. | **Implemented & Verified** |
 | **Frontend Validation Panel** | `static/index.html` (UI Panel) | Dedicated slide-out UI panel to render live `/api/validation` reports and trigger `/api/benchmark/tracing` runs from the browser. | **Proposed Enhancement** (Backend API & Contract Tests Verified) |
 
 ---
@@ -55,7 +55,7 @@ The system architecture cleanly separates graph data storage, core validation, h
 ## 3. Flask & NetworkX Integration Details
 
 ### 3.1 Startup Validation
-During server initialization in [`app.py`](file:///d:/EPAM%20MVP-1/EPAM-SPRINTS-main/DynamicGraph/app.py#L50-L57), the raw JSON payload is audited by `validate_raw_graph_data(RAW)` before the NetworkX graph object is constructed:
+During server initialization in [`app.py`](../backend/app.py#L50-L57), the raw JSON payload is audited by `validate_raw_graph_data(RAW)` before the NetworkX graph object is constructed:
 
 ```python
 RAW = _load_raw_data()
@@ -272,42 +272,46 @@ All endpoints return JSON responses with standard HTTP status codes.
 ## 5. Repository Files and Their Roles
 
 ```
-DynamicGraph/
-├── app.py                                # Flask application and REST API endpoints
-├── photon_sprint1_graph_data.json       # Baseline supply-chain graph dataset
-├── requirements.txt                      # Dependencies (Flask, NetworkX, pytest, pytest-cov, ruff)
-├── pytest.ini                            # Pytest configuration and markers
-├── static/
-│   └── index.html                        # D3.js visualization and interactive client
-├── graph_validation/                     # Graph Validation Package
-│   ├── __init__.py                       # Package exports
-│   ├── schema.py                         # Dataclasses, Enums, and Policies
-│   ├── validator.py                      # Multi-rule validation engine
-│   ├── tracing.py                        # High-resolution downstream traversal timer
-│   └── reporting.py                      # Console & JSON report generators
-├── benchmarks/
-│   ├── __init__.py                       # Benchmark module
-│   └── benchmark_tracing.py              # Statistical benchmark CLI
-├── tests/
-│   ├── conftest.py                       # Fixtures (raw data, canonical graph, app client)
-│   ├── test_acyclicity.py                # DAG enforcement and cycle detection tests
-│   ├── test_api_integration.py          # Flask route integration & state tests
-│   ├── test_duplicate_ids.py             # Duplicate ID detection & collapse proof
-│   ├── test_edge_direction.py           # Valid and invalid edge transition tests
-│   ├── test_edge_integrity.py           # Endpoint reference & edge count tests
-│   ├── test_frontend_validation_contract.py # API schema contract tests
-│   ├── test_malformed_data.py            # Corrupt payloads and type tests
-│   ├── test_missing_entities.py          # Missing keys and invalid values tests
-│   ├── test_node_counts.py              # Category and total node count tests
-│   ├── test_reporting.py                 # Report formatting and disk output tests
-│   └── test_tracing.py                   # Reachability and traversal latency tests
+EPAM-SPRINTS/
+├── backend/                              # Flask application and validation package
+│   ├── app.py                            # Flask application and REST API endpoints
+│   ├── photon_sprint1_graph_data.json   # Baseline supply-chain graph dataset
+│   ├── requirements.txt                  # Dependencies (Flask, NetworkX, pytest, pytest-cov, ruff)
+│   ├── pytest.ini                        # Pytest configuration and markers
+│   ├── static/
+│   │   └── index.html                    # D3.js visualization and interactive client
+│   ├── graph_validation/                 # Graph Validation Package
+│   │   ├── __init__.py                   # Package exports
+│   │   ├── schema.py                     # Dataclasses, Enums, and Policies
+│   │   ├── validator.py                  # Multi-rule validation engine
+│   │   ├── tracing.py                    # High-resolution downstream traversal timer
+│   │   └── reporting.py                  # Console & JSON report generators
+│   ├── benchmarks/
+│   │   ├── __init__.py                   # Benchmark module
+│   │   └── benchmark_tracing.py          # Statistical benchmark CLI
+│   └── tests/
+│       ├── conftest.py                       # Fixtures (raw data, canonical graph, app client)
+│       ├── test_acyclicity.py                # DAG enforcement and cycle detection tests
+│       ├── test_api_integration.py          # Flask route integration & state tests
+│       ├── test_duplicate_ids.py             # Duplicate ID detection & collapse proof
+│       ├── test_edge_direction.py           # Valid and invalid edge transition tests
+│       ├── test_edge_integrity.py           # Endpoint reference & edge count tests
+│       ├── test_frontend_validation_contract.py # API schema contract tests
+│       ├── test_malformed_data.py            # Corrupt payloads and type tests
+│       ├── test_missing_entities.py          # Missing keys and invalid values tests
+│       ├── test_node_counts.py              # Category and total node count tests
+│       ├── test_reporting.py                 # Report formatting and disk output tests
+│       └── test_tracing.py                   # Reachability and traversal latency tests
+│   └── data/                                 # Canonical graph dataset
+│       └── photon_sprint1_graph_data.json
+├── reports/                              # Generated JSON benchmark and validation reports
 └── docs/
     ├── INTEGRATION_GUIDE.md              # Architecture and integration specification (this file)
     ├── FRONTEND_VALIDATION_GUIDE.md       # Frontend UI interaction & validation contract
     ├── GRAPH_SCHEMA.md                   # Formal entity & relationship schema
     ├── TESTING_AND_BENCHMARKING.md       # Test suite & benchmark execution details
     ├── ACCEPTANCE_CHECKLIST.md           # Acceptance criteria verification table
-    └── SETUP_GUIDE.md                    # Environment setup and developer runbook
+    └── SETUP.md                          # Step-by-step environment setup and execution guide
 ```
 
 ---

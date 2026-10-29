@@ -2,7 +2,7 @@
 
 ## 1. Overview & Current Frontend Architecture
 
-The **Team Photon** frontend is a high-performance, single-page web application implemented in vanilla JavaScript and **D3.js (v7)** located at [`static/index.html`](file:///d:/EPAM%20MVP-1/EPAM-SPRINTS-main/DynamicGraph/static/index.html). It connects directly to the Flask backend to visualize the multi-tier supply-chain dependency network.
+The **Team Photon** frontend is a high-performance, single-page web application implemented in vanilla JavaScript and **D3.js (v7)** located at [`static/index.html`](../backend/static/index.html). It connects directly to the Flask backend to visualize the multi-tier supply-chain dependency network.
 
 ### 1.1 Rendering Technology & Design Principles
 - **Visualization Library**: D3.js (v7.8.5) using standard SVG `<svg>` rendering.
@@ -16,7 +16,7 @@ The **Team Photon** frontend is a high-performance, single-page web application 
 
 ## 2. Implemented Frontend Features & Interaction Flow
 
-The following features are **fully implemented and verified** in [`static/index.html`](file:///d:/EPAM%20MVP-1/EPAM-SPRINTS-main/DynamicGraph/static/index.html):
+The following features are **fully implemented and verified** in [`static/index.html`](../backend/static/index.html):
 
 ```
 +-------------------------------------------------------------------------------+
@@ -72,7 +72,7 @@ The following features are **fully implemented and verified** in [`static/index.
 
 ## 3. Validation API Contract (Frontend Readiness)
 
-The backend exposes dedicated endpoints to support frontend validation and performance reporting. These contracts are verified by automated tests in [`tests/test_frontend_validation_contract.py`](file:///d:/EPAM%20MVP-1/EPAM-SPRINTS-main/DynamicGraph/tests/test_frontend_validation_contract.py):
+The backend exposes dedicated endpoints to support frontend validation and performance reporting. These contracts are verified by automated tests in [`tests/test_frontend_validation_contract.py`](../backend/tests/test_frontend_validation_contract.py):
 
 ### 3.1 Structure Validation Contract (`GET /api/validation`)
 

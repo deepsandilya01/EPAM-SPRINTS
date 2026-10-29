@@ -12,5 +12,9 @@ exclude = [
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "W", "UP"]
-ignore = ["E501"]
+ignore = ["E501", "UP042", "W293"]
 
+[tool.pyright]
+extraPaths = ["backend"]
+venvPath = "."
+venv = ".venv"
