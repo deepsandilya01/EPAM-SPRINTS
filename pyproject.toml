@@ -3,8 +3,6 @@ name = "epam-sprints-supply-chain"
 version = "1.0.0"
 requires-python = ">=3.12"
 
-[tool.vercel]
-entrypoint = "backend.app:app"
 
 [tool.ruff]
 target-version = "py312"
