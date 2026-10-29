@@ -29,17 +29,30 @@ from graph_validation import (  # noqa: E402
     validate_raw_graph_data,
 )
 
-DATA_FILE = BASE_DIR / "data" / "photon_sprint1_graph_data.json"
-if not DATA_FILE.exists():
-    for _candidate in (
+def _find_data_file() -> pathlib.Path:
+    candidates = (
+        BASE_DIR / "data" / "photon_sprint1_graph_data.json",
+        REPO_ROOT / "backend" / "data" / "photon_sprint1_graph_data.json",
         REPO_ROOT / "data" / "photon_sprint1_graph_data.json",
+        REPO_ROOT / "api" / "data" / "photon_sprint1_graph_data.json",
         pathlib.Path("backend/data") / "photon_sprint1_graph_data.json",
         pathlib.Path("data") / "photon_sprint1_graph_data.json",
         BASE_DIR / "photon_sprint1_graph_data.json",
-    ):
-        if _candidate.exists():
-            DATA_FILE = _candidate
-            break
+        pathlib.Path("/var/task/backend/data/photon_sprint1_graph_data.json"),
+        pathlib.Path("/var/task/data/photon_sprint1_graph_data.json"),
+    )
+    for cand in candidates:
+        if cand.exists():
+            return cand
+    for root in (BASE_DIR, REPO_ROOT, pathlib.Path.cwd()):
+        if root.exists():
+            matches = list(root.glob("**/photon_sprint1_graph_data.json"))
+            if matches:
+                return matches[0]
+    return BASE_DIR / "data" / "photon_sprint1_graph_data.json"
+
+
+DATA_FILE = _find_data_file()
 
 app = Flask(__name__, static_folder="static", static_url_path="/static")
 
@@ -118,18 +131,28 @@ def _restore(snap: dict):
 # --- REST Routes ---
 
 @app.route("/")
+@app.route("/api/index")
+@app.route("/api/index.py")
 def index():
-    static_dir = BASE_DIR / "static"
-    if not (static_dir / "index.html").exists():
-        for _candidate in (
-            REPO_ROOT / "backend" / "static",
-            pathlib.Path("backend/static"),
-            pathlib.Path("static"),
-        ):
-            if (_candidate / "index.html").exists():
-                static_dir = _candidate
-                break
-    return send_from_directory(static_dir, "index.html")
+    candidates = (
+        BASE_DIR / "static",
+        REPO_ROOT / "backend" / "static",
+        REPO_ROOT / "static",
+        REPO_ROOT / "api" / "static",
+        pathlib.Path("backend/static"),
+        pathlib.Path("static"),
+        pathlib.Path("/var/task/backend/static"),
+        pathlib.Path("/var/task/static"),
+    )
+    for cand in candidates:
+        if (cand / "index.html").exists():
+            return send_from_directory(cand, "index.html")
+    for root in (BASE_DIR, REPO_ROOT, pathlib.Path.cwd()):
+        if root.exists():
+            matches = list(root.glob("**/static/index.html"))
+            if matches:
+                return send_from_directory(matches[0].parent, "index.html")
+    return send_from_directory(BASE_DIR / "static", "index.html")
 
 
 @app.route("/api/graph")
