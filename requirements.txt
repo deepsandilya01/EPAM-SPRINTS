@@ -1,2 +1,2 @@
-# Team Photon — Dependencies
--r backend/requirements.txt
+flask>=3.0.0
+networkx>=3.2.0

@@ -119,7 +119,17 @@ def _restore(snap: dict):
 
 @app.route("/")
 def index():
-    return send_from_directory(BASE_DIR / "static", "index.html")
+    static_dir = BASE_DIR / "static"
+    if not (static_dir / "index.html").exists():
+        for _candidate in (
+            REPO_ROOT / "backend" / "static",
+            pathlib.Path("backend/static"),
+            pathlib.Path("static"),
+        ):
+            if (_candidate / "index.html").exists():
+                static_dir = _candidate
+                break
+    return send_from_directory(static_dir, "index.html")
 
 
 @app.route("/api/graph")
