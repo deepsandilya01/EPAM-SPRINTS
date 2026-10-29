@@ -45,9 +45,9 @@ flowchart TD
     end
 
     subgraph Storage["Data & Evidence Artifacts"]
-        JSON["photon_sprint1_graph_data.json"]
-        RepJSON["reports/graph_validation_report.json"]
-        BenchJSON["reports/graph_benchmark_report.json"]
+        JSON["backend/data/photon_sprint1_graph_data.json"]
+        RepJSON["backend/reports/graph_validation_report.json"]
+        BenchJSON["backend/reports/graph_benchmark_report.json"]
     end
 
     UI <--> API
@@ -102,51 +102,58 @@ $$\text{Supplier} \xrightarrow{\text{SUPPLIES}} \text{Part} \xrightarrow{\text{U
 ## 4. Repository Structure
 
 ```text
-DynamicGraph/
-├── app.py                                    # Flask backend API with NetworkX and validation routes
-├── photon_sprint1_graph_data.json          # Canonical Sprint 1 supply-chain graph dataset
-├── requirements.txt                          # Python dependencies (runtime + testing/linting)
+EPAM-SPRINTS/
+├── backend/                                  # Flask backend service & validation engine
+│   ├── app.py                                # Flask backend API with NetworkX and validation routes
+│   ├── requirements.txt                      # Backend Python dependencies
+│   ├── pytest.ini                            # Pytest configuration for backend
+│   ├── pyproject.toml                        # Ruff linter and tooling configuration
+│   ├── data/                                 # Canonical graph dataset
+│   │   └── photon_sprint1_graph_data.json    # Canonical Sprint 1 supply-chain graph dataset
+│   ├── static/                               # Static assets served by Flask
+│   │   └── index.html                        # Interactive D3.js frontend with validation panel
+│   ├── graph_validation/                     # Graph Structure Validation Package
+│   │   ├── __init__.py                       # Package exports
+│   │   ├── schema.py                         # Dataclasses, validation policies, and reports
+│   │   ├── validator.py                      # Pre-construction raw validation & live DiGraph checks
+│   │   ├── tracing.py                        # Downstream reachability tracing with nanosecond metrics
+│   │   └── reporting.py                      # Console report formatting & JSON serialization
+│   ├── benchmarks/                           # Performance Benchmarking Suite
+│   │   ├── __init__.py                       # Benchmarks package
+│   │   ├── benchmark_tracing.py              # Traversal latency benchmark runner (p95 < 10 ms)
+│   │   └── README.md                         # Benchmark methodology and execution options
+│   └── tests/                                # Automated Pytest Suite (73 Tests)
+│       ├── conftest.py                       # Isolated fixtures & Flask client state cleanup
+│       ├── test_node_counts.py               # Node count & configurable baseline tests
+│       ├── test_edge_integrity.py            # Edge count & endpoint reference tests
+│       ├── test_edge_direction.py            # Supply-chain tier direction tests
+│       ├── test_duplicate_ids.py             # Pre-construction raw duplicate ID tests
+│       ├── test_missing_entities.py          # Missing field & schema attribute tests
+│       ├── test_malformed_data.py            # Non-dict, empty graph & JSON export tests
+│       ├── test_acyclicity.py                # Conditional DAG & cycle detection tests
+│       ├── test_tracing.py                   # Exact supplier reachability & metrics tests
+│       ├── test_reporting.py                 # Console formatting & report save tests
+│       ├── test_api_integration.py           # Live Flask endpoint & lifecycle integration tests
+│       └── test_frontend_validation_contract.py # Frontend validation contract tests
+│   └── reports/                              # Evidence Reports Directory
+│       ├── graph_validation_report.json      # Live generated baseline validation report
+│       └── graph_benchmark_report.json       # Live generated benchmark measurements
+├── docs/                                     # Comprehensive EPAM Technical Documentation
+│   ├── ARCHITECTURE.md                       # High-level architecture, 4-tier model & trade-offs
+│   ├── SETUP.md                              # Step-by-step setup & execution guide (Windows/macOS/Linux)
+│   ├── DEVELOPMENT.md                        # Coding standards, pytest strategy & contribution workflow
+│   ├── TECHNICAL_OVERVIEW.md                 # Core algorithms, mathematical model & BFS traversal timing
+│   ├── DEPLOYMENT_GUIDE.md                   # Production deployment, Gunicorn & Docker architecture
+│   ├── INTEGRATION_GUIDE.md                  # Backend API routes, Flask architecture & undo engine
+│   ├── FRONTEND_VALIDATION_GUIDE.md          # UI architecture, D3.js interaction & validation panel
+│   ├── GRAPH_SCHEMA.md                       # Domain entities, required fields & DAG physical rationale
+│   ├── TESTING_AND_BENCHMARKING.md           # Test suite architecture, coverage & latency benchmarks
+│   ├── ACCEPTANCE_CHECKLIST.md               # Evidence traceability matrix for AC-01 through AC-11
+│   └── Test_result.md                        # Test execution logs and coverage reports
 ├── README.md                                 # Main project overview and entry point
-├── pytest.ini                                # Pytest testpaths, pythonpath, and test discovery
-├── pyproject.toml                            # Ruff linter and project configuration
-├── .gitignore                                # Git exclusion rules
-├── static/
-│   └── index.html                            # Interactive D3.js frontend with validation panel
-├── index.html                                # Root synchronized frontend entry point
-├── graph_validation/                         # Graph Structure Validation Package
-│   ├── __init__.py                           # Public exports
-│   ├── schema.py                             # Dataclasses, validation policies, and reports
-│   ├── validator.py                          # Pre-construction raw validation & live DiGraph checks
-│   ├── tracing.py                            # Downstream reachability tracing with nanosecond metrics
-│   └── reporting.py                          # Console report formatting & JSON serialization
-├── benchmarks/                               # Performance Benchmarking Suite
-│   ├── __init__.py                           # Benchmarks package
-│   ├── benchmark_tracing.py                  # Traversal latency benchmark runner (p95 < 10 ms)
-│   └── README.md                             # Benchmark methodology and execution options
-├── reports/                                  # Evidence Reports Directory
-│   ├── .gitkeep                              # Directory marker
-│   ├── graph_validation_report.json          # Live generated baseline validation report
-│   └── graph_benchmark_report.json           # Live generated 2,000-iteration benchmark measurements
-├── docs/                                     # Comprehensive Technical Documentation
-│   ├── SETUP_GUIDE.md                        # Step-by-step setup guide for Windows/Linux/macOS
-│   ├── INTEGRATION_GUIDE.md                  # Backend architecture, Flask routes, and rollback guide
-│   ├── FRONTEND_VALIDATION_GUIDE.md          # UI architecture, D3.js interaction, and testing steps
-│   ├── GRAPH_SCHEMA.md                       # Domain entities, required fields, and DAG physical rationale
-│   ├── TESTING_AND_BENCHMARKING.md           # Test suite details, coverage, and latency benchmarking
-│   └── ACCEPTANCE_CHECKLIST.md               # Evidence traceability matrix for AC-01 through AC-11
-└── tests/                                    # Automated Pytest Suite (73 Tests)
-    ├── conftest.py                           # Isolated fixtures & Flask client state cleanup
-    ├── test_node_counts.py                   # Node count & configurable baseline tests
-    ├── test_edge_integrity.py                # Edge count & endpoint reference tests
-    ├── test_edge_direction.py                # Supply-chain tier direction tests
-    ├── test_duplicate_ids.py                 # Pre-construction raw duplicate ID tests
-    ├── test_missing_entities.py              # Missing field & schema attribute tests
-    ├── test_malformed_data.py                # Non-dict, empty graph & JSON export tests
-    ├── test_acyclicity.py                    # Conditional DAG & cycle detection tests
-    ├── test_tracing.py                       # Exact supplier reachability & metrics tests
-    ├── test_reporting.py                     # Console formatting & report save tests
-    ├── test_api_integration.py               # Live Flask endpoint & lifecycle integration tests
-    └── test_frontend_validation_contract.py  # Frontend JSON schema contract tests
+├── pytest.ini                                # Root-level pytest test runner configuration
+├── pyproject.toml                            # Root-level Ruff & package configuration
+└── requirements.txt                          # Root dependencies manifest
 ```
 
 ---
@@ -157,23 +164,22 @@ DynamicGraph/
 - Python 3.10+ (Verified on Python 3.12.14 / 3.13.7).
 - PowerShell (Windows) or Bash/Zsh (Linux/macOS).
 
-### Installation (Windows PowerShell)
+### Installation
 
-```powershell
-# 1. Open directory
-cd "d:\EPAM MVP-1\EPAM-SPRINTS-main\DynamicGraph"
+```bash
+# 1. Create a virtual environment
+python3 -m venv .venv
 
-# 2. Create virtual environment
-python -m venv .venv
+# 2. Activate virtual environment
+# On Linux/macOS:
+source .venv/bin/activate
+# On Windows PowerShell:
+# .\.venv\Scripts\Activate.ps1
 
-# 3. Activate virtual environment
-.\.venv\Scripts\Activate.ps1
-# (If blocked by PowerShell script policy, run: Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass)
-
-# 4. Install dependencies
+# 3. Install dependencies
 pip install -r requirements.txt
 
-# 5. Verify installation
+# 4. Verify installation
 python -c "import flask, networkx, pytest; print('Environment Verified OK')"
 ```
 
@@ -181,7 +187,14 @@ python -c "import flask, networkx, pytest; print('Environment Verified OK')"
 
 ## 6. Starting the Application
 
-```powershell
+From repository root:
+```bash
+python -m backend.app
+```
+
+Or from inside `backend/`:
+```bash
+cd backend
 python app.py
 ```
 
@@ -209,24 +222,31 @@ python app.py
 ## 8. Validation, Testing & Benchmarking Commands
 
 ### Automated Test Suite
-```powershell
-# Run all 73 tests
+```bash
+# Run all 73 tests from repository root:
 pytest -v
 
-# Run with test coverage report
-pytest --cov=graph_validation --cov-report=term-missing
+# Or from within backend:
+cd backend && pytest -v
+
+# Run with test coverage report:
+pytest --cov=backend/graph_validation --cov-report=term-missing
 ```
-*Current Result: 73 passed in 0.70s; 91% code coverage.*
+*Current Result: 73 passed; 91% code coverage.*
 
 ### Code Linting
-```powershell
+```bash
 ruff check .
 ```
 *Current Result: All checks passed!*
 
 ### Traversal Latency Benchmark (< 10 ms Target)
-```powershell
-python -m benchmarks.benchmark_tracing
+```bash
+# From repository root:
+python -m backend.benchmarks.benchmark_tracing
+
+# Or from inside backend:
+cd backend && python -m benchmarks.benchmark_tracing
 ```
 
 #### Measured Benchmark Results (2,000 Runs)
@@ -263,13 +283,21 @@ python -m benchmarks.benchmark_tracing
 
 ## 11. Detailed Documentation Links
 
-- **Setup & Installation**: [`docs/SETUP_GUIDE.md`](docs/SETUP_GUIDE.md)
-- **Integration Architecture**: [`docs/INTEGRATION_GUIDE.md`](docs/INTEGRATION_GUIDE.md)
-- **Frontend Validation UI Guide**: [`docs/FRONTEND_VALIDATION_GUIDE.md`](docs/FRONTEND_VALIDATION_GUIDE.md)
-- **Graph Schema & DAG Rationale**: [`docs/GRAPH_SCHEMA.md`](docs/GRAPH_SCHEMA.md)
-- **Testing & Benchmarking Specification**: [`docs/TESTING_AND_BENCHMARKING.md`](docs/TESTING_AND_BENCHMARKING.md)
-- **Acceptance Criteria Verification Matrix**: [`docs/ACCEPTANCE_CHECKLIST.md`](docs/ACCEPTANCE_CHECKLIST.md)
-- **Generated Validation Report**: [`reports/graph_validation_report.json`](reports/graph_validation_report.json)
-- **Generated Benchmark Report**: [`reports/graph_benchmark_report.json`](reports/graph_benchmark_report.json)
-- **Standalone Archive**: [`team_photon_validation_module.zip`](team_photon_validation_module.zip)
+### Core EPAM Submission Documentation
+- **Architecture & Design**: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — System architecture, 4-tier model, and design trade-offs.
+- **Environment Setup**: [`docs/SETUP.md`](docs/SETUP.md) — Step-by-step setup and execution instructions across macOS, Linux, and Windows.
+- **Developer Guidelines**: [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md) — Coding conventions, testing strategy, and contribution workflow.
+- **Technical Overview**: [`docs/TECHNICAL_OVERVIEW.md`](docs/TECHNICAL_OVERVIEW.md) — Core algorithms, BFS reachability, monotonic timing, and time complexity.
+
+### Domain, Implementation & Operational Guides
+- **Production Deployment**: [`docs/DEPLOYMENT_GUIDE.md`](docs/DEPLOYMENT_GUIDE.md) — Production WSGI deployment, Gunicorn, systemd, and Docker configuration.
+- **Graph Schema & Rules**: [`docs/GRAPH_SCHEMA.md`](docs/GRAPH_SCHEMA.md) — Node categories, edge relationships, schema rules, and physical rationale.
+- **Frontend Validation UI**: [`docs/FRONTEND_VALIDATION_GUIDE.md`](docs/FRONTEND_VALIDATION_GUIDE.md) — D3.js visualization, ripple highlighting, and validation drawer.
+- **Testing & Benchmarking**: [`docs/TESTING_AND_BENCHMARKING.md`](docs/TESTING_AND_BENCHMARKING.md) — 73-test suite design, code coverage, and sub-10ms benchmark methodology.
+- **Acceptance Criteria Matrix**: [`docs/ACCEPTANCE_CHECKLIST.md`](docs/ACCEPTANCE_CHECKLIST.md) — Verification matrix for requirements AC-01 through AC-11.
+- **Test Execution Evidence**: [`docs/Test_result.md`](docs/Test_result.md) — Automated test logs and coverage reports.
+
+### Generated Evidence Artifacts
+- **Validation Audit Report**: [`backend/reports/graph_validation_report.json`](backend/reports/graph_validation_report.json) — JSON report generated by the validation engine.
+- **Benchmark Traversal Report**: [`backend/reports/graph_benchmark_report.json`](backend/reports/graph_benchmark_report.json) — Statistical traversal timing measurements.
 

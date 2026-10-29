@@ -1,0 +1,47 @@
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+.python/
+
+# Python bytecode & cache
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Environment variables & local secrets
+.env
+.env.local
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDEs & Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Build & packaging artifacts
+*.zip
+*.tar.gz
+dist/
+build/
+*.egg-info/
+
+# Linter and formatter caches
+.ruff_cache/
+
+# Temporary directories
+scratch/
+.system_generated/

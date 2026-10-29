@@ -12,22 +12,22 @@ The verification architecture of the **Team Photon** graph engine ensures both f
 ## 2. Test Suite Architecture & Summary
 
 ### 2.1 Test Module Breakdown
-All test modules reside in the [`tests/`](file:///d:/EPAM%20MVP-1/EPAM-SPRINTS-main/DynamicGraph/tests/) directory and are executed using the unified test runner:
+All test modules reside in the [`tests/`](../backend/tests/) directory and are executed using the unified test runner:
 
 | Test File | Category | Test Count | Scope & Behaviors Verified | Status |
 |---|---|---:|---|---|
-| [`test_node_counts.py`](file:///d:/EPAM%20MVP-1/EPAM-SPRINTS-main/DynamicGraph/tests/test_node_counts.py) | Unit | 5 | Exact baseline counts (19 nodes: 2 sup, 5 part, 2 prod, 10 ord) & post-deletion mode. | **73/73 PASSED** |
-| [`test_edge_integrity.py`](file:///d:/EPAM%20MVP-1/EPAM-SPRINTS-main/DynamicGraph/tests/test_edge_integrity.py) | Unit | 8 | Total edges (21: 6 supplies, 5 used_in, 10 fulfills) & dangling endpoint checks. | **73/73 PASSED** |
-| [`test_edge_direction.py`](file:///d:/EPAM%20MVP-1/EPAM-SPRINTS-main/DynamicGraph/tests/test_edge_direction.py) | Unit | 6 | Strict tier transitions (`Sup -> Part -> Prod -> Ord`) & tier-jump rejections. | **73/73 PASSED** |
-| [`test_duplicate_ids.py`](file:///d:/EPAM%20MVP-1/EPAM-SPRINTS-main/DynamicGraph/tests/test_duplicate_ids.py) | Unit | 3 | Pre-construction raw JSON duplicate ID audits & NetworkX silent collapse proof. | **73/73 PASSED** |
-| [`test_acyclicity.py`](file:///d:/EPAM%20MVP-1/EPAM-SPRINTS-main/DynamicGraph/tests/test_acyclicity.py) | Unit | 4 | DAG verification, cycle rejection, `ALLOW_CYCLES` policy, & warning on unspecified. | **73/73 PASSED** |
-| [`test_tracing.py`](file:///d:/EPAM%20MVP-1/EPAM-SPRINTS-main/DynamicGraph/tests/test_tracing.py) | Unit | 5 | Deterministic reachability (SUP-01 = 10, SUP-02 = 15) & timer resolution checks. | **73/73 PASSED** |
-| [`test_malformed_data.py`](file:///d:/EPAM%20MVP-1/EPAM-SPRINTS-main/DynamicGraph/tests/test_malformed_data.py) | Unit | 5 | Corrupted payloads (non-dict, non-JSON, empty, wrong container types). | **73/73 PASSED** |
-| [`test_missing_entities.py`](file:///d:/EPAM%20MVP-1/EPAM-SPRINTS-main/DynamicGraph/tests/test_missing_entities.py) | Unit | 7 | Missing required keys, blank labels, negative stock, and invalid order quantities. | **73/73 PASSED** |
-| [`test_reporting.py`](file:///d:/EPAM%20MVP-1/EPAM-SPRINTS-main/DynamicGraph/tests/test_reporting.py) | Unit | 3 | Human-readable terminal output formatting and JSON report serialization to disk. | **73/73 PASSED** |
-| [`test_api_integration.py`](file:///d:/EPAM%20MVP-1/EPAM-SPRINTS-main/DynamicGraph/tests/test_api_integration.py) | Integration | 10 | Flask routes (`/`, `/api/graph`, `/api/validation`, `/api/impact`, delete/undo/reset). | **73/73 PASSED** |
-| [`test_frontend_validation_contract.py`](file:///d:/EPAM%20MVP-1/EPAM-SPRINTS-main/DynamicGraph/tests/test_frontend_validation_contract.py) | Contract | 2 | JSON payload structure, field presence, and vocabulary matching frontend D3 UI. | **73/73 PASSED** |
-| [`conftest.py`](file:///d:/EPAM%20MVP-1/EPAM-SPRINTS-main/DynamicGraph/tests/conftest.py) | Harness | 0 | Test fixtures, raw data loaders, and Flask client with state isolation. | **Active** |
+| [`test_node_counts.py`](../backend/tests/test_node_counts.py) | Unit | 5 | Exact baseline counts (19 nodes: 2 sup, 5 part, 2 prod, 10 ord) & post-deletion mode. | **73/73 PASSED** |
+| [`test_edge_integrity.py`](../backend/tests/test_edge_integrity.py) | Unit | 8 | Total edges (21: 6 supplies, 5 used_in, 10 fulfills) & dangling endpoint checks. | **73/73 PASSED** |
+| [`test_edge_direction.py`](../backend/tests/test_edge_direction.py) | Unit | 6 | Strict tier transitions (`Sup -> Part -> Prod -> Ord`) & tier-jump rejections. | **73/73 PASSED** |
+| [`test_duplicate_ids.py`](../backend/tests/test_duplicate_ids.py) | Unit | 3 | Pre-construction raw JSON duplicate ID audits & NetworkX silent collapse proof. | **73/73 PASSED** |
+| [`test_acyclicity.py`](../backend/tests/test_acyclicity.py) | Unit | 4 | DAG verification, cycle rejection, `ALLOW_CYCLES` policy, & warning on unspecified. | **73/73 PASSED** |
+| [`test_tracing.py`](../backend/tests/test_tracing.py) | Unit | 5 | Deterministic reachability (SUP-01 = 10, SUP-02 = 15) & timer resolution checks. | **73/73 PASSED** |
+| [`test_malformed_data.py`](../backend/tests/test_malformed_data.py) | Unit | 5 | Corrupted payloads (non-dict, non-JSON, empty, wrong container types). | **73/73 PASSED** |
+| [`test_missing_entities.py`](../backend/tests/test_missing_entities.py) | Unit | 7 | Missing required keys, blank labels, negative stock, and invalid order quantities. | **73/73 PASSED** |
+| [`test_reporting.py`](../backend/tests/test_reporting.py) | Unit | 3 | Human-readable terminal output formatting and JSON report serialization to disk. | **73/73 PASSED** |
+| [`test_api_integration.py`](../backend/tests/test_api_integration.py) | Integration | 10 | Flask routes (`/`, `/api/graph`, `/api/validation`, `/api/impact`, delete/undo/reset). | **73/73 PASSED** |
+| [`test_frontend_validation_contract.py`](../backend/tests/test_frontend_validation_contract.py) | Contract | 2 | JSON payload structure, field presence, and vocabulary matching frontend D3 UI. | **73/73 PASSED** |
+| [`conftest.py`](../backend/tests/conftest.py) | Harness | 0 | Test fixtures, raw data loaders, and Flask client with state isolation. | **Active** |
 | **Total** | — | **73** | **Complete Test Suite** | **100% Pass** |
 
 ---
@@ -95,7 +95,7 @@ python -m benchmarks.benchmark_tracing
 
 ## 6. Actual Executed Benchmark Results (Verified Evidence)
 
-The benchmark was executed in the test environment and recorded in [`reports/graph_benchmark_report.json`](file:///d:/EPAM%20MVP-1/EPAM-SPRINTS-main/DynamicGraph/reports/graph_benchmark_report.json):
+The benchmark was executed in the test environment and recorded in [`backend/reports/graph_benchmark_report.json`](../backend/reports/graph_benchmark_report.json):
 
 ### 6.1 Test Environment Metadata
 - **OS**: Microsoft Windows 11 Enterprise (Build 10.0.26300, AMD64)
@@ -133,7 +133,7 @@ The observed $95^{\text{th}}$ percentile latency of **0.0329 ms** represents les
 ### 7.1 Re-generating Reports
 To re-run the benchmark and write an updated JSON report:
 ```powershell
-python -m benchmarks.benchmark_tracing --runs 1000 --warmup 50 --output reports/graph_benchmark_report.json
+python -m backend.benchmarks.benchmark_tracing --iterations 1000 --warmup 50 --output backend/reports/graph_benchmark_report.json
 ```
 
 ### 7.2 Benchmark Variations in Virtualized Environments
