@@ -1,0 +1,84 @@
+{
+  "timestamp": "2026-10-28T16:42:09.273599+00:00",
+  "environment": {
+    "python_version": "3.12.14",
+    "python_implementation": "CPython",
+    "os_system": "Windows",
+    "os_release": "11",
+    "os_version": "10.0.26300",
+    "machine": "AMD64",
+    "processor": "Intel64 Family 6 Model 142 Stepping 10, GenuineIntel",
+    "networkx_version": "3.4.2"
+  },
+  "workload": {
+    "graph_nodes": 19,
+    "graph_edges": 21,
+    "target_nodes": [
+      "SUP-01",
+      "SUP-02"
+    ],
+    "warmup_runs": 50,
+    "measured_runs_per_node": 1000,
+    "total_measured_runs": 2000,
+    "acceptance_criterion": "p95 latency <= 10.0 ms",
+    "threshold_ms": 10.0
+  },
+  "aggregate_metrics": {
+    "min_ms": 0.0103,
+    "max_ms": 0.1585,
+    "mean_ms": 0.018793,
+    "median_ms": 0.014,
+    "p90_ms": 0.0291,
+    "p95_ms": 0.032905,
+    "p99_ms": 0.0422
+  },
+  "node_benchmarks": {
+    "SUP-01": {
+      "node_id": "SUP-01",
+      "downstream_count": 10,
+      "downstream_sample": [
+        "ORD-01",
+        "ORD-02",
+        "ORD-03",
+        "ORD-04",
+        "ORD-05",
+        "ORD-06"
+      ],
+      "iterations": 1000,
+      "min_ms": 0.0103,
+      "max_ms": 0.1585,
+      "mean_ms": 0.020834,
+      "median_ms": 0.0199,
+      "p90_ms": 0.0302,
+      "p95_ms": 0.0338,
+      "p99_ms": 0.042205,
+      "std_dev_ms": 0.010339,
+      "threshold_ms": 10.0,
+      "passed_threshold": true
+    },
+    "SUP-02": {
+      "node_id": "SUP-02",
+      "downstream_count": 15,
+      "downstream_sample": [
+        "ORD-01",
+        "ORD-02",
+        "ORD-03",
+        "ORD-04",
+        "ORD-05",
+        "ORD-06"
+      ],
+      "iterations": 1000,
+      "min_ms": 0.0135,
+      "max_ms": 0.1479,
+      "mean_ms": 0.016751,
+      "median_ms": 0.0139,
+      "p90_ms": 0.0257,
+      "p95_ms": 0.030365,
+      "p99_ms": 0.042101,
+      "std_dev_ms": 0.009117,
+      "threshold_ms": 10.0,
+      "passed_threshold": true
+    }
+  },
+  "overall_status": "PASS"
+}
