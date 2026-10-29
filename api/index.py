@@ -1,44 +1,29 @@
 """
-Vercel Serverless Function entry point for Team Photon Supply-Chain Intelligence.
-Exposes the WSGI Flask application to Vercel's Python runtime.
+Vercel serverless entry point — re-exports the Flask application from backend.app.
+
+Vercel's framework detector scans this file for a module-level ``app`` variable.
+The [tool.vercel] section in pyproject.toml sets the authoritative entrypoint to
+``backend.app:app``, but this shim satisfies both the detector and existing tests
+that import ``from api.index import app``.
 """
 
 from __future__ import annotations
 
-import logging
 import pathlib
 import sys
-import traceback
 
-REPO_ROOT = pathlib.Path(__file__).resolve().parent.parent
-if str(REPO_ROOT) not in sys.path:
-    sys.path.insert(0, str(REPO_ROOT))
+# Ensure repo root is on sys.path so ``backend`` package is importable.
+_REPO_ROOT = pathlib.Path(__file__).resolve().parent.parent
+if str(_REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(_REPO_ROOT))
 
-BACKEND_DIR = REPO_ROOT / "backend"
-if str(BACKEND_DIR) not in sys.path:
-    sys.path.insert(0, str(BACKEND_DIR))
+# Also add backend/ so its internal relative imports (graph_validation) resolve.
+_BACKEND_DIR = _REPO_ROOT / "backend"
+if str(_BACKEND_DIR) not in sys.path:
+    sys.path.insert(0, str(_BACKEND_DIR))
 
-try:
-    from backend.app import app  # noqa: E402
-except Exception as e:
-    logging.exception("Failed to import backend.app: %s", e)
-    from flask import Flask, jsonify
+# Module-level re-export: Vercel's AST scanner requires ``app`` to be a
+# bare top-level name, not buried inside a try/except block.
+from backend.app import app  # noqa: E402
 
-    app = Flask(__name__)
-
-    @app.route("/", defaults={"path": ""})
-    @app.route("/<path:path>")
-    def catch_all(path):
-        return (
-            jsonify(
-                {
-                    "error": "Backend initialization failed",
-                    "exception": str(e),
-                    "traceback": traceback.format_exc(),
-                }
-            ),
-            500,
-        )
-
-# Vercel's serverless Python runtime automatically discovers the 'app' WSGI callable
 __all__ = ["app"]
