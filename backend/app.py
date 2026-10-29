@@ -29,6 +29,7 @@ from graph_validation import (  # noqa: E402
     validate_raw_graph_data,
 )
 
+
 def _find_data_file() -> pathlib.Path:
     candidates = (
         BASE_DIR / "data" / "photon_sprint1_graph_data.json",
