@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-10-29T16:18:44.886599+00:00",
+  "timestamp": "2026-10-29T16:43:09.003014+00:00",
   "environment": {
     "python_version": "3.9.6",
     "python_implementation": "CPython",
@@ -24,13 +24,13 @@
     "threshold_ms": 10.0
   },
   "aggregate_metrics": {
-    "min_ms": 0.003,
-    "max_ms": 0.014334,
-    "mean_ms": 0.00359,
-    "median_ms": 0.003875,
-    "p90_ms": 0.004,
-    "p95_ms": 0.004083,
-    "p99_ms": 0.004291
+    "min_ms": 0.003167,
+    "max_ms": 0.071833,
+    "mean_ms": 0.003875,
+    "median_ms": 0.004041,
+    "p90_ms": 0.004292,
+    "p95_ms": 0.004375,
+    "p99_ms": 0.005294
   },
   "node_benchmarks": {
     "SUP-01": {
@@ -45,14 +45,14 @@
         "ORD-06"
       ],
       "iterations": 1000,
-      "min_ms": 0.003,
-      "max_ms": 0.014334,
-      "mean_ms": 0.003188,
-      "median_ms": 0.003125,
-      "p90_ms": 0.003292,
-      "p95_ms": 0.003375,
-      "p99_ms": 0.004125,
-      "std_dev_ms": 0.000501,
+      "min_ms": 0.003167,
+      "max_ms": 0.071833,
+      "mean_ms": 0.003395,
+      "median_ms": 0.003292,
+      "p90_ms": 0.003375,
+      "p95_ms": 0.003458,
+      "p99_ms": 0.003584,
+      "std_dev_ms": 0.002181,
       "threshold_ms": 10.0,
       "passed_threshold": true
     },
@@ -68,14 +68,14 @@
         "ORD-06"
       ],
       "iterations": 1000,
-      "min_ms": 0.003833,
-      "max_ms": 0.012,
-      "mean_ms": 0.003992,
-      "median_ms": 0.003958,
-      "p90_ms": 0.004042,
-      "p95_ms": 0.004167,
-      "p99_ms": 0.004459,
-      "std_dev_ms": 0.000356,
+      "min_ms": 0.004,
+      "max_ms": 0.02425,
+      "mean_ms": 0.004356,
+      "median_ms": 0.004208,
+      "p90_ms": 0.004338,
+      "p95_ms": 0.004458,
+      "p99_ms": 0.008504,
+      "std_dev_ms": 0.001269,
       "threshold_ms": 10.0,
       "passed_threshold": true
     }
