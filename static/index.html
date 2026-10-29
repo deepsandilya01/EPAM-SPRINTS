@@ -3,567 +3,204 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Photon Sprint 1 — Supply-Chain Graph &amp; Ripple Intelligence</title>
-  <meta name="description" content="Mission-critical supply chain graph engine, downstream disruption simulation, and topological validation platform." />
+  <title>Photon Sprint 1 — Supply-Chain Graph</title>
+  <meta name="description" content="Interactive supply-chain dependency graph for Team Photon Sprint 1. Visualise suppliers, parts, products, and customer orders." />
 
-  <!-- Google Fonts: Inter & JetBrains Mono -->
+  <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
 
-  <!-- D3.js v7 -->
+  <!-- D3.js -->
   <script src="https://d3js.org/d3.v7.min.js"></script>
 
   <style>
-    /* ══════════════════════════════════════════════════════════
-       Enterprise Industrial Design System
-       Modern Obsidian Foundation + Restrained Functional Accents
-       ══════════════════════════════════════════════════════════ */
-    *, *::before, *::after {
-      margin: 0; padding: 0; box-sizing: border-box;
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-    }
+    /* ───────────────── Reset & Tokens ───────────────── */
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
     :root {
-      /* Surface & Canvas Hierarchy */
-      --bg-canvas:         #0B0D11;
-      --bg-panel:          #11141A;
-      --bg-surface:        #161A22;
-      --bg-surface-hover:  #1D222C;
-      --bg-surface-active: #252B37;
+      /* palette — matches the reference image */
+      --col-supplier:    #D6436E;
+      --col-part:        #F5A623;
+      --col-product:     #1AABB8;
+      --col-order:       #2C5F8A;
+      --col-order-dim:   #B0B8C1;
 
-      /* High-Precision Borders */
-      --border-subtle:     #1E232D;
-      --border-medium:     #2B3240;
-      --border-strong:     #3D4658;
-      --border-focus:      #6366F1;
+      --bg-body:         #0F1117;
+      --bg-panel:        rgba(22, 25, 37, 0.82);
+      --bg-card:         rgba(30, 34, 50, 0.90);
+      --border-glass:    rgba(255,255,255,0.08);
+      --text-primary:    #E8ECF2;
+      --text-secondary:  #8A92A6;
+      --accent-glow:     rgba(26,171,184,0.35);
 
-      /* Typography Scale */
-      --text-primary:      #F1F3F5;
-      --text-secondary:    #9AA2B1;
-      --text-tertiary:     #636D7E;
-      --text-disabled:     #434B58;
-
-      --font-sans:         'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      --font-mono:         'JetBrains Mono', 'SFMono-Regular', Menlo, Consolas, monospace;
-
-      /* Functional Tier Colors (Precision Industrial) */
-      --col-supplier:      #E05252;
-      --col-supplier-sub:  rgba(224, 82, 82, 0.12);
-      --col-supplier-bd:   rgba(224, 82, 82, 0.32);
-
-      --col-part:          #E59312;
-      --col-part-sub:      rgba(229, 147, 18, 0.12);
-      --col-part-bd:       rgba(229, 147, 18, 0.32);
-
-      --col-product:       #10B981;
-      --col-product-sub:   rgba(16, 185, 129, 0.12);
-      --col-product-bd:    rgba(16, 185, 129, 0.32);
-
-      --col-order:         #6366F1;
-      --col-order-sub:     rgba(99, 102, 241, 0.12);
-      --col-order-bd:      rgba(99, 102, 241, 0.32);
-
-      /* Semantic Accents */
-      --col-accent:        #6366F1;
-      --col-accent-hover:  #4F46E5;
-      --col-success:       #10B981;
-      --col-warning:       #F59E0B;
-      --col-danger:        #EF4444;
-      --col-danger-hover:  #DC2626;
-
-      /* Layout Geometry */
-      --header-h:          54px;
-      --dock-h:            230px;
-      --dock-min-h:        40px;
+      --font: 'Inter', system-ui, -apple-system, sans-serif;
+      --radius: 14px;
+      --shadow: 0 8px 32px rgba(0,0,0,0.45);
     }
 
-    html, body {
-      height: 100%;
-      width: 100%;
-      overflow: hidden;
-      background-color: var(--bg-canvas);
+    html, body { height: 100%; }
+    body {
+      font-family: var(--font);
+      background: var(--bg-body);
       color: var(--text-primary);
-      font-family: var(--font-sans);
-      font-size: 13px;
-      line-height: 1.5;
+      overflow: hidden;
     }
 
+    /* ───────────────── Layout ───────────────── */
     #app {
       display: flex;
       flex-direction: column;
       height: 100vh;
-      width: 100vw;
-      position: relative;
-      background: radial-gradient(circle at 50% 0%, rgba(99, 102, 241, 0.03) 0%, transparent 60%);
     }
 
-    /* ══════════════════════════════════════════════════════════
-       Command Header
-       ══════════════════════════════════════════════════════════ */
+    /* Top bar */
     header {
-      height: var(--header-h);
-      padding: 0 20px;
-      background: var(--bg-panel);
-      border-bottom: 1px solid var(--border-subtle);
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 16px;
-      z-index: 30;
-      flex-shrink: 0;
+      padding: 14px 28px;
+      background: var(--bg-panel);
+      backdrop-filter: blur(18px);
+      border-bottom: 1px solid var(--border-glass);
+      z-index: 10;
     }
-
-    .brand-group {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    .brand-mark {
-      width: 28px;
-      height: 28px;
-      border-radius: 6px;
-      background: var(--bg-surface);
-      border: 1px solid var(--border-medium);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--col-accent);
-      flex-shrink: 0;
-    }
-    .brand-mark svg {
-      width: 15px;
-      height: 15px;
-    }
-    .brand-meta {
-      display: flex;
-      flex-direction: column;
-      gap: 1px;
-    }
-    .brand-title {
-      font-size: 13px;
+    header h1 {
+      font-size: 1.15rem;
       font-weight: 700;
-      letter-spacing: -0.2px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      color: var(--text-primary);
+      letter-spacing: -0.3px;
+      background: linear-gradient(135deg, var(--col-product), #7dd3fc);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
     }
-    .brand-tag {
-      font-size: 10px;
-      font-weight: 600;
-      padding: 1px 6px;
-      border-radius: 4px;
-      background: var(--bg-surface);
-      border: 1px solid var(--border-medium);
+    header .subtitle {
+      font-size: 0.78rem;
       color: var(--text-secondary);
-      font-family: var(--font-mono);
-      letter-spacing: 0.2px;
-    }
-    .brand-sub {
-      font-size: 11px;
-      color: var(--text-tertiary);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .indicator-live {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: var(--col-success);
+      margin-left: 14px;
     }
 
-    /* Telemetry Ribbon */
-    .telemetry-ribbon {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      background: var(--bg-surface);
-      border: 1px solid var(--border-subtle);
-      padding: 4px 14px;
-      border-radius: 6px;
-      font-size: 11px;
-      color: var(--text-secondary);
-      font-variant-numeric: tabular-nums;
-    }
-    .telemetry-cell {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-    }
-    .telemetry-cell strong {
-      color: var(--text-primary);
-      font-family: var(--font-mono);
-      font-weight: 600;
-    }
-    .telemetry-div {
-      width: 1px;
-      height: 12px;
-      background: var(--border-medium);
-    }
-
-    /* Search Input */
-    .search-control {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      background: var(--bg-surface);
-      border: 1px solid var(--border-subtle);
-      padding: 5px 10px;
-      border-radius: 6px;
-      width: 210px;
-      transition: border-color 0.15s ease, width 0.15s ease;
-    }
-    .search-control:focus-within {
-      width: 250px;
-      border-color: var(--border-focus);
-      outline: 1px solid var(--border-focus);
-    }
-    .search-control input {
-      background: transparent;
-      border: none;
-      outline: none;
-      color: var(--text-primary);
-      font-family: var(--font-sans);
-      font-size: 12px;
-      width: 100%;
-    }
-    .search-control input::placeholder {
-      color: var(--text-tertiary);
-    }
-    .kbd-chip {
-      font-size: 10px;
-      padding: 1px 5px;
-      background: var(--bg-surface-hover);
-      border: 1px solid var(--border-subtle);
-      border-radius: 3px;
-      color: var(--text-tertiary);
-      font-family: var(--font-mono);
-      line-height: 1.2;
-    }
-
-    /* Header Actions */
     .header-actions {
       display: flex;
-      align-items: center;
-      gap: 6px;
+      gap: 10px;
     }
 
-    /* Standard Button Component */
+    /* Buttons */
     .btn {
       display: inline-flex;
       align-items: center;
-      justify-content: center;
       gap: 6px;
-      height: 30px;
-      padding: 0 11px;
-      border-radius: 6px;
-      font-size: 12px;
-      font-weight: 500;
-      font-family: var(--font-sans);
-      cursor: pointer;
-      border: 1px solid var(--border-medium);
-      background: var(--bg-surface);
+      padding: 8px 18px;
+      border: 1px solid var(--border-glass);
+      border-radius: 10px;
+      background: var(--bg-card);
       color: var(--text-primary);
-      transition: background-color 0.12s ease, border-color 0.12s ease, color 0.12s ease;
-      user-select: none;
-      white-space: nowrap;
+      font-family: var(--font);
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      backdrop-filter: blur(8px);
     }
-    .btn:hover:not(:disabled) {
-      background: var(--bg-surface-hover);
-      border-color: var(--border-strong);
-    }
-    .btn:active:not(:disabled) {
-      background: var(--bg-surface-active);
-    }
-    .btn:focus-visible {
-      outline: 2px solid var(--border-focus);
-      outline-offset: 2px;
-    }
-    .btn:disabled {
-      opacity: 0.4;
-      cursor: not-allowed;
-    }
-    .btn svg {
-      width: 13px;
-      height: 13px;
-      flex-shrink: 0;
-    }
-    .btn--primary {
-      background: var(--col-accent);
-      border-color: var(--col-accent);
-      color: #FFFFFF;
-    }
-    .btn--primary:hover:not(:disabled) {
-      background: var(--col-accent-hover);
-      border-color: var(--col-accent-hover);
-    }
-    .btn--danger {
-      background: var(--col-supplier-sub);
-      border-color: var(--col-supplier-bd);
-      color: #F87171;
-    }
-    .btn--danger:hover:not(:disabled) {
-      background: var(--col-danger);
-      border-color: var(--col-danger);
-      color: #FFFFFF;
-    }
-    .btn--sm {
-      height: 24px;
-      padding: 0 8px;
-      font-size: 11px;
-    }
+    .btn:hover { background: rgba(26,171,184,0.15); border-color: var(--col-product); }
+    .btn:disabled { opacity: 0.35; cursor: not-allowed; }
+    .btn:disabled:hover { background: var(--bg-card); border-color: var(--border-glass); }
+    .btn svg { width: 15px; height: 15px; }
 
-    /* ══════════════════════════════════════════════════════════
-       Canvas Container & Swimlanes
-       ══════════════════════════════════════════════════════════ */
+    .btn--danger { border-color: rgba(214,67,110,0.3); }
+    .btn--danger:hover { background: rgba(214,67,110,0.18); border-color: var(--col-supplier); }
+
+    .btn--reset { border-color: rgba(245,166,35,0.3); }
+    .btn--reset:hover { background: rgba(245,166,35,0.15); border-color: var(--col-part); }
+
+    /* Canvas area */
     #graph-container {
       flex: 1;
       position: relative;
       overflow: hidden;
-      width: 100%;
     }
-    #graph-svg {
+    #graph-container svg {
       width: 100%;
       height: 100%;
       display: block;
     }
 
-    /* Architectural Swimlane Tracks */
-    .swimlanes-track {
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 40px;
-      display: flex;
-      pointer-events: none;
-      z-index: 10;
-      border-bottom: 1px solid var(--border-subtle);
-      background: rgba(11, 13, 17, 0.85);
-      backdrop-filter: blur(8px);
-    }
-    .swimlane-col-header {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 20px;
-      border-right: 1px solid var(--border-subtle);
-      pointer-events: auto;
-    }
-    .swimlane-col-header:last-child {
-      border-right: none;
-    }
-    .col-title-group {
-      display: flex;
-      align-items: center;
-      gap: 7px;
-    }
-    .col-dot {
-      width: 7px;
-      height: 7px;
-      border-radius: 2px;
-      flex-shrink: 0;
-    }
-    .col-label {
-      font-size: 11px;
-      font-weight: 600;
-      color: var(--text-primary);
-      letter-spacing: 0.1px;
-    }
-    .col-count {
-      font-size: 10px;
-      font-weight: 600;
-      font-family: var(--font-mono);
-      padding: 1px 5px;
-      border-radius: 4px;
-      background: var(--bg-surface);
-      color: var(--text-secondary);
-      border: 1px solid var(--border-subtle);
-    }
-
-    /* Viewport Float Controls */
-    .canvas-tools {
-      position: absolute;
-      top: 50px;
-      right: 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      z-index: 15;
-    }
-    .tool-btn {
-      width: 28px;
-      height: 28px;
-      padding: 0;
-      border-radius: 6px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: var(--bg-panel);
-      border: 1px solid var(--border-medium);
-      color: var(--text-secondary);
-      cursor: pointer;
-      transition: background-color 0.12s, color 0.12s;
-    }
-    .tool-btn:hover {
-      background: var(--bg-surface-hover);
-      color: var(--text-primary);
-    }
-    .tool-btn svg {
-      width: 13px;
-      height: 13px;
-    }
-
-    /* ══════════════════════════════════════════════════════════
-       D3 Graph Elements (Crisp Engineering Aesthetic)
-       ══════════════════════════════════════════════════════════ */
-    .edge-path {
-      fill: none;
-      stroke: #252B37;
-      stroke-width: 1.5;
-      transition: stroke 0.2s ease, stroke-width 0.2s ease, opacity 0.2s ease;
-    }
-    .edge-path.highlighted {
-      stroke-width: 2.2;
-      stroke-dasharray: 5 3;
-      animation: edgeStream 1s linear infinite;
-    }
-    @keyframes edgeStream {
-      from { stroke-dashoffset: 16; }
-      to   { stroke-dashoffset: 0; }
-    }
-    .edge-path.dimmed {
-      opacity: 0.08;
-    }
-
-    .node-g {
-      cursor: pointer;
-    }
-    .node-target-ring {
-      fill: none;
-      stroke: transparent;
-      stroke-width: 2;
-      transition: stroke 0.15s ease;
-    }
-    .node-g:hover .node-target-ring {
-      stroke: rgba(255, 255, 255, 0.25);
-    }
-    .node-g.active .node-target-ring {
-      stroke: #FFFFFF;
-      stroke-width: 2;
-    }
-
-    .node-core-circle {
-      fill: var(--bg-panel);
-      stroke-width: 1.8;
-      transition: fill 0.15s ease, stroke 0.15s ease;
-    }
-    .node-g:hover .node-core-circle {
-      fill: var(--bg-surface-hover);
-    }
-    .node-g.active .node-core-circle {
-      fill: var(--bg-surface-active);
-    }
-
-    .node-text-id {
-      font-family: var(--font-mono);
-      font-size: 11px;
-      font-weight: 700;
-      fill: var(--text-primary);
-      text-anchor: middle;
-      pointer-events: none;
-      user-select: none;
-    }
-    .node-text-label {
-      font-family: var(--font-sans);
-      font-size: 9px;
-      font-weight: 500;
-      fill: var(--text-secondary);
-      text-anchor: middle;
-      pointer-events: none;
-      user-select: none;
-    }
-    .node-g.dimmed {
-      opacity: 0.14;
-    }
-
-    /* ══════════════════════════════════════════════════════════
-       Bottom Intelligence Dock
-       ══════════════════════════════════════════════════════════ */
-    #bottom-dock {
+    /* ───────────────── Bottom Output Panel ("What happens when you delete a node") ───────────────── */
+    #bottom-output-panel {
       position: absolute;
       bottom: 0;
       left: 0;
       right: 0;
-      height: var(--dock-h);
-      background: var(--bg-panel);
-      border-top: 1px solid var(--border-subtle);
+      height: 195px;
+      background: rgba(15, 18, 28, 0.95);
+      backdrop-filter: blur(24px);
+      border-top: 1px solid var(--border-glass);
+      z-index: 40;
+      box-shadow: 0 -8px 32px rgba(0,0,0,0.5);
       display: flex;
       flex-direction: column;
-      z-index: 40;
-      transition: height 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-      box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.4);
+      transition: height 0.3s cubic-bezier(0.22, 1, 0.36, 1);
     }
-    #bottom-dock.minimized {
-      height: var(--dock-min-h);
+    #bottom-output-panel.minimized {
+      height: 40px;
     }
-
-    .dock-header {
-      height: var(--dock-min-h);
-      padding: 0 18px;
+    #bottom-output-panel .panel-dock-header {
+      height: 40px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      border-bottom: 1px solid var(--border-subtle);
-      background: var(--bg-panel);
+      padding: 0 20px;
+      background: rgba(22, 27, 42, 0.9);
+      border-bottom: 1px solid var(--border-glass);
       flex-shrink: 0;
-      user-select: none;
     }
-    .dock-tabs {
+    #bottom-output-panel .dock-title {
+      font-size: 0.76rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
       display: flex;
       align-items: center;
-      gap: 16px;
-    }
-    .dock-tab {
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--text-secondary);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      cursor: pointer;
-      padding: 4px 0;
-      border-bottom: 2px solid transparent;
-      transition: color 0.12s, border-color 0.12s;
-    }
-    .dock-tab.active {
+      gap: 8px;
       color: var(--text-primary);
-      border-color: var(--col-accent);
     }
-    .dock-tab:hover:not(.active) {
-      color: var(--text-primary);
+    #bottom-output-panel .dock-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--col-product);
+      box-shadow: 0 0 8px var(--col-product);
+      animation: pulseDot 2s infinite ease-in-out;
+    }
+    @keyframes pulseDot {
+      0%, 100% { opacity: 0.6; transform: scale(0.9); }
+      50% { opacity: 1; transform: scale(1.15); }
     }
 
+    /* Embedded Legend in dock header */
     .dock-legend {
       display: flex;
       align-items: center;
-      gap: 16px;
-      font-size: 11px;
-      color: var(--text-tertiary);
+      gap: 18px;
+      font-size: 0.70rem;
+      font-weight: 600;
+      color: var(--text-secondary);
     }
-    .legend-item {
+    .dock-legend-item {
       display: flex;
       align-items: center;
-      gap: 5px;
+      gap: 6px;
     }
-    .legend-item-dot {
-      width: 7px;
-      height: 7px;
+    .dock-legend-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .dock-legend-line {
+      width: 20px;
+      height: 2px;
+      background: var(--text-secondary);
       border-radius: 2px;
+      flex-shrink: 0;
     }
 
     .dock-actions {
@@ -571,589 +208,669 @@
       align-items: center;
       gap: 8px;
     }
+    .btn-dock {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid var(--border-glass);
+      color: var(--text-secondary);
+      font-size: 0.68rem;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .btn-dock:hover {
+      background: rgba(255,255,255,0.12);
+      color: var(--text-primary);
+    }
 
-    .dock-body {
+    #bottom-output-panel .panel-dock-body {
       flex: 1;
       display: flex;
       overflow: hidden;
     }
 
-    /* Pane 1: Entity Inspector */
-    .dock-pane-inspector {
-      flex: 0 0 320px;
-      min-width: 280px;
-      padding: 12px 18px;
-      border-right: 1px solid var(--border-subtle);
+    /* Column 1: Impact Preview */
+    .dock-col-impact {
+      flex: 1.35;
+      padding: 12px 20px;
+      border-right: 1px solid var(--border-glass);
       overflow-y: auto;
       display: flex;
       flex-direction: column;
       gap: 8px;
     }
-    .inspector-header {
+    .impact-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
     }
-    .inspector-title-group {
+    .impact-title {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--col-supplier);
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
       display: flex;
       align-items: center;
-      gap: 7px;
+      gap: 6px;
     }
-    .inspector-badge {
-      font-size: 10px;
+    .impact-target-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 0.72rem;
       font-weight: 700;
-      padding: 1px 6px;
-      border-radius: 4px;
-      font-family: var(--font-mono);
-      letter-spacing: 0.3px;
-    }
-    .inspector-name {
-      font-size: 13px;
-      font-weight: 700;
+      background: rgba(255,255,255,0.08);
       color: var(--text-primary);
-      font-family: var(--font-mono);
-    }
-    .inspector-desc {
-      font-size: 11px;
-      color: var(--text-secondary);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .inspector-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 11px;
-      margin-top: 2px;
-    }
-    .inspector-table tr {
-      border-bottom: 1px solid rgba(255, 255, 255, 0.03);
-    }
-    .inspector-table td {
-      padding: 3px 0;
-    }
-    .inspector-table td.lbl {
-      color: var(--text-tertiary);
-      text-transform: capitalize;
-    }
-    .inspector-table td.val {
-      text-align: right;
-      color: var(--text-primary);
-      font-family: var(--font-mono);
-      font-weight: 500;
     }
 
-    /* Pane 2: Blast Radius & Impact */
-    .dock-pane-impact {
-      flex: 1.5;
-      padding: 12px 18px;
-      border-right: 1px solid var(--border-subtle);
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
+    .impact-content {
+      font-size: 0.74rem;
+      line-height: 1.55;
+      color: var(--text-secondary);
     }
-    .impact-stats-grid {
+    .impact-card-empty {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      background: rgba(255,255,255,0.03);
+      border-radius: 8px;
+      border: 1px dashed rgba(255,255,255,0.1);
+      font-size: 0.74rem;
+      color: var(--text-secondary);
+    }
+    .impact-card-empty strong { color: var(--text-primary); }
+    .impact-grid {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
       gap: 8px;
     }
-    .stat-box {
-      background: var(--bg-surface);
-      border: 1px solid var(--border-subtle);
-      border-radius: 6px;
-      padding: 7px 10px;
+    .impact-box {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 8px;
+      padding: 6px 10px;
       display: flex;
       flex-direction: column;
       gap: 2px;
     }
-    .stat-box-title {
-      font-size: 10px;
-      font-weight: 600;
+    .impact-box-label {
+      font-size: 0.64rem;
       text-transform: uppercase;
-      letter-spacing: 0.4px;
-      color: var(--text-tertiary);
+      letter-spacing: 0.5px;
+      color: var(--text-secondary);
+      font-weight: 600;
     }
-    .stat-box-val {
-      font-size: 13px;
+    .impact-box-val {
+      font-size: 0.75rem;
       font-weight: 700;
       color: var(--text-primary);
-      font-family: var(--font-mono);
-    }
-    .impact-chain-section {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      font-size: 11px;
-    }
-    .impact-chain-header {
-      color: var(--text-tertiary);
-      font-size: 10px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.4px;
-    }
-    .impact-chips-wrap {
       display: flex;
       align-items: center;
-      gap: 5px;
+      gap: 4px;
       flex-wrap: wrap;
     }
-    .entity-chip {
-      display: inline-flex;
-      align-items: center;
-      padding: 2px 7px;
+    .impact-pill {
+      display: inline-block;
+      padding: 1px 6px;
       border-radius: 4px;
-      font-size: 11px;
-      font-family: var(--font-mono);
+      font-size: 0.65rem;
       font-weight: 600;
-      background: var(--bg-surface);
-      border: 1px solid var(--border-medium);
+      background: rgba(255,255,255,0.08);
       color: var(--text-primary);
-      cursor: pointer;
-      transition: background-color 0.1s, border-color 0.1s;
     }
-    .entity-chip:hover {
-      background: var(--bg-surface-hover);
-      border-color: var(--border-strong);
+    .complexity-tag {
+      background: linear-gradient(135deg, rgba(26,171,184,0.25), rgba(44,95,138,0.3));
+      border: 1px solid rgba(26,171,184,0.4);
+      color: #7dd3fc;
+      padding: 2px 7px;
+      border-radius: 5px;
+      font-family: monospace;
+      font-weight: 800;
+      font-size: 0.72rem;
     }
 
-    /* Pane 3: Audit Trail Log */
-    .dock-pane-log {
+    /* Column 2: Log History */
+    .dock-col-log {
       flex: 1;
-      padding: 12px 18px;
+      padding: 12px 20px;
       overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .log-title {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--col-product);
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .log-list {
       display: flex;
       flex-direction: column;
       gap: 6px;
     }
-    .log-header {
-      font-size: 10px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      color: var(--text-tertiary);
+    .log-item {
+      padding: 6px 10px;
+      background: rgba(255,255,255,0.03);
+      border-left: 3px solid rgba(255,255,255,0.2);
+      border-radius: 0 6px 6px 0;
+      font-size: 0.71rem;
+      line-height: 1.45;
+    }
+    .log-item.delete { border-left-color: var(--col-supplier); }
+    .log-item.undo { border-left-color: var(--col-product); }
+    .log-item.reset { border-left-color: var(--col-part); }
+    .log-item-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
       margin-bottom: 2px;
     }
-    .log-feed {
-      display: flex;
-      flex-direction: column;
-      gap: 5px;
-    }
-    .log-entry {
-      background: var(--bg-surface);
-      border: 1px solid var(--border-subtle);
-      border-radius: 5px;
-      padding: 6px 10px;
-      font-size: 11px;
-      line-height: 1.4;
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
-    .log-entry-head {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      font-weight: 600;
-    }
-    .log-entry-meta {
-      font-size: 10px;
-      color: var(--text-tertiary);
-      font-family: var(--font-mono);
-    }
-    .log-entry-body {
-      color: var(--text-secondary);
-      font-size: 11px;
-    }
+    .log-item-action { font-weight: 700; }
+    .log-item-time { font-size: 0.63rem; color: rgba(138,146,166,0.6); }
 
-    /* ══════════════════════════════════════════════════════════
-       Dialog / Modal Windows (Accessible & Clean)
-       ══════════════════════════════════════════════════════════ */
-    .dialog-overlay {
+    /* ───────────────── Small Undo Timing Popup (5 Seconds) ───────────────── */
+    #undo-timing-popup {
       position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.72);
-      backdrop-filter: blur(4px);
-      z-index: 500;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      animation: dialogFade 0.15s ease;
-    }
-    @keyframes dialogFade {
-      from { opacity: 0; }
-      to   { opacity: 1; }
-    }
-    .dialog-window {
-      background: var(--bg-panel);
-      border: 1px solid var(--border-medium);
-      border-radius: 8px;
-      width: 90%;
-      max-width: 520px;
-      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-    }
-    .dialog-head {
-      padding: 14px 18px;
-      border-bottom: 1px solid var(--border-subtle);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    .dialog-head h3 {
-      font-size: 13px;
-      font-weight: 700;
-      color: var(--text-primary);
-    }
-    .dialog-close {
-      background: transparent;
-      border: none;
-      color: var(--text-tertiary);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 4px;
-      border-radius: 4px;
-    }
-    .dialog-close:hover {
-      color: var(--text-primary);
-      background: var(--bg-surface-hover);
-    }
-    .dialog-body {
-      padding: 16px 18px;
-      color: var(--text-secondary);
-      font-size: 12px;
-      line-height: 1.55;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      max-height: 70vh;
-      overflow-y: auto;
-    }
-    .dialog-actions {
-      padding: 12px 18px;
-      border-top: 1px solid var(--border-subtle);
-      background: var(--bg-surface);
-      display: flex;
-      justify-content: flex-end;
-      gap: 8px;
-    }
-
-    /* Modal Data Grid Table */
-    .data-grid {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 11px;
-    }
-    .data-grid th {
-      text-align: left;
-      padding: 6px 8px;
-      background: var(--bg-surface);
-      color: var(--text-tertiary);
-      font-weight: 600;
-      border-bottom: 1px solid var(--border-subtle);
-    }
-    .data-grid td {
-      padding: 6px 8px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.03);
-      color: var(--text-secondary);
-    }
-    .data-grid tr:hover td {
-      background: var(--bg-surface-hover);
-    }
-
-    /* ══════════════════════════════════════════════════════════
-       Undo Status Toast
-       ══════════════════════════════════════════════════════════ */
-    #undo-toast {
-      position: fixed;
-      bottom: 250px;
+      top: 80px;
       left: 50%;
-      transform: translateX(-50%) translateY(12px);
-      background: var(--bg-surface);
-      border: 1px solid var(--border-medium);
-      border-radius: 6px;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
-      z-index: 450;
+      transform: translateX(-50%) translateY(-24px);
+      width: 480px;
+      max-width: 92vw;
+      background: rgba(18, 22, 34, 0.95);
+      backdrop-filter: blur(28px);
+      border: 1px solid rgba(26,171,184,0.4);
+      border-radius: 14px;
+      box-shadow: 0 16px 48px rgba(0,0,0,0.6), 0 0 40px rgba(26,171,184,0.18);
+      z-index: 500;
       opacity: 0;
       pointer-events: none;
-      transition: opacity 0.2s ease, transform 0.2s ease;
+      transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+      overflow: hidden;
       display: flex;
       flex-direction: column;
-      width: 380px;
-      max-width: 90vw;
-      overflow: hidden;
     }
-    #undo-toast.visible {
+    #undo-timing-popup.visible {
       opacity: 1;
       pointer-events: auto;
       transform: translateX(-50%) translateY(0);
     }
-    .undo-toast-inner {
-      padding: 9px 14px;
+    .undo-popup-head {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 10px;
+      padding: 12px 18px 10px;
+      border-bottom: 1px solid var(--border-glass);
+      background: linear-gradient(90deg, rgba(26,171,184,0.12), transparent);
     }
-    .undo-toast-text {
+    .undo-popup-head-left {
       display: flex;
       align-items: center;
-      gap: 8px;
-      font-size: 12px;
-      font-weight: 600;
+      gap: 10px;
+    }
+    .undo-popup-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: rgba(26,171,184,0.22);
+      border: 1px solid rgba(26,171,184,0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--col-product);
+    }
+    .undo-popup-icon svg { width: 17px; height: 17px; }
+    .undo-popup-title {
+      font-size: 0.88rem;
+      font-weight: 800;
       color: var(--text-primary);
     }
-    .undo-toast-timer {
-      font-size: 11px;
-      font-family: var(--font-mono);
+    .undo-popup-subtitle {
+      font-size: 0.68rem;
       color: var(--text-secondary);
     }
-    .undo-toast-bar {
-      height: 2px;
-      width: 100%;
-      background: rgba(255, 255, 255, 0.08);
+    .undo-timer-tag {
+      font-size: 0.70rem;
+      font-weight: 700;
+      color: #7dd3fc;
+      background: rgba(26,171,184,0.18);
+      border: 1px solid rgba(26,171,184,0.3);
+      padding: 3px 9px;
+      border-radius: 20px;
+      font-family: monospace;
     }
-    .undo-toast-progress {
+    .undo-popup-body {
+      padding: 14px 18px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .undo-stat-card {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 8px;
+      padding: 8px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .undo-stat-card.featured {
+      grid-column: span 2;
+      background: linear-gradient(135deg, rgba(26,171,184,0.1), rgba(44,95,138,0.15));
+      border-color: rgba(26,171,184,0.3);
+    }
+    .undo-stat-title {
+      font-size: 0.65rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: var(--text-secondary);
+    }
+    .undo-stat-value {
+      font-size: 0.96rem;
+      font-weight: 800;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .undo-stat-value.highlight-cyan {
+      color: #7dd3fc;
+    }
+    .undo-stat-value.highlight-supplier {
+      color: var(--col-supplier);
+    }
+    .undo-stat-desc {
+      font-size: 0.68rem;
+      color: var(--text-secondary);
+      line-height: 1.35;
+    }
+    .undo-bar-container {
+      width: 100%;
+      height: 3px;
+      background: rgba(255,255,255,0.06);
+      overflow: hidden;
+    }
+    .undo-progress-bar {
       height: 100%;
       width: 100%;
-      background: var(--col-accent);
-      animation: toastProgress 5s linear forwards;
+      background: linear-gradient(90deg, var(--col-product), #7dd3fc);
+      animation: undoProgressShrink 5s linear forwards;
     }
-    @keyframes toastProgress {
+    @keyframes undoProgressShrink {
       from { width: 100%; }
       to   { width: 0%; }
     }
 
-    /* Tooltip */
+    /* ───────────────── Column Headers ───────────────── */
+    .column-headers {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      display: flex;
+      justify-content: space-around;
+      padding: 18px 50px 10px;
+      pointer-events: none;
+      z-index: 5;
+    }
+    .column-headers span {
+      font-size: 0.82rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+    }
+    .col-sup  { color: var(--col-supplier); }
+    .col-part { color: var(--col-part); }
+    .col-prod { color: var(--col-product); }
+    .col-ord  { color: var(--col-order); }
+
+    /* ───────────────── Legend ───────────────── */
+    .legend {
+      position: absolute;
+      bottom: 14px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 24px;
+      padding: 10px 28px;
+      background: var(--bg-panel);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--border-glass);
+      border-radius: 12px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      z-index: 5;
+      color: var(--text-secondary);
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+    .legend-dot {
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .legend-line {
+      width: 26px;
+      height: 2px;
+      background: var(--text-secondary);
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+
+    /* ───────────────── Tooltip ───────────────── */
     #tooltip {
       position: fixed;
       pointer-events: none;
-      padding: 8px 12px;
-      background: var(--bg-panel);
-      border: 1px solid var(--border-medium);
-      border-radius: 6px;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
-      max-width: 260px;
-      font-size: 11px;
-      z-index: 600;
+      padding: 14px 18px;
+      background: var(--bg-card);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--border-glass);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      max-width: 320px;
+      font-size: 0.78rem;
+      line-height: 1.55;
+      z-index: 100;
       opacity: 0;
-      transition: opacity 0.12s ease;
+      transition: opacity 0.15s ease;
     }
     #tooltip.visible { opacity: 1; }
-    .tt-head {
+    #tooltip .tt-title {
       font-weight: 700;
-      font-size: 12px;
+      font-size: 0.88rem;
+      margin-bottom: 6px;
       color: var(--text-primary);
-      margin-bottom: 2px;
     }
-    .tt-tier {
-      font-size: 10px;
-      font-family: var(--font-mono);
-      font-weight: 600;
-      margin-bottom: 4px;
+    #tooltip .tt-kind {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 8px;
     }
-    .tt-grid {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
-    .tt-row {
+    #tooltip .tt-row {
       display: flex;
       justify-content: space-between;
-      gap: 8px;
+      gap: 12px;
+      padding: 2px 0;
     }
-    .tt-k { color: var(--text-tertiary); }
-    .tt-v { color: var(--text-secondary); font-family: var(--font-mono); font-weight: 500; }
+    #tooltip .tt-label { color: var(--text-secondary); }
+    #tooltip .tt-value { color: var(--text-primary); font-weight: 600; text-align: right; }
 
-    /* Toast Notifications Shelf */
-    #toast-shelf {
+    /* ───────────────── Toast ───────────────── */
+    #toast-container {
       position: fixed;
-      top: 66px;
-      right: 20px;
-      z-index: 600;
+      bottom: 70px;
+      right: 24px;
+      z-index: 200;
       display: flex;
       flex-direction: column;
-      gap: 6px;
-      pointer-events: none;
+      gap: 8px;
     }
-    .toast-pill {
-      background: var(--bg-surface);
-      border: 1px solid var(--border-medium);
-      border-radius: 6px;
-      padding: 6px 12px;
-      font-size: 11px;
-      font-weight: 500;
+    .toast {
+      padding: 10px 20px;
+      background: var(--bg-card);
+      backdrop-filter: blur(14px);
+      border: 1px solid var(--border-glass);
+      border-radius: 10px;
+      font-size: 0.78rem;
+      font-weight: 600;
       color: var(--text-primary);
-      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+      box-shadow: var(--shadow);
+      animation: toastIn 0.3s ease, toastOut 0.3s ease 2.4s forwards;
+    }
+    @keyframes toastIn  { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes toastOut { from { opacity: 1; } to { opacity: 0; transform: translateY(-8px); } }
+
+    /* ───────────────── Confirm Modal ───────────────── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.55);
+      backdrop-filter: blur(6px);
+      z-index: 300;
       display: flex;
       align-items: center;
-      gap: 6px;
-      animation: toastIn 0.15s ease;
-      pointer-events: auto;
+      justify-content: center;
+      animation: fadeIn 0.18s ease;
     }
-    @keyframes toastIn {
-      from { opacity: 0; transform: translateY(-6px); }
-      to   { opacity: 1; transform: translateY(0); }
+    .modal-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border-glass);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+      max-width: 400px;
+      width: 90%;
+      box-shadow: 0 12px 48px rgba(0,0,0,0.6);
     }
+    .modal-box h3 {
+      font-size: 1rem;
+      margin-bottom: 10px;
+    }
+    .modal-box p {
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      margin-bottom: 20px;
+    }
+    .modal-box .modal-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+    /* ───────────────── Info Panel (selected node) ───────────────── */
+    #info-panel {
+      position: absolute;
+      top: 60px;
+      right: 20px;
+      width: 280px;
+      background: var(--bg-panel);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--border-glass);
+      border-radius: var(--radius);
+      padding: 20px;
+      z-index: 50;
+      box-shadow: var(--shadow);
+      transform: translateX(320px);
+      transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    #info-panel.open {
+      transform: translateX(0);
+    }
+    #info-panel .panel-close {
+      position: absolute;
+      top: 10px;
+      right: 12px;
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: color 0.15s;
+    }
+    #info-panel .panel-close:hover { color: var(--text-primary); }
+    #info-panel .panel-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    #info-panel .panel-kind {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 12px;
+    }
+    #info-panel .panel-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 4px 0;
+      font-size: 0.78rem;
+      border-bottom: 1px solid var(--border-glass);
+    }
+    #info-panel .panel-row:last-child { border-bottom: none; }
+    #info-panel .panel-label { color: var(--text-secondary); }
+    #info-panel .panel-value { font-weight: 600; }
+    #info-panel .panel-actions { margin-top: 14px; display: flex; gap: 8px; }
+
+    /* ───────────────── SVG node/edge styles & Arrow Flow Animation ───────────────── */
+    .edge-line {
+      fill: none;
+      stroke: rgba(255,255,255,0.12);
+      stroke-width: 1.8;
+      transition: stroke 0.3s, stroke-width 0.3s, opacity 0.3s;
+    }
+    .edge-line.highlighted {
+      stroke-width: 2.8;
+      stroke-dasharray: 6 3;
+      animation: edgeFlow 0.8s linear infinite;
+      filter: drop-shadow(0 0 6px currentColor);
+    }
+    @keyframes edgeFlow {
+      from { stroke-dashoffset: 18; }
+      to   { stroke-dashoffset: 0; }
+    }
+    .edge-line.dimmed { opacity: 0.06; }
+
+    .arrow-marker { fill: rgba(255,255,255,0.12); }
+    .arrow-marker.highlighted { fill: currentColor; }
+
+    .node-group { cursor: pointer; }
+    .node-circle {
+      transition: r 0.25s ease, filter 0.25s ease, opacity 0.3s;
+    }
+    .node-circle.dimmed { opacity: 0.12; }
+    .node-circle:not(.dimmed):hover {
+      filter: drop-shadow(0 0 12px currentColor) brightness(1.15);
+    }
+    .node-label {
+      font-family: 'Inter', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      fill: #fff;
+      text-anchor: middle;
+      pointer-events: none;
+      transition: opacity 0.3s;
+    }
+    .node-label.dimmed { opacity: 0.12; }
+
+    .node-glow {
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .node-group:hover .node-glow { opacity: 0.5; }
+    .node-glow.active { opacity: 0.7; }
   </style>
 </head>
 
 <body>
   <div id="app">
-    <!-- ─── Master Header ─── -->
+    <!-- ─── Header ─── -->
     <header>
-      <div class="brand-group">
-        <div class="brand-mark" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-            <polygon points="12 2 2 7 12 12 22 7 12 2"/>
-            <polyline points="2 17 12 22 22 17"/>
-            <polyline points="2 12 12 17 22 12"/>
-          </svg>
-        </div>
-        <div class="brand-meta">
-          <div class="brand-title">
-            <span>Photon Sprint 1 — Supply-Chain Graph</span>
-            <span class="brand-tag">EPAM SPRINT 1</span>
-          </div>
-          <div class="brand-sub">
-            <span class="indicator-live"></span>
-            <span>Supply-Chain Ripple &amp; Graph Intelligence</span>
-          </div>
-        </div>
+      <div style="display:flex;align-items:center;">
+        <h1>Photon Sprint 1 — Supply-Chain Graph</h1>
+        <span class="subtitle" id="graph-subtitle">Loading…</span>
       </div>
-
-      <!-- Live Operational Telemetry -->
-      <div class="telemetry-ribbon" id="telemetry-strip" aria-label="Operational Telemetry">
-        <div class="telemetry-cell">Entities: <strong id="tel-nodes">19</strong></div>
-        <div class="telemetry-div"></div>
-        <div class="telemetry-cell">Edges: <strong id="tel-edges">21</strong></div>
-        <div class="telemetry-div"></div>
-        <div class="telemetry-cell">Topology: <strong style="color:var(--col-product);">Acyclic DAG</strong></div>
-        <div class="telemetry-div"></div>
-        <div class="telemetry-cell">Traversal SLA: <strong id="tel-sla" style="color:var(--col-part);">&lt; 10.0 ms</strong></div>
-      </div>
-
-      <!-- Quick Search Filter -->
-      <div class="search-control">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--text-tertiary);"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <input type="text" id="node-search-input" placeholder="Search node (e.g. SUP-01)..." aria-label="Search graph entities" />
-        <span class="kbd-chip">⌘K</span>
-      </div>
-
-      <!-- Operational Actions -->
       <div class="header-actions">
-        <button class="btn btn--primary" id="btn-run-benchmark" title="Execute high-resolution downstream traversal latency probe">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-          SLA Probe
-        </button>
-        <button class="btn" id="btn-validate-graph" title="Run formal topological schema and DAG validation">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-          Validate
-        </button>
-        <button class="btn" id="btn-undo" title="Undo last disruption mutation (⌘Z)" disabled>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+        <button class="btn" id="btn-undo" disabled title="Undo last delete">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
           Undo
         </button>
-        <button class="btn" id="btn-reset" title="Reset in-memory graph to canonical 19-entity baseline (⌘R)">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6"/><path d="M2.5 22v-6h6"/><path d="M2.91 13.12a10 10 0 0 1 17.68-4.53L21.5 8"/><path d="M21.09 10.88a10 10 0 0 1-17.68 4.53L2.5 16"/></svg>
+        <button class="btn btn--reset" id="btn-reset" title="Reset to original graph">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6"/><path d="M2.5 22v-6h6"/><path d="M2.91 13.12a10 10 0 0 1 17.68-4.53L21.5 8"/><path d="M21.09 10.88a10 10 0 0 1-17.68 4.53L2.5 16"/></svg>
           Reset
         </button>
       </div>
     </header>
 
-    <!-- ─── Graph Canvas & Swimlane Columns ─── -->
+    <!-- ─── Graph SVG ─── -->
     <div id="graph-container">
-      <div class="swimlanes-track">
-        <div class="swimlane-col-header">
-          <div class="col-title-group">
-            <span class="col-dot" style="background:var(--col-supplier);"></span>
-            <span class="col-label">Tier 1 · Suppliers</span>
-          </div>
-          <span class="col-count" id="badge-count-supplier">2</span>
-        </div>
-        <div class="swimlane-col-header">
-          <div class="col-title-group">
-            <span class="col-dot" style="background:var(--col-part);"></span>
-            <span class="col-label">Tier 2 · BOM Parts</span>
-          </div>
-          <span class="col-count" id="badge-count-part">5</span>
-        </div>
-        <div class="swimlane-col-header">
-          <div class="col-title-group">
-            <span class="col-dot" style="background:var(--col-product);"></span>
-            <span class="col-label">Tier 3 · Products</span>
-          </div>
-          <span class="col-count" id="badge-count-product">2</span>
-        </div>
-        <div class="swimlane-col-header">
-          <div class="col-title-group">
-            <span class="col-dot" style="background:var(--col-order);"></span>
-            <span class="col-label">Tier 4 · Orders</span>
-          </div>
-          <span class="col-count" id="badge-count-order">10</span>
-        </div>
+      <div class="column-headers">
+        <span class="col-sup">Suppliers</span>
+        <span class="col-part">BOM Parts</span>
+        <span class="col-prod">Finished Products</span>
+        <span class="col-ord">Customer Orders</span>
       </div>
-
       <svg id="graph-svg"></svg>
-
-      <!-- Viewport Tool Buttons -->
-      <div class="canvas-tools">
-        <button class="tool-btn" id="tool-fit" title="Reset Viewport">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
-        </button>
-      </div>
     </div>
 
-    <!-- ─── Bottom Intelligence Dock ─── -->
-    <div id="bottom-dock">
-      <div class="dock-header">
-        <div class="dock-tabs">
-          <div class="dock-tab active" id="dock-tab-impact">
-            <span>Downstream Blast Radius</span>
-          </div>
+    <!-- Side panel (selected node details) -->
+    <div id="info-panel">
+      <button class="panel-close" id="panel-close-btn">&times;</button>
+      <div id="panel-content"></div>
+    </div>
+
+    <!-- ─── Bottom Output Panel ("What will happen when you delete a node") ─── -->
+    <div id="bottom-output-panel">
+      <div class="panel-dock-header">
+        <div class="dock-title">
+          <div class="dock-dot"></div>
+          <span>OUTPUT TERMINAL — DELETION IMPACT &amp; EXECUTION</span>
         </div>
 
+        <!-- Integrated Legend -->
         <div class="dock-legend">
-          <div class="legend-item"><span class="legend-item-dot" style="background:var(--col-supplier);"></span>Suppliers (2)</div>
-          <div class="legend-item"><span class="legend-item-dot" style="background:var(--col-part);"></span>Parts (5)</div>
-          <div class="legend-item"><span class="legend-item-dot" style="background:var(--col-product);"></span>Products (2)</div>
-          <div class="legend-item"><span class="legend-item-dot" style="background:var(--col-order);"></span>Orders (10)</div>
+          <div class="dock-legend-item"><div class="dock-legend-dot" style="background:var(--col-supplier)"></div>Suppliers</div>
+          <div class="dock-legend-item"><div class="dock-legend-dot" style="background:var(--col-part)"></div>BOM Parts</div>
+          <div class="dock-legend-item"><div class="dock-legend-dot" style="background:var(--col-product)"></div>Finished Products</div>
+          <div class="dock-legend-item"><div class="dock-legend-dot" style="background:var(--col-order)"></div>Customer Orders</div>
+          <div class="dock-legend-item"><div class="dock-legend-line"></div>SUPPLIES / USED_IN / FULFILLS</div>
         </div>
 
         <div class="dock-actions">
-          <button class="btn btn--sm" id="dock-btn-clear">Clear Log</button>
-          <button class="btn btn--sm" id="dock-btn-toggle">
-            <span id="dock-icon">−</span> <span id="dock-label">Minimize</span>
+          <button class="btn-dock" id="btn-dock-clear" title="Clear log entries">Clear Log</button>
+          <button class="btn-dock" id="btn-dock-toggle" title="Minimize / Expand bottom panel">
+            <span id="dock-toggle-icon">−</span> <span id="dock-toggle-text">Minimize</span>
           </button>
         </div>
       </div>
 
-      <div class="dock-body">
-        <!-- Pane 1: Selected Entity Inspector -->
-        <div class="dock-pane-inspector" id="dock-entity-pane">
-          <!-- Populated dynamically by inspectNode() -->
-        </div>
-
-        <!-- Pane 2: Blast Radius Breakdown -->
-        <div class="dock-pane-impact" id="dock-impact-pane">
-          <!-- Populated dynamically -->
-        </div>
-
-        <!-- Pane 3: Audit Trail -->
-        <div class="dock-pane-log">
-          <div class="log-header">
-            <span>Audit Trail &amp; Mutations</span>
-            <span style="font-family:var(--font-mono);color:var(--text-tertiary);">O(V + E)</span>
+      <div class="panel-dock-body">
+        <!-- Col 1: Impact Preview (What will happen when you delete a node) -->
+        <div class="dock-col-impact">
+          <div class="impact-header">
+            <div class="impact-title">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+              <span>What Happens When You Delete A Node</span>
+            </div>
+            <div id="impact-target-badge" style="display:none;"></div>
           </div>
-          <div class="log-feed" id="dock-log-container">
+          <div id="impact-preview-body" class="impact-content">
+            <!-- Populated dynamically via JS -->
+          </div>
+        </div>
+
+        <!-- Col 2: Action & Timing Log -->
+        <div class="dock-col-log">
+          <div class="log-title">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <span>Operation &amp; Timing Log</span>
+          </div>
+          <div id="dock-log-list" class="log-list">
             <!-- Dynamic log entries -->
           </div>
         </div>
@@ -1161,798 +878,790 @@
     </div>
   </div>
 
-  <!-- ─── Undo Notification Toast ─── -->
-  <div id="undo-toast" role="status" aria-live="polite">
-    <div class="undo-toast-inner">
-      <div class="undo-toast-text">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--col-product)" stroke-width="2.5"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
-        <span id="hud-node">Entity Restored</span>
+  <!-- Tooltip -->
+  <div id="tooltip"></div>
+
+  <!-- ─── Small Undo Timing Popup (Shows for 5 seconds on Undo) ─── -->
+  <div id="undo-timing-popup">
+    <div class="undo-popup-head">
+      <div class="undo-popup-head-left">
+        <div class="undo-popup-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+        </div>
+        <div>
+          <div class="undo-popup-title">Undo Successful — Node Restored</div>
+          <div class="undo-popup-subtitle">Graph reverted to previous state</div>
+        </div>
       </div>
-      <div style="display:flex;align-items:center;gap:8px;">
-        <span class="undo-toast-timer" id="hud-timer">5.0s</span>
-        <button class="btn btn--sm" id="toast-undo-again-btn" style="height:22px;padding:0 7px;font-size:10px;">Undo Again</button>
+      <div class="undo-timer-tag" id="undo-timer-countdown">5.0s</div>
+    </div>
+
+    <div class="undo-popup-body">
+      <!-- Restored node -->
+      <div class="undo-stat-card">
+        <span class="undo-stat-title">Restored Node</span>
+        <div class="undo-stat-value" id="undo-stat-node">—</div>
+      </div>
+
+      <!-- Time taken to delete that node -->
+      <div class="undo-stat-card">
+        <span class="undo-stat-title">Time Taken To Delete That Node</span>
+        <div class="undo-stat-value highlight-cyan" id="undo-stat-delete-time">0.000 ms</div>
+      </div>
+
+      <!-- Time complexity -->
+      <div class="undo-stat-card featured">
+        <span class="undo-stat-title">Time Complexity</span>
+        <div class="undo-stat-value highlight-cyan">
+          <span class="complexity-tag" id="undo-stat-complexity">O(V + E)</span>
+        </div>
+        <span class="undo-stat-desc" id="undo-stat-complexity-desc">NetworkX Breadth-First Search (BFS) graph traversal &amp; cascading deletion</span>
+      </div>
+
+      <!-- Undo restoration time -->
+      <div class="undo-stat-card">
+        <span class="undo-stat-title">Undo Restoration Time</span>
+        <div class="undo-stat-value" id="undo-stat-undo-time">0.000 ms</div>
+      </div>
+
+      <!-- Entities restored -->
+      <div class="undo-stat-card">
+        <span class="undo-stat-title">Entities Restored</span>
+        <div class="undo-stat-value" id="undo-stat-count">0 nodes, 0 edges</div>
       </div>
     </div>
-    <div class="undo-toast-bar">
-      <div class="undo-toast-progress" id="hud-progress"></div>
+
+    <div class="undo-bar-container">
+      <div class="undo-progress-bar" id="undo-progress-bar"></div>
     </div>
-    <!-- Hidden compatibility elements for existing telemetry checks -->
-    <span id="hud-del-time" style="display:none;"></span>
-    <span id="hud-undo-time" style="display:none;"></span>
-    <div id="undo-hud" style="display:none;"></div>
   </div>
 
-  <!-- ─── Tooltip & Toast Shelf ─── -->
-  <div id="tooltip"></div>
-  <div id="toast-shelf"></div>
+  <!-- Toast container -->
+  <div id="toast-container"></div>
 
-  <!-- ══════════════════════════════════════════════════════════
-     Application Script & D3 Graph Controller
-     ══════════════════════════════════════════════════════════ -->
   <script>
-  const PALETTE = {
-    supplier: '#E05252',
-    part:     '#E59312',
-    product:  '#10B981',
-    order:    '#6366F1',
+  /* ═══════════════════════════════════════════════
+     Constants & colour mapping
+     ═══════════════════════════════════════════════ */
+  const COLOR = {
+    supplier: '#D6436E',
+    part:     '#F5A623',
+    product:  '#1AABB8',
+    order:    '#2C5F8A',
   };
-
-  const NODE_RADIUS = {
-    supplier: 24,
-    part:     21,
-    product:  25,
-    order:    19,
+  const RADIUS = {
+    supplier: 26,
+    part:     22,
+    product:  28,
+    order:    20,
   };
+  const COLUMN_X = { supplier: 0, part: 1, product: 2, order: 3 };
+  const COLUMNS = 4;
 
-  const TIER_COLUMNS = { supplier: 0, part: 1, product: 2, order: 3 };
-
-  let graphData = { nodes: [], edges: [] };
+  let graphData   = { nodes: [], edges: [] };
   let selectedNode = null;
-  let activeHighlightedIds = new Set();
-  let undoAvailable = false;
-  let undoCount = 0;
+  let highlightedIds = new Set();
 
-  /* ── Fetch Initial Graph Topology ── */
-  async function loadGraphData() {
-    try {
-      const res = await fetch('/api/graph');
-      graphData = await res.json();
-      renderGraph();
-      updateHeaderTelemetry();
-      initDefaultDockEntityPane();
-      initDefaultDockImpact();
-    } catch (err) {
-      showToast('Error connecting to backend API');
-    }
+  /* Serverless backend is stateless → the browser keeps delete/undo state */
+  let removedIds = [];     // all node ids currently removed from the graph
+  let undoStack  = [];     // [{ ids, node_id, label, kind, edges_removed, elapsed_ms, complexity }]
+  const removedQS = () => removedIds.length ? `?removed=${encodeURIComponent(removedIds.join(','))}` : '';
+
+  /* ═══════════════════════════════════════════════
+     Fetch graph data
+     ═══════════════════════════════════════════════ */
+  async function fetchGraph() {
+    const res = await fetch('/api/graph' + removedQS());
+    graphData = await res.json();
+    render();
   }
 
-  /* ── Layout Computation ── */
-  function computeCoordinates(nodes, width, height) {
-    const isMinimized = document.getElementById('bottom-dock')?.classList.contains('minimized');
-    const bottomPadding = isMinimized ? 55 : 245;
-    const padding = { top: 60, bottom: bottomPadding, left: 80, right: 80 };
-    const usableW = Math.max(360, width - padding.left - padding.right);
-    const usableH = Math.max(260, height - padding.top - padding.bottom);
-    const colStep = usableW / 3;
+  /* ═══════════════════════════════════════════════
+     Layout — deterministic column-based positioning
+     ═══════════════════════════════════════════════ */
+  function computeLayout(nodes, width, height) {
+    const isDockMinimized = document.getElementById('bottom-output-panel')?.classList.contains('minimized');
+    const bottomPad = isDockMinimized ? 65 : 225;
+    const pad = { top: 55, bottom: bottomPad, left: 100, right: 100 };
+    const usableW = width - pad.left - pad.right;
+    const usableH = height - pad.top - pad.bottom;
+    const colWidth = usableW / (COLUMNS - 1);
 
-    const buckets = { supplier: [], part: [], product: [], order: [] };
-    nodes.forEach(n => buckets[n.kind]?.push(n));
+    // Group by kind
+    const groups = { supplier: [], part: [], product: [], order: [] };
+    nodes.forEach(n => groups[n.kind]?.push(n));
 
-    // Update Swimlane Badges
-    ['supplier', 'part', 'product', 'order'].forEach(k => {
-      const el = document.getElementById(`badge-count-${k}`);
-      if (el) el.textContent = buckets[k].length;
-    });
-
-    const coords = {};
-    for (const [kind, list] of Object.entries(buckets)) {
-      const colIdx = TIER_COLUMNS[kind];
-      const x = padding.left + colIdx * colStep;
-      const rowStep = usableH / (list.length + 1);
-      list.forEach((node, i) => {
-        coords[node.id] = { x, y: padding.top + rowStep * (i + 1) };
+    const positions = {};
+    for (const [kind, list] of Object.entries(groups)) {
+      const col = COLUMN_X[kind];
+      const x = pad.left + col * colWidth;
+      const gap = usableH / (list.length + 1);
+      list.forEach((n, i) => {
+        positions[n.id] = { x, y: pad.top + gap * (i + 1) };
       });
     }
-    return coords;
+    return positions;
   }
 
-  /* ── D3 Canvas Rendering ── */
-  function renderGraph() {
+  /* ═══════════════════════════════════════════════
+     Render
+     ═══════════════════════════════════════════════ */
+  function render() {
     const svg = d3.select('#graph-svg');
     svg.selectAll('*').remove();
 
     const container = document.getElementById('graph-container');
-    const width = container.clientWidth || window.innerWidth;
-    const height = container.clientHeight || (window.innerHeight - 54);
+    const width  = container.clientWidth;
+    const height = container.clientHeight;
     svg.attr('viewBox', `0 0 ${width} ${height}`);
 
-    const coords = computeCoordinates(graphData.nodes, width, height);
+    const positions = computeLayout(graphData.nodes, width, height);
 
-    // Defs & Markers
+    // ── Defs: arrowheads & glow filter ──
     const defs = svg.append('defs');
 
-    // Directional Arrow Markers per Tier
-    ['supplier', 'part', 'product', 'order'].forEach(kind => {
+    // Per-kind arrow markers
+    for (const [kind, col] of Object.entries(COLOR)) {
       defs.append('marker')
-        .attr('id', `marker-${kind}`)
+        .attr('id', `arrow-${kind}`)
         .attr('viewBox', '0 0 10 10')
-        .attr('refX', 26).attr('refY', 5)
-        .attr('markerWidth', 5).attr('markerHeight', 5)
+        .attr('refX', 28).attr('refY', 5)
+        .attr('markerWidth', 7).attr('markerHeight', 7)
         .attr('orient', 'auto')
         .append('path')
-        .attr('d', 'M0,1 L8,5 L0,9 Z')
-        .attr('fill', PALETTE[kind]);
-    });
+        .attr('d', 'M0,0 L10,5 L0,10 Z')
+        .attr('fill', col);
+    }
+
+    // Default dim arrow
     defs.append('marker')
-      .attr('id', 'marker-dim')
+      .attr('id', 'arrow-dim')
       .attr('viewBox', '0 0 10 10')
-      .attr('refX', 26).attr('refY', 5)
-      .attr('markerWidth', 5).attr('markerHeight', 5)
+      .attr('refX', 28).attr('refY', 5)
+      .attr('markerWidth', 7).attr('markerHeight', 7)
       .attr('orient', 'auto')
       .append('path')
-      .attr('d', 'M0,1 L8,5 L0,9 Z')
-      .attr('fill', '#252B37');
+      .attr('d', 'M0,0 L10,5 L0,10 Z')
+      .attr('fill', 'rgba(255,255,255,0.12)');
 
-    // Render Edges
-    const edgeLayer = svg.append('g').attr('class', 'edges-layer');
-    edgeLayer.selectAll('.edge-path')
+    // Glow filter
+    const filter = defs.append('filter').attr('id', 'glow').attr('x', '-50%').attr('y', '-50%').attr('width', '200%').attr('height', '200%');
+    filter.append('feGaussianBlur').attr('stdDeviation', '6').attr('result', 'blur');
+    filter.append('feMerge').selectAll('feMergeNode').data(['blur', 'SourceGraphic']).enter().append('feMergeNode').attr('in', d => d);
+
+    // ── Edge group ──
+    const edgeG = svg.append('g').attr('class', 'edges-layer');
+
+    const edgeEls = edgeG.selectAll('.edge-line')
       .data(graphData.edges)
       .enter()
       .append('path')
-      .attr('class', 'edge-path')
+      .attr('class', 'edge-line')
       .attr('d', d => {
-        const s = coords[d.source];
-        const t = coords[d.target];
+        const s = positions[d.source];
+        const t = positions[d.target];
         if (!s || !t) return '';
         const dx = t.x - s.x;
         return `M${s.x},${s.y} C${s.x + dx * 0.45},${s.y} ${t.x - dx * 0.45},${t.y} ${t.x},${t.y}`;
       })
-      .attr('marker-end', 'url(#marker-dim)');
+      .attr('marker-end', 'url(#arrow-dim)')
+      .each(function(d) { d._el = this; });
 
-    // Render Nodes
-    const nodeLayer = svg.append('g').attr('class', 'nodes-layer');
-    const validNodes = graphData.nodes.filter(n => coords[n.id]);
-    const nodeGroups = nodeLayer.selectAll('.node-g')
-      .data(validNodes)
+    // ── Node group ──
+    const nodeG = svg.append('g').attr('class', 'nodes-layer');
+
+    const nodeGroups = nodeG.selectAll('.node-group')
+      .data(graphData.nodes.filter(n => positions[n.id]))
       .enter()
       .append('g')
-      .attr('class', 'node-g')
-      .attr('id', d => `node-el-${d.id}`)
-      .attr('transform', d => `translate(${coords[d.id].x}, ${coords[d.id].y})`);
+      .attr('class', 'node-group')
+      .attr('transform', d => `translate(${positions[d.id].x}, ${positions[d.id].y})`)
+      .each(function(d) { d._el = this; });
 
-    // Outer Target Ring (Hover / Selection Focus)
+    // Outer glow circle
     nodeGroups.append('circle')
-      .attr('class', 'node-target-ring')
-      .attr('r', d => NODE_RADIUS[d.kind] + 5);
+      .attr('class', 'node-glow')
+      .attr('r', d => RADIUS[d.kind] + 10)
+      .attr('fill', d => COLOR[d.kind])
+      .attr('opacity', 0);
 
-    // Core Solid Circle
+    // Main circle
     nodeGroups.append('circle')
-      .attr('class', 'node-core-circle')
-      .attr('r', d => NODE_RADIUS[d.kind])
-      .attr('stroke', d => PALETTE[d.kind]);
+      .attr('class', 'node-circle')
+      .attr('r', d => RADIUS[d.kind])
+      .attr('fill', d => COLOR[d.kind])
+      .style('color', d => COLOR[d.kind]);
 
-    // Node Primary ID
+    // Label
     nodeGroups.append('text')
-      .attr('class', 'node-text-id')
+      .attr('class', 'node-label')
       .attr('dy', '0.35em')
       .text(d => d.id);
 
-    // Hover Tooltips & Selection
+    // ── Interactions ──
     nodeGroups
-      .on('mouseenter', (e, d) => showTooltip(e, d))
-      .on('mousemove', e => moveTooltip(e))
-      .on('mouseleave', () => hideTooltip())
-      .on('click', (e, d) => {
-        e.stopPropagation();
-        inspectNode(d);
-      });
+      .on('mouseenter', function(event, d) { showTooltip(event, d); })
+      .on('mousemove',  function(event)    { moveTooltip(event); })
+      .on('mouseleave', function()         { hideTooltip(); })
+      .on('click', function(event, d)      { handleNodeClick(d, positions); event.stopPropagation(); });
 
     svg.on('click', () => clearSelection());
+
+    updateSubtitle();
+    updateUndoBtn();
   }
 
-  /* ── Interactive Selection & Downstream Ripple ── */
-  async function inspectNode(d) {
-    selectedNode = d;
-
-    // Auto-expand dock if minimized
-    const dockEl = document.getElementById('bottom-dock');
-    if (dockEl && dockEl.classList.contains('minimized')) {
-      dockEl.classList.remove('minimized');
-      document.getElementById('dock-icon').textContent = '−';
-      document.getElementById('dock-label').textContent = 'Minimize';
-      renderGraph();
-    }
-
-    try {
-      const res = await fetch(`/api/downstream/${d.id}`);
-      const data = await res.json();
-      const downstream = data.downstream || [];
-      activeHighlightedIds = new Set([d.id, ...downstream]);
-
-      // Apply Visual Filters
-      d3.selectAll('.node-g')
-        .classed('dimmed', n => !activeHighlightedIds.has(n.id))
-        .classed('active', n => n.id === d.id);
-
-      d3.selectAll('.edge-path')
-        .classed('dimmed', e => !activeHighlightedIds.has(e.source) && !activeHighlightedIds.has(e.target))
-        .classed('highlighted', e => activeHighlightedIds.has(e.source) && activeHighlightedIds.has(e.target))
-        .each(function(e) {
-          const isHl = activeHighlightedIds.has(e.source) && activeHighlightedIds.has(e.target);
-          if (isHl) {
-            const target = graphData.nodes.find(n => n.id === e.target);
-            const kind = target ? target.kind : 'product';
-            d3.select(this)
-              .attr('stroke', PALETTE[kind])
-              .attr('marker-end', `url(#marker-${kind})`);
-          } else {
-            d3.select(this)
-              .attr('stroke', null)
-              .attr('marker-end', 'url(#marker-dim)');
-          }
-        });
-
-      updateDockEntityPane(d);
-      updateDockBlastRadius(d, downstream);
-    } catch (err) {
-      showToast('Error calculating downstream reachability');
-    }
-  }
-
-  function clearSelection() {
-    selectedNode = null;
-    activeHighlightedIds.clear();
-    d3.selectAll('.node-g').classed('dimmed', false).classed('active', false);
-    d3.selectAll('.edge-path').classed('dimmed', false).classed('highlighted', false).attr('stroke', null).attr('marker-end', 'url(#marker-dim)');
-    initDefaultDockEntityPane();
-    initDefaultDockImpact();
-  }
-
-  /* ── Dock Pane 1: Entity Inspector ── */
-  function initDefaultDockEntityPane() {
-    const pane = document.getElementById('dock-entity-pane');
-    if (!pane) return;
-    pane.innerHTML = `
-      <div style="display:flex;align-items:center;gap:10px;height:100%;color:var(--text-tertiary);font-size:11px;">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="opacity:0.5;flex-shrink:0;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-        <span>Select an entity in the DAG canvas to inspect technical metadata, incident dependencies, and sever controls.</span>
-      </div>
-    `;
-  }
-
-  function updateDockEntityPane(d) {
-    const pane = document.getElementById('dock-entity-pane');
-    if (!pane) return;
-
-    let rowsHtml = '';
-    const skipKeys = new Set(['id', 'kind', 'label', '_el']);
-    for (const [k, v] of Object.entries(d)) {
-      if (skipKeys.has(k)) continue;
-      const formattedKey = k.replace(/_/g, ' ');
-      rowsHtml += `<tr><td class="lbl">${formattedKey}</td><td class="val">${v}</td></tr>`;
-    }
-
-    pane.innerHTML = `
-      <div class="inspector-header">
-        <div class="inspector-title-group">
-          <span class="inspector-badge" style="background:${PALETTE[d.kind]}1A;color:${PALETTE[d.kind]};">${d.kind.toUpperCase()}</span>
-          <span class="inspector-name">${d.id}</span>
-        </div>
-        <button class="btn btn--danger btn--sm" id="dock-entity-del-btn">
-          Sever Entity
-        </button>
-      </div>
-      <div class="inspector-desc">${d.label || d.id}</div>
-      <table class="inspector-table">
-        <tbody>${rowsHtml}</tbody>
-      </table>
-    `;
-
-    document.getElementById('dock-entity-del-btn')?.addEventListener('click', () => showDeleteModal(d));
-  }
-
-  /* ── Dock Pane 2: Blast Radius Breakdown ── */
-  function initDefaultDockImpact() {
-    const pane = document.getElementById('dock-impact-pane');
-    if (!pane) return;
-    pane.innerHTML = `
-      <div style="display:flex;align-items:center;gap:12px;background:var(--bg-surface);border:1px dashed var(--border-subtle);border-radius:6px;padding:14px 16px;">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--col-part)" stroke-width="2" style="flex-shrink:0;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-        <div>
-          <div style="font-size:12px;font-weight:600;color:var(--text-primary);">Topological Disruption Simulation</div>
-          <div style="font-size:11px;color:var(--text-secondary);margin-top:1px;">
-            Click on any entity to compute downstream cascade reachability, blast radius, and incident orders in <span style="font-family:var(--font-mono);color:var(--text-primary);">O(V + E)</span> time.
-          </div>
-        </div>
-      </div>
-    `;
-  }
-
-  function updateDockBlastRadius(d, downstreamIds) {
-    const pane = document.getElementById('dock-impact-pane');
-    if (!pane) return;
-
-    const outgoing = graphData.edges.filter(e => e.source === d.id);
-    const incoming = graphData.edges.filter(e => e.target === d.id);
-    const totalIncidentEdges = outgoing.length + incoming.length;
-
-    const downstreamNodes = graphData.nodes.filter(n => downstreamIds.includes(n.id) && n.id !== d.id);
-    const chipsHtml = downstreamNodes.map(n => `<span class="entity-chip" onclick="inspectNodeById('${n.id}')" style="border-left:2px solid ${PALETTE[n.kind]};">${n.id}</span>`).join(' ') || '<span style="color:var(--text-tertiary);font-size:11px;">Terminal Node (0 downstream descendants)</span>';
-
-    pane.innerHTML = `
-      <div style="display:flex;align-items:center;justify-content:space-between;">
-        <div style="font-size:12px;font-weight:700;color:var(--text-primary);display:flex;align-items:center;gap:6px;">
-          <span>Target Blast Radius:</span>
-          <span style="font-family:var(--font-mono);color:${PALETTE[d.kind]};">${d.id}</span>
-          <span style="color:var(--text-tertiary);font-size:11px;">(${d.label || d.id})</span>
-        </div>
-        <button class="btn btn--danger btn--sm" id="dock-quick-del-btn">
-          Sever &amp; Cascade Prune
-        </button>
-      </div>
-
-      <div class="impact-stats-grid">
-        <div class="stat-box">
-          <span class="stat-box-title">Classification</span>
-          <span class="stat-box-val" style="color:${PALETTE[d.kind]};font-size:11px;">${d.kind.toUpperCase()}</span>
-        </div>
-        <div class="stat-box">
-          <span class="stat-box-title">Incident Edges</span>
-          <span class="stat-box-val">${totalIncidentEdges}</span>
-        </div>
-        <div class="stat-box">
-          <span class="stat-box-title">Downstream Cascaded</span>
-          <span class="stat-box-val" style="color:#F87171;">${downstreamNodes.length} entities</span>
-        </div>
-        <div class="stat-box">
-          <span class="stat-box-title">Algorithm</span>
-          <span class="stat-box-val" style="font-size:11px;color:var(--col-part);">O(V + E) BFS</span>
-        </div>
-      </div>
-
-      <div class="impact-chain-section">
-        <span class="impact-chain-header">Downstream Cascade Sequence:</span>
-        <div class="impact-chips-wrap">
-          ${chipsHtml}
-        </div>
-      </div>
-    `;
-
-    document.getElementById('dock-quick-del-btn')?.addEventListener('click', () => showDeleteModal(d));
-  }
-
-  function inspectNodeById(id) {
-    const n = graphData.nodes.find(item => item.id === id);
-    if (n) inspectNode(n);
-  }
-
-  /* ── Cascading Deletion Modal ── */
-  function showDeleteModal(d) {
-    const overlay = document.createElement('div');
-    overlay.className = 'dialog-overlay';
-    overlay.innerHTML = `
-      <div class="dialog-window" role="dialog" aria-modal="true">
-        <div class="dialog-head">
-          <h3>Sever Entity ${d.id}?</h3>
-          <button class="dialog-close" id="modal-close-x" aria-label="Close dialog">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-          </button>
-        </div>
-        <div class="dialog-body">
-          <p>You are initiating a proactive cascading disruption simulation on <strong>${d.id} (${d.label || d.id})</strong>.</p>
-          <p>This operation permanently removes this node and all dependent downstream sub-assembly parts, products, and customer purchase orders from in-memory NetworkX topology.</p>
-          <div style="background:var(--bg-surface);border:1px solid var(--border-subtle);border-radius:6px;padding:10px 12px;font-size:11px;color:var(--text-tertiary);">
-            This operation is reversible via the <strong>Undo (⌘Z)</strong> stack or by triggering <strong>Reset (⌘R)</strong>.
-          </div>
-        </div>
-        <div class="dialog-actions">
-          <button class="btn" id="modal-cancel">Cancel</button>
-          <button class="btn btn--danger" id="modal-confirm">Confirm Sever</button>
-        </div>
-      </div>
-    `;
-    document.body.appendChild(overlay);
-
-    const close = () => overlay.remove();
-    document.getElementById('modal-close-x').onclick = close;
-    document.getElementById('modal-cancel').onclick = close;
-    overlay.onclick = e => { if (e.target === overlay) close(); };
-
-    document.getElementById('modal-confirm').onclick = async () => {
-      close();
-      try {
-        const res = await fetch(`/api/node/${d.id}`, { method: 'DELETE' });
-        const result = await res.json();
-        if (result.error) { showToast(`Error: ${result.error}`); return; }
-
-        undoCount++;
-        updateUndoButtonState();
-        graphData = result.graph;
-        clearSelection();
-        renderGraph();
-        updateHeaderTelemetry();
-        showToast(`Severed ${result.deleted.length} entities in ${result.elapsed_ms.toFixed(3)} ms`);
-
-        appendLogEntry('delete', {
-          id: d.id,
-          label: d.label || d.id,
-          deletedCount: result.deleted.length,
-          edgesCount: result.edges_removed,
-          ms: result.elapsed_ms,
-        });
-      } catch (err) {
-        showToast('Deletion request failed');
-      }
-    };
-  }
-
-  /* ── Undo Operation & Toast ── */
-  document.getElementById('btn-undo').addEventListener('click', async () => {
-    try {
-      const res = await fetch('/api/undo', { method: 'POST' });
-      const data = await res.json();
-      if (!res.ok || data.error) {
-        showToast(data.error || 'Nothing to undo');
-        undoCount = 0;
-        updateUndoButtonState();
-        return;
-      }
-
-      if (undoCount > 0) undoCount--;
-      updateUndoButtonState();
-      graphData = data.graph;
-      clearSelection();
-      renderGraph();
-      updateHeaderTelemetry();
-      showToast('Restored previous snapshot');
-
-      appendLogEntry('undo', {
-        id: data.restored_node_id,
-        label: data.restored_label,
-        undoMs: data.undo_elapsed_ms,
-        delMs: data.delete_elapsed_ms,
-      });
-
-      triggerUndoHud(data);
-    } catch (err) {
-      showToast('Undo operation failed');
-    }
-  });
-
-  /* ── Reset to Canonical Baseline ── */
-  document.getElementById('btn-reset').addEventListener('click', async () => {
-    try {
-      const res = await fetch('/api/reset', { method: 'POST' });
-      const data = await res.json();
-      undoCount = 0;
-      updateUndoButtonState();
-      graphData = data.graph;
-      clearSelection();
-      renderGraph();
-      updateHeaderTelemetry();
-      showToast('Baseline restored (19 nodes, 21 edges)');
-      appendLogEntry('reset', { count: data.node_count });
-    } catch (err) {
-      showToast('Reset failed');
-    }
-  });
-
-  /* ── SLA Probe & Modal ── */
-  document.getElementById('btn-run-benchmark').addEventListener('click', async () => {
-    try {
-      const res = await fetch('/api/benchmark/tracing?node_id=SUP-01&threshold_ms=10.0');
-      const data = await res.json();
-      const ms = (data.elapsed_ms || 0.003).toFixed(4);
-      document.getElementById('tel-sla').textContent = `${ms} ms (${data.status})`;
-      showBenchmarkModal(data);
-    } catch (err) {
-      showToast('Benchmark probe failed');
-    }
-  });
-
-  function showBenchmarkModal(data) {
-    const overlay = document.createElement('div');
-    overlay.className = 'dialog-overlay';
-    const ms = (data.elapsed_ms || 0.003).toFixed(4);
-    overlay.innerHTML = `
-      <div class="dialog-window" role="dialog" aria-modal="true">
-        <div class="dialog-head">
-          <h3>High-Precision Latency Benchmark</h3>
-          <button class="dialog-close" id="bench-close-x">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-          </button>
-        </div>
-        <div class="dialog-body">
-          <div style="background:var(--bg-surface);border:1px solid var(--border-subtle);border-radius:6px;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;">
-            <div>
-              <div style="font-size:10px;text-transform:uppercase;color:var(--text-tertiary);font-weight:600;">Traversal Monotonic Latency</div>
-              <div style="font-size:22px;font-weight:700;font-family:var(--font-mono);color:var(--col-product);">${ms} ms</div>
-            </div>
-            <div style="text-align:right;">
-              <span class="inspector-badge" style="background:var(--col-product-sub);color:var(--col-product);font-size:11px;">PASS · SLA &lt; 10.0 ms</span>
-            </div>
-          </div>
-          <table class="data-grid">
-            <tbody>
-              <tr><td style="font-weight:600;">Evaluation Node</td><td style="font-family:var(--font-mono);text-align:right;">${data.node_id || 'SUP-01'}</td></tr>
-              <tr><td style="font-weight:600;">SLA Ceiling Target</td><td style="font-family:var(--font-mono);text-align:right;">10.000 ms</td></tr>
-              <tr><td style="font-weight:600;">Performance Headroom</td><td style="font-family:var(--font-mono);text-align:right;color:var(--col-product);">&gt; 99.9% margin</td></tr>
-              <tr><td style="font-weight:600;">Reachability Algorithm</td><td style="font-family:var(--font-mono);text-align:right;">Breadth-First Search (BFS)</td></tr>
-              <tr><td style="font-weight:600;">Computational Complexity</td><td style="font-family:var(--font-mono);text-align:right;">O(V + E)</td></tr>
-              <tr><td style="font-weight:600;">Clock Source</td><td style="font-family:var(--font-mono);text-align:right;">Python time.perf_counter_ns</td></tr>
-            </tbody>
-          </table>
-        </div>
-        <div class="dialog-actions">
-          <button class="btn btn--primary" id="bench-close-btn">Dismiss</button>
-        </div>
-      </div>
-    `;
-    document.body.appendChild(overlay);
-    const close = () => overlay.remove();
-    document.getElementById('bench-close-x').onclick = close;
-    document.getElementById('bench-close-btn').onclick = close;
-    overlay.onclick = e => { if (e.target === overlay) close(); };
-  }
-
-  /* ── Live Formal Validation & Modal ── */
-  document.getElementById('btn-validate-graph').addEventListener('click', async () => {
-    try {
-      const res = await fetch('/api/validation');
-      const data = await res.json();
-      showValidationModal(data);
-    } catch (err) {
-      showToast('Validation request failed');
-    }
-  });
-
-  function showValidationModal(data) {
-    const overlay = document.createElement('div');
-    overlay.className = 'dialog-overlay';
-    const isValid = data.valid;
-
-    let checksRows = '';
-    if (data.checks && data.checks.length) {
-      data.checks.forEach(c => {
-        const statusColor = c.status === 'PASS' ? 'var(--col-product)' : (c.status === 'WARN' ? 'var(--col-part)' : 'var(--col-supplier)');
-        checksRows += `
-          <tr>
-            <td style="font-family:var(--font-mono);font-weight:600;">${c.name}</td>
-            <td style="color:${statusColor};font-family:var(--font-mono);font-weight:700;">${c.status}</td>
-            <td style="color:var(--text-secondary);">${c.details || '—'}</td>
-          </tr>
-        `;
-      });
-    }
-
-    overlay.innerHTML = `
-      <div class="dialog-window" style="max-width:600px;" role="dialog" aria-modal="true">
-        <div class="dialog-head">
-          <h3>Topological Graph Integrity Audit</h3>
-          <button class="dialog-close" id="val-close-x">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-          </button>
-        </div>
-        <div class="dialog-body">
-          <div style="background:var(--bg-surface);border:1px solid ${isValid ? 'var(--col-product-bd)' : 'var(--col-supplier-bd)'};border-radius:6px;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;">
-            <div>
-              <div style="font-size:10px;text-transform:uppercase;color:var(--text-tertiary);font-weight:600;">Topological Status</div>
-              <div style="font-size:14px;font-weight:700;color:${isValid ? 'var(--col-product)' : 'var(--col-supplier)'};">
-                ${isValid ? '100% DAG Compliant &amp; Structurally Sound' : 'Integrity Deviations Detected'}
-              </div>
-            </div>
-            <span class="inspector-badge" style="background:${isValid ? 'var(--col-product-sub)' : 'var(--col-supplier-sub)'};color:${isValid ? 'var(--col-product)' : 'var(--col-supplier)'};font-size:11px;">
-              ${isValid ? 'PASS' : 'WARN'}
-            </span>
-          </div>
-
-          <table class="data-grid">
-            <thead>
-              <tr><th>Integrity Rule</th><th>Status</th><th>Details</th></tr>
-            </thead>
-            <tbody>
-              ${checksRows || '<tr><td colspan="3" style="text-align:center;color:var(--text-tertiary);">No individual checks reported</td></tr>'}
-            </tbody>
-          </table>
-        </div>
-        <div class="dialog-actions">
-          <button class="btn btn--primary" id="val-close-btn">Dismiss</button>
-        </div>
-      </div>
-    `;
-    document.body.appendChild(overlay);
-    const close = () => overlay.remove();
-    document.getElementById('val-close-x').onclick = close;
-    document.getElementById('val-close-btn').onclick = close;
-    overlay.onclick = e => { if (e.target === overlay) close(); };
-  }
-
-  /* ── 5-Second Undo Toast ── */
-  let hudTimeout = null;
-  let hudInterval = null;
-
-  function triggerUndoHud(data) {
-    const toast = document.getElementById('undo-toast');
-    if (!toast) return;
-
-    document.getElementById('hud-node').textContent = `Restored: ${data.restored_node_id || ''} (${data.restored_label || ''})`;
-
-    const prog = document.getElementById('hud-progress');
-    prog.style.animation = 'none';
-    prog.offsetHeight;
-    prog.style.animation = 'toastProgress 5s linear forwards';
-
-    let left = 5.0;
-    const timerTag = document.getElementById('hud-timer');
-    if (hudInterval) clearInterval(hudInterval);
-    hudInterval = setInterval(() => {
-      left = Math.max(0, left - 0.1);
-      timerTag.textContent = `${left.toFixed(1)}s`;
-      if (left <= 0) { clearInterval(hudInterval); hudInterval = null; }
-    }, 100);
-
-    toast.classList.add('visible');
-
-    if (hudTimeout) clearTimeout(hudTimeout);
-    hudTimeout = setTimeout(() => {
-      toast.classList.remove('visible');
-      if (hudInterval) { clearInterval(hudInterval); hudInterval = null; }
-    }, 5000);
-
-    document.getElementById('toast-undo-again-btn').onclick = () => {
-      document.getElementById('btn-undo').click();
-    };
-  }
-
-  /* ── Audit Trail Log Feed ── */
-  function appendLogEntry(type, info) {
-    const container = document.getElementById('dock-log-container');
-    if (!container) return;
-    const item = document.createElement('div');
-    item.className = 'log-entry';
-    const time = new Date().toLocaleTimeString();
-
-    if (type === 'delete') {
-      item.innerHTML = `
-        <div class="log-entry-head">
-          <span style="color:var(--col-supplier);">✕ SEVERED: ${info.id} (${info.label})</span>
-          <span class="log-entry-meta">${time}</span>
-        </div>
-        <div class="log-entry-body">
-          Excised <strong>${info.deletedCount}</strong> entities &amp; <strong>${info.edgesCount}</strong> edges in <strong style="color:var(--col-part);">${info.ms.toFixed(3)} ms</strong> · O(V+E)
-        </div>
-      `;
-    } else if (type === 'undo') {
-      item.innerHTML = `
-        <div class="log-entry-head">
-          <span style="color:var(--col-product);">↺ RESTORED: ${info.id} (${info.label})</span>
-          <span class="log-entry-meta">${time}</span>
-        </div>
-        <div class="log-entry-body">
-          State restored in <strong style="color:var(--col-product);">${info.undoMs.toFixed(3)} ms</strong> (original sever took ${info.delMs.toFixed(3)} ms)
-        </div>
-      `;
-    } else if (type === 'reset') {
-      item.innerHTML = `
-        <div class="log-entry-head">
-          <span style="color:var(--col-part);">⟳ BASELINE RESTORED</span>
-          <span class="log-entry-meta">${time}</span>
-        </div>
-        <div class="log-entry-body">
-          Reset in-memory NetworkX state to 19 nodes and 21 edges.
-        </div>
-      `;
-    }
-    container.prepend(item);
-  }
-
-  document.getElementById('dock-btn-clear')?.addEventListener('click', () => {
-    const el = document.getElementById('dock-log-container');
-    if (el) el.innerHTML = '<div style="font-size:11px;color:var(--text-tertiary);padding:4px 0;">Audit log cleared.</div>';
-  });
-
-  /* ── Dock Collapse / Expand ── */
-  const dock = document.getElementById('bottom-dock');
-  document.getElementById('dock-btn-toggle')?.addEventListener('click', () => {
-    dock.classList.toggle('minimized');
-    const isMin = dock.classList.contains('minimized');
-    document.getElementById('dock-icon').textContent = isMin ? '+' : '−';
-    document.getElementById('dock-label').textContent = isMin ? 'Expand' : 'Minimize';
-    renderGraph();
-  });
-
-  document.getElementById('tool-fit')?.addEventListener('click', () => {
-    renderGraph();
-  });
-
-  /* ── Telemetry & Header Counters ── */
-  function updateHeaderTelemetry() {
-    const nodes = graphData.nodes || [];
-    const edges = graphData.edges || [];
-    document.getElementById('tel-nodes').textContent = nodes.length;
-    document.getElementById('tel-edges').textContent = edges.length;
-  }
-
-  function updateUndoButtonState() {
-    undoAvailable = undoCount > 0;
-    const btn = document.getElementById('btn-undo');
-    if (btn) btn.disabled = !undoAvailable;
-  }
-
-  /* ── Search Input & Keyboard Navigation ── */
-  const searchInput = document.getElementById('node-search-input');
-  searchInput?.addEventListener('input', e => {
-    const query = e.target.value.trim().toUpperCase();
-    if (!query) {
-      clearSelection();
-      return;
-    }
-    const matched = graphData.nodes.find(n => n.id.toUpperCase().includes(query) || (n.label && n.label.toUpperCase().includes(query)));
-    if (matched) {
-      inspectNode(matched);
-    }
-  });
-
-  window.addEventListener('keydown', e => {
-    if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-      e.preventDefault();
-      searchInput?.focus();
-    }
-    if ((e.metaKey || e.ctrlKey) && e.key === 'z') {
-      e.preventDefault();
-      if (undoAvailable) document.getElementById('btn-undo')?.click();
-    }
-    if (e.key === 'Escape') {
-      clearSelection();
-      searchInput?.blur();
-      document.querySelectorAll('.dialog-overlay').forEach(el => el.remove());
-    }
-  });
-
-  /* ── Hover Tooltip Controller ── */
+  /* ═══════════════════════════════════════════════
+     Tooltip
+     ═══════════════════════════════════════════════ */
   const tooltip = document.getElementById('tooltip');
+
   function showTooltip(event, d) {
+    const kindColors = { supplier: COLOR.supplier, part: COLOR.part, product: COLOR.product, order: COLOR.order };
+    const kindBg     = { supplier: 'rgba(214,67,110,0.18)', part: 'rgba(245,166,35,0.18)', product: 'rgba(26,171,184,0.18)', order: 'rgba(44,95,138,0.18)' };
+
     let rows = '';
     const skip = new Set(['id', 'kind', 'label', '_el']);
     for (const [k, v] of Object.entries(d)) {
       if (skip.has(k)) continue;
-      const keyLabel = k.replace(/_/g, ' ');
-      rows += `<div class="tt-row"><span class="tt-k">${keyLabel}</span><span class="tt-v">${v}</span></div>`;
+      const label = k.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+      rows += `<div class="tt-row"><span class="tt-label">${label}</span><span class="tt-value">${v}</span></div>`;
     }
+
     tooltip.innerHTML = `
-      <div class="tt-head">${d.id} · ${d.label || d.id}</div>
-      <div class="tt-tier" style="color:${PALETTE[d.kind]};">${d.kind.toUpperCase()} TIER</div>
-      <div class="tt-grid">${rows}</div>
+      <div class="tt-title">${d.label || d.id}</div>
+      <span class="tt-kind" style="background:${kindBg[d.kind]};color:${kindColors[d.kind]}">${d.kind}</span>
+      ${rows}
     `;
     tooltip.classList.add('visible');
     moveTooltip(event);
   }
   function moveTooltip(event) {
-    const pad = 14;
+    const pad = 16;
     let x = event.clientX + pad;
     let y = event.clientY + pad;
-    if (x + 270 > window.innerWidth) x = event.clientX - 280;
-    if (y + 180 > window.innerHeight) y = event.clientY - 190;
-    tooltip.style.left = `${x}px`;
-    tooltip.style.top = `${y}px`;
+    if (x + 320 > window.innerWidth)  x = event.clientX - 330;
+    if (y + 260 > window.innerHeight) y = event.clientY - 270;
+    tooltip.style.left = x + 'px';
+    tooltip.style.top  = y + 'px';
   }
   function hideTooltip() { tooltip.classList.remove('visible'); }
 
-  /* ── Toast Notifications Shelf ── */
-  function showToast(msg) {
-    const shelf = document.getElementById('toast-shelf');
-    if (!shelf) return;
-    const toast = document.createElement('div');
-    toast.className = 'toast-pill';
-    toast.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg><span>${msg}</span>`;
-    shelf.appendChild(toast);
-    setTimeout(() => toast.remove(), 2600);
+  /* ═══════════════════════════════════════════════
+     Node Click → highlight downstream & update Bottom Output Box
+     ═══════════════════════════════════════════════ */
+  async function handleNodeClick(d, positions) {
+    selectedNode = d;
+
+    // Fetch downstream from server (computed by NetworkX)
+    const res = await fetch(`/api/downstream/${d.id}${removedQS()}`);
+    const data = await res.json();
+
+    highlightedIds = new Set([d.id, ...data.downstream]);
+
+    // Dim everything, then highlight
+    d3.selectAll('.node-circle').classed('dimmed', n => !highlightedIds.has(n.id));
+    d3.selectAll('.node-label').classed('dimmed', n => !highlightedIds.has(n.id));
+    d3.selectAll('.node-glow').classed('active', n => highlightedIds.has(n.id));
+
+    d3.selectAll('.edge-line')
+      .classed('dimmed', e => !highlightedIds.has(e.source) && !highlightedIds.has(e.target))
+      .classed('highlighted', e => highlightedIds.has(e.source) && highlightedIds.has(e.target))
+      .each(function(e) {
+        const isHl = highlightedIds.has(e.source) && highlightedIds.has(e.target);
+        if (isHl) {
+          // Figure out the target kind to pick arrow color
+          const targetNode = graphData.nodes.find(n => n.id === e.target);
+          const kind = targetNode ? targetNode.kind : 'dim';
+          d3.select(this)
+            .attr('stroke', COLOR[kind] || 'rgba(255,255,255,0.12)')
+            .attr('marker-end', `url(#arrow-${kind})`);
+        } else {
+          d3.select(this)
+            .attr('stroke', null)
+            .attr('marker-end', 'url(#arrow-dim)');
+        }
+      });
+
+    openInfoPanel(d, data.downstream);
+    updateImpactPreview(d, data.downstream);
   }
 
-  window.addEventListener('resize', () => { if (graphData.nodes.length) renderGraph(); });
+  function clearSelection() {
+    selectedNode = null;
+    highlightedIds.clear();
+    d3.selectAll('.node-circle').classed('dimmed', false);
+    d3.selectAll('.node-label').classed('dimmed', false);
+    d3.selectAll('.node-glow').classed('active', false);
+    d3.selectAll('.edge-line')
+      .classed('dimmed', false)
+      .classed('highlighted', false)
+      .attr('stroke', null)
+      .attr('marker-end', 'url(#arrow-dim)');
+    closeInfoPanel();
+    initDefaultImpactPreview();
+  }
 
-  /* ── Initialize Application ── */
-  loadGraphData();
+  /* ═══════════════════════════════════════════════
+     Bottom Output Box — Impact Preview Logic
+     ═══════════════════════════════════════════════ */
+  function initDefaultImpactPreview() {
+    const badge = document.getElementById('impact-target-badge');
+    if (badge) badge.style.display = 'none';
+
+    const container = document.getElementById('impact-preview-body');
+    if (!container) return;
+    container.innerHTML = `
+      <div class="impact-card-empty">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--col-product);flex-shrink:0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        <div>
+          <div><strong>Select any node</strong> in the graph above to preview what will happen if it is deleted.</div>
+          <div style="font-size:0.69rem;color:var(--text-secondary);margin-top:3px;">
+            In this supply chain, deleting an entity removes it and cuts its consecutive connected edges. Downstream dependencies cascade in <span class="complexity-tag">O(V + E)</span> time.
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function updateImpactPreview(d, downstreamIds) {
+    const badge = document.getElementById('impact-target-badge');
+    const container = document.getElementById('impact-preview-body');
+    if (!container) return;
+
+    const kindColors = { supplier: COLOR.supplier, part: COLOR.part, product: COLOR.product, order: COLOR.order };
+    const kindBg     = { supplier: 'rgba(214,67,110,0.18)', part: 'rgba(245,166,35,0.18)', product: 'rgba(26,171,184,0.18)', order: 'rgba(44,95,138,0.18)' };
+
+    if (badge) {
+      badge.style.display = 'inline-flex';
+      badge.innerHTML = `Selected: <span style="color:${kindColors[d.kind]}">${d.id} (${d.label || d.id})</span>`;
+    }
+
+    // Direct consecutive edges
+    const outgoing = graphData.edges.filter(e => e.source === d.id);
+    const incoming = graphData.edges.filter(e => e.target === d.id);
+    const consecutiveEdges = [...outgoing, ...incoming];
+
+    // Downstream entities
+    const downstreamNodes = graphData.nodes.filter(n => downstreamIds.includes(n.id) && n.id !== d.id);
+    const byKind = { supplier: [], part: [], product: [], order: [] };
+    downstreamNodes.forEach(n => byKind[n.kind]?.push(n));
+
+    let edgePills = outgoing.map(e => `<span class="impact-pill" style="border-left:2px solid ${COLOR[d.kind]}">${e.source} ➔ ${e.target}</span>`).join(' ');
+    if (incoming.length) {
+      edgePills += ' ' + incoming.map(e => `<span class="impact-pill" style="opacity:0.8">${e.source} ➔ ${e.target}</span>`).join(' ');
+    }
+    if (!edgePills) edgePills = '<span style="color:var(--text-secondary);font-size:0.68rem">No connected edges</span>';
+
+    let affectedPills = '';
+    ['part', 'product', 'order'].forEach(k => {
+      if (byKind[k]?.length) {
+        affectedPills += byKind[k].map(n => `<span class="impact-pill" style="color:${COLOR[k]};background:rgba(255,255,255,0.06)">${n.id}</span>`).join(' ') + ' ';
+      }
+    });
+    if (!affectedPills) affectedPills = '<span style="color:var(--text-secondary);font-size:0.68rem">None (Leaf node)</span>';
+
+    const totalNodesAffected = 1 + downstreamNodes.length;
+    const totalEdgesAffected = consecutiveEdges.length;
+
+    container.innerHTML = `
+      <div class="impact-grid">
+        <div class="impact-box">
+          <span class="impact-box-label">Target Entity Deletion</span>
+          <div class="impact-box-val">
+            <span class="impact-pill" style="background:${kindBg[d.kind]};color:${kindColors[d.kind]}">${d.kind.toUpperCase()}</span>
+            <span>${d.id} — ${d.label || d.id}</span>
+          </div>
+          <span style="font-size:0.65rem;color:var(--text-secondary)">This node will be permanently excised from NetworkX.</span>
+        </div>
+
+        <div class="impact-box">
+          <span class="impact-box-label">Consecutive Connected Edges (${consecutiveEdges.length})</span>
+          <div class="impact-box-val">${edgePills}</div>
+          <span style="font-size:0.65rem;color:var(--text-secondary)">Incident edges will be severed immediately.</span>
+        </div>
+
+        <div class="impact-box">
+          <span class="impact-box-label">Downstream Affected Cascade (${downstreamNodes.length})</span>
+          <div class="impact-box-val">${affectedPills}</div>
+          <span style="font-size:0.65rem;color:var(--text-secondary)">Dependent parts, products, and customer orders disrupted.</span>
+        </div>
+
+        <div class="impact-box" style="border-color:rgba(26,171,184,0.3);background:rgba(26,171,184,0.04)">
+          <span class="impact-box-label" style="color:#7dd3fc">Algorithmic Time Complexity</span>
+          <div class="impact-box-val">
+            <span class="complexity-tag">O(V + E)</span>
+            <span style="font-size:0.68rem;color:var(--text-secondary)">Linear DAG Traversal</span>
+          </div>
+          <span style="font-size:0.65rem;color:var(--text-secondary)">Visits ${totalNodesAffected} vertices and ${totalEdgesAffected} incident edges.</span>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:2px;">
+        <span style="font-size:0.68rem;color:var(--text-secondary)">Ready to delete this supply-chain branch?</span>
+        <button class="btn btn--danger btn--sm" id="btn-dock-quick-delete" style="padding:4px 12px;font-size:0.72rem">
+          Delete Node ${d.id}
+        </button>
+      </div>
+    `;
+
+    document.getElementById('btn-dock-quick-delete')?.addEventListener('click', () => confirmDelete(d));
+  }
+
+  /* ═══════════════════════════════════════════════
+     Info Panel (Right sidebar)
+     ═══════════════════════════════════════════════ */
+  function openInfoPanel(d, downstream) {
+    const panel = document.getElementById('info-panel');
+    const content = document.getElementById('panel-content');
+    const kindColors = { supplier: COLOR.supplier, part: COLOR.part, product: COLOR.product, order: COLOR.order };
+    const kindBg     = { supplier: 'rgba(214,67,110,0.18)', part: 'rgba(245,166,35,0.18)', product: 'rgba(26,171,184,0.18)', order: 'rgba(44,95,138,0.18)' };
+
+    let rows = '';
+    const skip = new Set(['id', 'kind', 'label', '_el']);
+    for (const [k, v] of Object.entries(d)) {
+      if (skip.has(k)) continue;
+      const label = k.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+      rows += `<div class="panel-row"><span class="panel-label">${label}</span><span class="panel-value">${v}</span></div>`;
+    }
+
+    const downstreamCount = downstream.length;
+
+    content.innerHTML = `
+      <div class="panel-title">${d.label || d.id}</div>
+      <span class="panel-kind" style="background:${kindBg[d.kind]};color:${kindColors[d.kind]}">${d.kind}</span>
+      ${rows}
+      <div class="panel-row" style="margin-top:8px;border-top:1px solid var(--border-glass);padding-top:8px;">
+        <span class="panel-label">Downstream nodes</span>
+        <span class="panel-value">${downstreamCount}</span>
+      </div>
+      <div class="panel-actions">
+        <button class="btn btn--danger" id="btn-delete-node" title="Delete this node and all downstream">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+          Delete node
+        </button>
+      </div>
+    `;
+
+    document.getElementById('btn-delete-node').addEventListener('click', () => confirmDelete(d));
+    panel.classList.add('open');
+  }
+
+  function closeInfoPanel() {
+    document.getElementById('info-panel').classList.remove('open');
+  }
+  document.getElementById('panel-close-btn').addEventListener('click', () => { closeInfoPanel(); clearSelection(); });
+
+  /* ═══════════════════════════════════════════════
+     Delete with confirmation
+     ═══════════════════════════════════════════════ */
+  function confirmDelete(d) {
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay';
+    overlay.innerHTML = `
+      <div class="modal-box">
+        <h3>Delete "${d.label || d.id}"?</h3>
+        <p>This will permanently remove the node <strong>${d.id}</strong> and <em>all consecutive connected edges &amp; downstream dependencies</em> from the NetworkX graph. You can undo this action.</p>
+        <div class="modal-actions">
+          <button class="btn" id="modal-cancel">Cancel</button>
+          <button class="btn btn--danger" id="modal-confirm">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+            Delete
+          </button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+
+    document.getElementById('modal-cancel').addEventListener('click', () => overlay.remove());
+    overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+
+    document.getElementById('modal-confirm').addEventListener('click', async () => {
+      overlay.remove();
+      const res = await fetch(`/api/node/${d.id}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ removed: removedIds })
+      });
+      const result = await res.json();
+      if (result.error) { showToast(`Error: ${result.error}`); return; }
+      graphData = result.graph;
+      removedIds = removedIds.concat(result.deleted);
+      undoStack.push({
+        ids: result.deleted,
+        node_id: result.deleted_node_id,
+        label: result.deleted_label,
+        kind: result.deleted_kind,
+        details: result.deleted_details,
+        edges_removed: result.edges_removed,
+        elapsed_ms: result.elapsed_ms,
+        complexity: result.time_complexity,
+        complexity_details: result.time_complexity_details
+      });
+      closeInfoPanel();
+      clearSelection();
+      render();
+      showToast(`Deleted ${result.deleted.length} node(s)`);
+
+      // Add to dock operation log
+      addLogEntry('delete', {
+        id: d.id,
+        label: d.label || d.id,
+        kind: d.kind,
+        nodeCount: result.deleted.length,
+        edgeCount: result.edges_removed,
+        elapsed_ms: result.elapsed_ms,
+        complexity: result.time_complexity || 'O(V + E)'
+      });
+    });
+  }
+
+  /* ═══════════════════════════════════════════════
+     Undo — Displays 5-second popup with Time Complexity and Deletion Timing
+     ═══════════════════════════════════════════════ */
+  document.getElementById('btn-undo').addEventListener('click', async () => {
+    if (!undoStack.length) { showToast('Nothing to undo'); return; }
+    const snap = undoStack.pop();
+    const remaining = removedIds.filter(id => !snap.ids.includes(id));
+    const res = await fetch('/api/undo', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ removed: remaining })
+    });
+    const data = await res.json();
+    if (data.error) { undoStack.push(snap); showToast(data.error); return; }
+    removedIds = remaining;
+    Object.assign(data, {
+      restored_node_id: snap.node_id,
+      restored_label: snap.label,
+      restored_kind: snap.kind,
+      deleted_details: snap.details,
+      edges_removed: snap.edges_removed,
+      delete_elapsed_ms: snap.elapsed_ms,
+      time_complexity: snap.complexity,
+      time_complexity_details: snap.complexity_details
+    });
+    graphData = data.graph;
+    closeInfoPanel();
+    clearSelection();
+    render();
+    showToast('Undo successful — Node restored');
+
+    // Add to dock operation log
+    addLogEntry('undo', {
+      id: data.restored_node_id || 'Node',
+      label: data.restored_label || '',
+      undo_elapsed_ms: data.undo_elapsed_ms,
+      delete_elapsed_ms: data.delete_elapsed_ms,
+      complexity: data.time_complexity || 'O(V + E)'
+    });
+
+    // 5-SECOND POPUP SHOWING TIME COMPLEXITY & HOW MUCH TIME WAS TAKEN TO DELETE THAT NODE
+    showUndoTimingPopup(data);
+  });
+
+  /* ═══════════════════════════════════════════════
+     Reset
+     ═══════════════════════════════════════════════ */
+  document.getElementById('btn-reset').addEventListener('click', async () => {
+    const res = await fetch('/api/reset', { method: 'POST' });
+    const data = await res.json();
+    removedIds = [];
+    undoStack = [];
+    graphData = data.graph;
+    closeInfoPanel();
+    clearSelection();
+    render();
+    showToast('Graph reset to original 19 nodes');
+    addLogEntry('reset', { nodeCount: graphData.nodes.length });
+  });
+
+  /* ═══════════════════════════════════════════════
+     Toast notifications
+     ═══════════════════════════════════════════════ */
+  function showToast(msg) {
+    const container = document.getElementById('toast-container');
+    const el = document.createElement('div');
+    el.className = 'toast';
+    el.textContent = msg;
+    container.appendChild(el);
+    setTimeout(() => el.remove(), 2800);
+  }
+
+  /* ═══════════════════════════════════════════════
+     Subtitle counts
+     ═══════════════════════════════════════════════ */
+  function updateSubtitle() {
+    const counts = { supplier: 0, part: 0, product: 0, order: 0 };
+    graphData.nodes.forEach(n => counts[n.kind]++);
+    document.getElementById('graph-subtitle').textContent =
+      `${graphData.nodes.length} entities  ·  ${counts.supplier} suppliers  ·  ${counts.part} parts  ·  ${counts.product} products  ·  ${counts.order} orders  ·  ${graphData.edges.length} edges`;
+  }
+
+  function updateUndoBtn() {
+    document.getElementById('btn-undo').disabled = !undoStack.length;
+  }
+
+  /* ═══════════════════════════════════════════════
+     Resize handler
+     ═══════════════════════════════════════════════ */
+  window.addEventListener('resize', () => { if (graphData.nodes.length) render(); });
+
+  /* ═══════════════════════════════════════════════
+     Dock Log History
+     ═══════════════════════════════════════════════ */
+  const logList = document.getElementById('dock-log-list');
+
+  function addLogEntry(action, details) {
+    if (!logList) return;
+    const item = document.createElement('div');
+    const now = new Date().toLocaleTimeString();
+
+    if (action === 'delete') {
+      item.className = 'log-item delete';
+      item.innerHTML = `
+        <div class="log-item-header">
+          <span class="log-item-action" style="color:var(--col-supplier)">✕ DELETED: ${details.id} (${details.label})</span>
+          <span class="log-item-time">${now}</span>
+        </div>
+        <div style="font-size:0.69rem;color:var(--text-secondary);margin-top:2px;">
+          Removed <strong>${details.nodeCount}</strong> nodes &amp; <strong>${details.edgeCount}</strong> edges in <strong style="color:#7dd3fc">${details.elapsed_ms.toFixed(3)} ms</strong> · <span class="complexity-tag">${details.complexity}</span>
+        </div>
+      `;
+    } else if (action === 'undo') {
+      item.className = 'log-item undo';
+      item.innerHTML = `
+        <div class="log-item-header">
+          <span class="log-item-action" style="color:var(--col-product)">↺ UNDO: Restored ${details.id} (${details.label})</span>
+          <span class="log-item-time">${now}</span>
+        </div>
+        <div style="font-size:0.69rem;color:var(--text-secondary);margin-top:2px;">
+          Restored in <strong style="color:#7dd3fc">${details.undo_elapsed_ms.toFixed(3)} ms</strong> · Original delete took <strong style="color:var(--col-supplier)">${details.delete_elapsed_ms.toFixed(3)} ms</strong> · <span class="complexity-tag">${details.complexity}</span>
+        </div>
+      `;
+    } else if (action === 'reset') {
+      item.className = 'log-item reset';
+      item.innerHTML = `
+        <div class="log-item-header">
+          <span class="log-item-action" style="color:var(--col-part)">⟳ RESET: All 19 Entities Restored</span>
+          <span class="log-item-time">${now}</span>
+        </div>
+        <div style="font-size:0.69rem;color:var(--text-secondary);margin-top:2px;">
+          Graph re-initialized to default state with 19 nodes and 18 edges.
+        </div>
+      `;
+    }
+
+    logList.prepend(item);
+  }
+
+  document.getElementById('btn-dock-clear')?.addEventListener('click', () => {
+    if (logList) logList.innerHTML = '<div style="font-size:0.7rem;color:var(--text-secondary);padding:6px 0;">Log cleared.</div>';
+  });
+
+  // Dock Minimize/Expand button
+  const dockPanel = document.getElementById('bottom-output-panel');
+  const dockToggleBtn = document.getElementById('btn-dock-toggle');
+  dockToggleBtn?.addEventListener('click', () => {
+    dockPanel.classList.toggle('minimized');
+    const isMin = dockPanel.classList.contains('minimized');
+    document.getElementById('dock-toggle-icon').textContent = isMin ? '+' : '−';
+    document.getElementById('dock-toggle-text').textContent = isMin ? 'Expand' : 'Minimize';
+    render();
+  });
+
+  /* ═══════════════════════════════════════════════
+     5-SECOND UNDO TIMING & COMPLEXITY POPUP
+     ═══════════════════════════════════════════════ */
+  let undoPopupTimer = null;
+  let undoCountdownInterval = null;
+
+  function showUndoTimingPopup(data) {
+    const popup = document.getElementById('undo-timing-popup');
+    if (!popup) return;
+
+    // 1. Restored node details
+    const nodeEl = document.getElementById('undo-stat-node');
+    if (nodeEl) {
+      const label = data.restored_label || data.restored_node_id || 'Node';
+      const id = data.restored_node_id || '';
+      nodeEl.innerHTML = `<span class="impact-pill" style="color:var(--col-product);background:rgba(26,171,184,0.15)">${id}</span> ${label}`;
+    }
+
+    // 2. How much time was taken to delete that node
+    const deleteTimeEl = document.getElementById('undo-stat-delete-time');
+    if (deleteTimeEl) {
+      const deleteMs = (data.delete_elapsed_ms || 0).toFixed(3);
+      deleteTimeEl.textContent = `${deleteMs} ms`;
+    }
+
+    // 3. Time complexity
+    const complexityEl = document.getElementById('undo-stat-complexity');
+    if (complexityEl) {
+      complexityEl.textContent = data.time_complexity || 'O(V + E)';
+    }
+    const complexityDescEl = document.getElementById('undo-stat-complexity-desc');
+    if (complexityDescEl) {
+      complexityDescEl.textContent = data.time_complexity_details || 'NetworkX BFS graph traversal & cascading deletion';
+    }
+
+    // 4. Undo restoration time
+    const undoTimeEl = document.getElementById('undo-stat-undo-time');
+    if (undoTimeEl) {
+      const undoMs = (data.undo_elapsed_ms || 0).toFixed(3);
+      undoTimeEl.textContent = `${undoMs} ms`;
+    }
+
+    // 5. Entities restored count
+    const countEl = document.getElementById('undo-stat-count');
+    if (countEl) {
+      const n = data.deleted_details ? data.deleted_details.length : 1;
+      const e = data.edges_removed || 0;
+      countEl.textContent = `${n} node(s), ${e} edge(s)`;
+    }
+
+    // Restart progress bar animation
+    const bar = document.getElementById('undo-progress-bar');
+    if (bar) {
+      bar.style.animation = 'none';
+      bar.offsetHeight; // force reflow
+      bar.style.animation = 'undoProgressShrink 5s linear forwards';
+    }
+
+    // 5-second countdown ticker
+    const timerTag = document.getElementById('undo-timer-countdown');
+    let timeLeft = 5.0;
+    if (timerTag) timerTag.textContent = '5.0s';
+
+    if (undoCountdownInterval) clearInterval(undoCountdownInterval);
+    undoCountdownInterval = setInterval(() => {
+      timeLeft = Math.max(0, timeLeft - 0.1);
+      if (timerTag) timerTag.textContent = `${timeLeft.toFixed(1)}s`;
+      if (timeLeft <= 0) {
+        clearInterval(undoCountdownInterval);
+        undoCountdownInterval = null;
+      }
+    }, 100);
+
+    // Make visible
+    popup.classList.add('visible');
+
+    // Auto-dismiss after EXACTLY 5 seconds (5000 ms)
+    if (undoPopupTimer) clearTimeout(undoPopupTimer);
+    undoPopupTimer = setTimeout(() => {
+      popup.classList.remove('visible');
+      undoPopupTimer = null;
+      if (undoCountdownInterval) {
+        clearInterval(undoCountdownInterval);
+        undoCountdownInterval = null;
+      }
+    }, 5000);
+  }
+
+  /* ═══════════════════════════════════════════════
+     Init
+     ═══════════════════════════════════════════════ */
+  initDefaultImpactPreview();
+  fetchGraph();
   </script>
 </body>
 </html>
