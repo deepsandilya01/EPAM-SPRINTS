@@ -1,0 +1,218 @@
+import {
+  Supplier,
+  BOMPart,
+  FinishedProduct,
+  CustomerOrder,
+  GraphEdgeData,
+} from '@/types'
+
+export const CANONICAL_SUPPLIERS: Supplier[] = [
+  {
+    id: 'SUP-01',
+    name: 'Supplier 01',
+    location: 'USA',
+    type: 'Raw Material Supplier',
+    note: 'Primary supplier',
+    reliabilityScore: 98.4,
+    contactEmail: 'ops@supplier01.us',
+  },
+  {
+    id: 'SUP-02',
+    name: 'Supplier 02',
+    location: 'Germany',
+    type: 'Component Fabricator',
+    note: 'Secondary supplier',
+    reliabilityScore: 94.2,
+    contactEmail: 'logistics@supplier02.de',
+  },
+]
+
+export const CANONICAL_PARTS: BOMPart[] = [
+  {
+    id: 'PART-01',
+    name: 'Microcontroller Core',
+    category: 'Semiconductor',
+    stockLevel: 1400,
+    unitCost: 24.5,
+    leadTimeDays: 14,
+    criticality: 'High',
+  },
+  {
+    id: 'PART-02',
+    name: 'Sensor Array Module',
+    category: 'Optoelectronics',
+    stockLevel: 850,
+    unitCost: 45.0,
+    leadTimeDays: 21,
+    criticality: 'High',
+  },
+  {
+    id: 'PART-03',
+    name: 'Power Management IC',
+    category: 'Power Electronics',
+    stockLevel: 3200,
+    unitCost: 8.2,
+    leadTimeDays: 7,
+    criticality: 'Medium',
+  },
+  {
+    id: 'PART-04',
+    name: 'Communication Antenna',
+    category: 'RF Components',
+    stockLevel: 4100,
+    unitCost: 5.8,
+    leadTimeDays: 5,
+    criticality: 'Low',
+  },
+  {
+    id: 'PART-05',
+    name: 'Enclosure Chassis',
+    category: 'Mechanical Housing',
+    stockLevel: 920,
+    unitCost: 18.9,
+    leadTimeDays: 10,
+    criticality: 'Medium',
+  },
+]
+
+export const CANONICAL_PRODUCTS: FinishedProduct[] = [
+  {
+    id: 'PROD-01',
+    name: 'Industrial IoT Gateway',
+    sku: 'IIOT-GW-100',
+    currentInventory: 320,
+    productionLine: 'Line A (North Plant)',
+    dailyTarget: 50,
+  },
+  {
+    id: 'PROD-02',
+    name: 'Smart Edge Sensor Node',
+    sku: 'SESN-200',
+    currentInventory: 180,
+    productionLine: 'Line B (South Plant)',
+    dailyTarget: 80,
+  },
+]
+
+export const CANONICAL_ORDERS: CustomerOrder[] = [
+  {
+    id: 'ORD-01',
+    customerName: 'Acme Corporation',
+    orderDate: '2025-01-28',
+    deliveryDeadline: '2025-02-12',
+    quantity: 50,
+    status: 'Pending',
+    priority: 'Urgent',
+  },
+  {
+    id: 'ORD-02',
+    customerName: 'Global Logistics Inc',
+    orderDate: '2025-01-29',
+    deliveryDeadline: '2025-02-14',
+    quantity: 120,
+    status: 'In Production',
+    priority: 'High',
+  },
+  {
+    id: 'ORD-03',
+    customerName: 'Apex Manufacturing',
+    orderDate: '2025-01-30',
+    deliveryDeadline: '2025-02-16',
+    quantity: 75,
+    status: 'In Production',
+    priority: 'Standard',
+  },
+  {
+    id: 'ORD-04',
+    customerName: 'Quantum Systems',
+    orderDate: '2025-02-01',
+    deliveryDeadline: '2025-02-18',
+    quantity: 30,
+    status: 'Pending',
+    priority: 'Urgent',
+  },
+  {
+    id: 'ORD-05',
+    customerName: 'Helios Energy',
+    orderDate: '2025-02-02',
+    deliveryDeadline: '2025-02-20',
+    quantity: 110,
+    status: 'Delayed',
+    priority: 'High',
+  },
+  {
+    id: 'ORD-06',
+    customerName: 'Pacific Automation',
+    orderDate: '2025-02-03',
+    deliveryDeadline: '2025-02-22',
+    quantity: 65,
+    status: 'In Production',
+    priority: 'Standard',
+  },
+  {
+    id: 'ORD-07',
+    customerName: 'Vanguard Defense',
+    orderDate: '2025-02-03',
+    deliveryDeadline: '2025-02-25',
+    quantity: 90,
+    status: 'Shipped',
+    priority: 'High',
+  },
+  {
+    id: 'ORD-08',
+    customerName: 'Nordic Instruments',
+    orderDate: '2025-02-04',
+    deliveryDeadline: '2025-02-26',
+    quantity: 40,
+    status: 'In Production',
+    priority: 'Standard',
+  },
+  {
+    id: 'ORD-09',
+    customerName: 'Horizon Robotics',
+    orderDate: '2025-02-04',
+    deliveryDeadline: '2025-02-28',
+    quantity: 150,
+    status: 'Pending',
+    priority: 'Standard',
+  },
+  {
+    id: 'ORD-10',
+    customerName: 'Cybernet Dynamics',
+    orderDate: '2025-02-05',
+    deliveryDeadline: '2025-03-02',
+    quantity: 85,
+    status: 'Pending',
+    priority: 'Urgent',
+  },
+]
+
+// 21 Directed Canonical Edges
+export const CANONICAL_EDGES: GraphEdgeData[] = [
+  // 6 SUPPLIES edges
+  { id: 'e-SUP01-PART01', source: 'SUP-01', target: 'PART-01', relation: 'SUPPLIES', isAffected: true },
+  { id: 'e-SUP01-PART02', source: 'SUP-01', target: 'PART-02', relation: 'SUPPLIES', isAffected: true },
+  { id: 'e-SUP01-PART05', source: 'SUP-01', target: 'PART-05', relation: 'SUPPLIES', isAffected: true },
+  { id: 'e-SUP02-PART03', source: 'SUP-02', target: 'PART-03', relation: 'SUPPLIES', isAffected: false },
+  { id: 'e-SUP02-PART04', source: 'SUP-02', target: 'PART-04', relation: 'SUPPLIES', isAffected: false },
+  { id: 'e-SUP02-PART05', source: 'SUP-02', target: 'PART-05', relation: 'SUPPLIES', isAffected: false },
+
+  // 5 USED_IN edges
+  { id: 'e-PART01-PROD01', source: 'PART-01', target: 'PROD-01', relation: 'USED_IN', isAffected: true },
+  { id: 'e-PART02-PROD01', source: 'PART-02', target: 'PROD-01', relation: 'USED_IN', isAffected: true },
+  { id: 'e-PART05-PROD01', source: 'PART-05', target: 'PROD-01', relation: 'USED_IN', isAffected: true },
+  { id: 'e-PART03-PROD02', source: 'PART-03', target: 'PROD-02', relation: 'USED_IN', isAffected: false },
+  { id: 'e-PART04-PROD02', source: 'PART-04', target: 'PROD-02', relation: 'USED_IN', isAffected: false },
+
+  // 10 FULFILLS edges
+  { id: 'e-PROD01-ORD01', source: 'PROD-01', target: 'ORD-01', relation: 'FULFILLS', isAffected: true },
+  { id: 'e-PROD01-ORD02', source: 'PROD-01', target: 'ORD-02', relation: 'FULFILLS', isAffected: true },
+  { id: 'e-PROD01-ORD03', source: 'PROD-01', target: 'ORD-03', relation: 'FULFILLS', isAffected: true },
+  { id: 'e-PROD01-ORD04', source: 'PROD-01', target: 'ORD-04', relation: 'FULFILLS', isAffected: true },
+  { id: 'e-PROD01-ORD05', source: 'PROD-01', target: 'ORD-05', relation: 'FULFILLS', isAffected: true },
+  { id: 'e-PROD01-ORD06', source: 'PROD-01', target: 'ORD-06', relation: 'FULFILLS', isAffected: true },
+  { id: 'e-PROD02-ORD07', source: 'PROD-02', target: 'ORD-07', relation: 'FULFILLS', isAffected: false },
+  { id: 'e-PROD02-ORD08', source: 'PROD-02', target: 'ORD-08', relation: 'FULFILLS', isAffected: false },
+  { id: 'e-PROD02-ORD09', source: 'PROD-02', target: 'ORD-09', relation: 'FULFILLS', isAffected: false },
+  { id: 'e-PROD02-ORD10', source: 'PROD-02', target: 'ORD-10', relation: 'FULFILLS', isAffected: false },
+]
