@@ -150,3 +150,4 @@ $$\text{Descendants}(u) = \{ v \in V \mid \exists \text{ path } u \rightsquigarr
 | **Undo Architecture** | In-Memory Snapshot Stack (LIFO) | Command Pattern / Inverse Operations | Snapshot restoration is deterministic, instantaneous for small-to-medium graphs, and eliminates edge-reconstruction edge cases. |
 | **Validation Architecture** | Dual Mode (`baseline` vs `integrity`) | Single Static Validator | Baseline mode enforces canonical Sprint 1 counts (19 nodes). Integrity mode allows dynamic graph mutations (deletions) without triggering false-positive count errors. |
 | **Timer Mechanism** | `time.perf_counter_ns()` | `time.time()` | `perf_counter_ns` uses hardware monotonic counters unaffected by system clock adjustments, providing true microsecond accuracy. |
+
