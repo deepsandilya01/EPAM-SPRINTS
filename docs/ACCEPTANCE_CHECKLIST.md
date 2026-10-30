@@ -56,4 +56,3 @@ python -m benchmarks.benchmark_tracing
 # 4. Start the live application
 python app.py
 ```
-
