@@ -7,10 +7,7 @@ from __future__ import annotations
 
 import time
 from typing import Any
-
 import networkx as nx
-
-
 def trace_downstream_with_metrics(
     graph: nx.DiGraph,
     source_node_id: str,
