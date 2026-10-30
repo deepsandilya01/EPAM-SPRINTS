@@ -188,3 +188,4 @@ curl -s http://127.0.0.1:5000/api/benchmark/tracing
 | `Address already in use: 5000` | Another process is bound to port 5000 (e.g. macOS AirPlay receiver or previous Flask instance) | Turn off AirPlay Receiver in macOS System Settings $\to$ Sharing, or specify an alternative port: `python -c "from backend.app import app; app.run(port=5050)"`. |
 | `Activate.ps1 cannot be loaded` | PowerShell execution policy restriction on Windows | Run `Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass` in your PowerShell window. |
 | `networkx install error on Python 3.9` | `networkx 3.4.2` requires Python $\ge 3.10$ | `requirements.txt` specifies `networkx>=3.2.0`, which automatically resolves to `3.2.1` on Python 3.9 and `3.4.2` on Python 3.12+. Run `pip install -r requirements.txt`. |
+
