@@ -1,22 +1,15 @@
-"""
-Project: RE:Flow
-Sprint: 1
-File: backend/app/api/routes/__init__.py
+from __future__ import annotations
 
-Ownership: Team Maintained
-Role: API Routes Package Initialization
+from backend.app.api.routes.benchmarks import benchmarks_bp
+from backend.app.api.routes.graph import graph_bp
+from backend.app.api.routes.health import health_bp
+from backend.app.api.routes.traversal import traversal_bp
+from backend.app.api.routes.validation import validation_bp
 
-Purpose:
-Routes package initializer.
-
-Responsibilities:
-- Package exports for route blueprints.
-
-Dependencies:
-- Route implementers: Divyanshu, Ansh, Preetam, Soumya, Kanak.
-
-Deliverables:
-- Clean route exports.
-
-Status: NOT STARTED
-"""
+__all__ = [
+    "graph_bp",
+    "traversal_bp",
+    "validation_bp",
+    "benchmarks_bp",
+    "health_bp",
+]

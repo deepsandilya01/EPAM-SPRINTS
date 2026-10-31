@@ -1,23 +1,3 @@
-"""
-Project: RE:Flow
-Sprint: 1
-File: backend/app/models/edges.py
-
-Ownership: Team Maintained
-Role: Graph Domain Models and Data Contracts
-Status: COMPLETED
-
-Ownership: Team Maintained (Implemented by Deep during Sprint 1)
-Role: Graph Domain Models and Data Contracts
-Status: COMPLETED
-
-Purpose:
-Domain models for the 3 directed supply chain relationships:
-1. SUPPLIES (Tier 1 -> Tier 2) - Supplier supplies a BOM Part
-2. USED_IN (Tier 2 -> Tier 3) - BOM Part is assembled into a Finished Product
-3. FULFILLS (Tier 3 -> Tier 4) - Finished Product fulfills a Customer Order
-"""
-
 from abc import ABC
 from dataclasses import dataclass, field
 from typing import Any, Dict, Optional, Union

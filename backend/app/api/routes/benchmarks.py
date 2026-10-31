@@ -1,25 +1,21 @@
-"""
-Project: RE:Flow
-Sprint: 1
-File: backend/app/api/routes/benchmarks.py
+from __future__ import annotations
 
-Primary Owner: Kanak
-Role: Performance Benchmarking
+from flask import Blueprint, jsonify, request
 
-Purpose:
-Performance benchmarking and latency profiling route definitions.
+from backend.app.services.benchmark_service import BenchmarkService
 
-Responsibilities:
-- Implement GET /api/benchmarks endpoint.
-- Return cached or executed benchmark metrics including traversal latency and SLA compliance.
-- Include hardware specifications and iteration counts.
+benchmarks_bp = Blueprint("benchmarks", __name__)
+benchmark_service = BenchmarkService()
 
-Dependencies:
-- Kanak: Benchmark service (backend/app/services/benchmark_service.py).
-- Benchmark response schema.
 
-Deliverables:
-- Working GET /api/benchmarks endpoint returning benchmark metrics.
+@benchmarks_bp.route("/benchmark/tracing", methods=["GET"])
+@benchmarks_bp.route("/benchmarks", methods=["GET"])
+def api_benchmark_tracing():
+    """Benchmark downstream traversal speed for a node (default: SUP-01) against the 10ms SLA."""
+    node_id = request.args.get("node_id", "SUP-01")
+    threshold_param = request.args.get("threshold_ms", "10.0")
 
-Status: NOT STARTED
-"""
+    result, status_code = benchmark_service.run_tracing_benchmark(
+        node_id=node_id, threshold_param=threshold_param
+    )
+    return jsonify(result), status_code

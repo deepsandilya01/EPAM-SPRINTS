@@ -1,22 +1,6 @@
-"""
-Project: RE:Flow
-Sprint: 1
-File: backend/app/core/constants.py
-
-Ownership: Team Maintained
-Role: Domain Constants and System Enums
-Status: COMPLETED
-
-Ownership: Team Maintained (Implemented by Deep during Sprint 1)
-Role: Domain Constants and System Enums
-Status: COMPLETED
-
-Purpose:
-System-wide constants and enumerations for the RE:Flow platform.
-"""
+from __future__ import annotations
 
 from enum import Enum
-from typing import Dict, Tuple
 
 
 class TierType(str, Enum):
@@ -27,7 +11,7 @@ class TierType(str, Enum):
     CUSTOMER_ORDER = "order"
 
     @classmethod
-    def from_str(cls, value: str) -> "TierType":
+    def from_str(cls, value: str) -> TierType:
         """Normalize case-insensitive or pluralized tier strings to TierType."""
         if not isinstance(value, str):
             raise ValueError(f"Tier must be a string, got {type(value).__name__}")
@@ -65,7 +49,7 @@ class EdgeType(str, Enum):
     FULFILLS = "FULFILLS"
 
     @classmethod
-    def from_str(cls, value: str) -> "EdgeType":
+    def from_str(cls, value: str) -> EdgeType:
         """Normalize case-insensitive relationship string to EdgeType."""
         if not isinstance(value, str):
             raise ValueError(f"Edge type must be a string, got {type(value).__name__}")
@@ -85,7 +69,7 @@ class EdgeType(str, Enum):
 
 
 # Valid directed transitions: (Source Tier, Target Tier) -> EdgeType
-ALLOWED_TRANSITIONS: Dict[Tuple[TierType, TierType], EdgeType] = {
+ALLOWED_TRANSITIONS: dict[tuple[TierType, TierType], EdgeType] = {
     (TierType.SUPPLIER, TierType.BOM_PART): EdgeType.SUPPLIES,
     (TierType.BOM_PART, TierType.FINISHED_PRODUCT): EdgeType.USED_IN,
     (TierType.FINISHED_PRODUCT, TierType.CUSTOMER_ORDER): EdgeType.FULFILLS,

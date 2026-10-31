@@ -1,43 +1,177 @@
-<!--
-=============================================================================
-Project: RE:Flow
-Sprint: 1
-File: backend/app/static/sprint-1-demo.html
-
-Primary Owner: Sumit
-Role: Documentation and Demo Guide
-
-Purpose:
-Sprint 1 static demonstration interface for supply chain visualization.
-
-Responsibilities:
-- Provide HTML5 structural skeleton for rendering the 4 supply chain tiers.
-- Include containers for swimlanes, node cards, metrics counters, and blast radius panels.
-- Link sprint-1-demo.css and sprint-1-demo.js.
-
-Dependencies:
-- Sumit: CSS stylesheet (backend/app/static/css/sprint-1-demo.css).
-- Sumit: JavaScript driver (backend/app/static/js/sprint-1-demo.js).
-- Flask static routing in backend/app/main.py.
-- Ansh & Preetam: REST API contracts for graph and traversal data.
-
-Deliverables:
-- Interactive, responsive HTML5 presentation interface for Sprint 1 demo.
-
-Status: NOT STARTED
-=============================================================================
--->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RE:Flow - Sprint 1 Demo</title>
-    <link rel="stylesheet" href="css/sprint-1-demo.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RE:Flow Sprint 1 — Supply-Chain Dependency Graph</title>
+  <meta name="description" content="Interactive supply-chain dependency graph for RE:Flow Sprint 1. Visualise suppliers, parts, products, and customer orders." />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+
+  <!-- D3.js -->
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+
+  <!-- RE:Flow Sprint 1 Stylesheet -->
+  <link rel="stylesheet" href="/static/css/sprint-1-demo.css" />
 </head>
+
 <body>
-    <!-- Sprint 1 Demo UI placeholder container -->
-    <div id="app"></div>
-    <script src="js/sprint-1-demo.js"></script>
+  <div id="app">
+    <!-- ─── Header ─── -->
+    <header>
+      <div style="display:flex;align-items:center;">
+        <h1>Photon Sprint 1 — Supply-Chain Graph</h1>
+        <span class="subtitle" id="graph-subtitle">Loading…</span>
+      </div>
+      <div class="header-actions">
+        <button class="btn" id="btn-undo" disabled title="Undo last delete">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+          Undo
+        </button>
+        <button class="btn btn--reset" id="btn-reset" title="Reset to original graph">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6"/><path d="M2.5 22v-6h6"/><path d="M2.91 13.12a10 10 0 0 1 17.68-4.53L21.5 8"/><path d="M21.09 10.88a10 10 0 0 1-17.68 4.53L2.5 16"/></svg>
+          Reset
+        </button>
+      </div>
+    </header>
+
+    <!-- ─── Graph SVG ─── -->
+    <div id="graph-container">
+      <div class="column-headers">
+        <span class="col-sup">Suppliers</span>
+        <span class="col-part">BOM Parts</span>
+        <span class="col-prod">Finished Products</span>
+        <span class="col-ord">Customer Orders</span>
+      </div>
+      <svg id="graph-svg"></svg>
+    </div>
+
+    <!-- Side panel (selected node details) -->
+    <div id="info-panel">
+      <button class="panel-close" id="panel-close-btn">&times;</button>
+      <div id="panel-content"></div>
+    </div>
+
+    <!-- ─── Bottom Output Panel ("What will happen when you delete a node") ─── -->
+    <div id="bottom-output-panel">
+      <div class="panel-dock-header">
+        <div class="dock-title">
+          <div class="dock-dot"></div>
+          <span>OUTPUT TERMINAL — DELETION IMPACT &amp; EXECUTION</span>
+        </div>
+
+        <!-- Integrated Legend -->
+        <div class="dock-legend">
+          <div class="dock-legend-item"><div class="dock-legend-dot" style="background:var(--col-supplier)"></div>Suppliers</div>
+          <div class="dock-legend-item"><div class="dock-legend-dot" style="background:var(--col-part)"></div>BOM Parts</div>
+          <div class="dock-legend-item"><div class="dock-legend-dot" style="background:var(--col-product)"></div>Finished Products</div>
+          <div class="dock-legend-item"><div class="dock-legend-dot" style="background:var(--col-order)"></div>Customer Orders</div>
+          <div class="dock-legend-item"><div class="dock-legend-line"></div>SUPPLIES / USED_IN / FULFILLS</div>
+        </div>
+
+        <div class="dock-actions">
+          <button class="btn-dock" id="btn-dock-clear" title="Clear log entries">Clear Log</button>
+          <button class="btn-dock" id="btn-dock-toggle" title="Minimize / Expand bottom panel">
+            <span id="dock-toggle-icon">−</span> <span id="dock-toggle-text">Minimize</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="panel-dock-body">
+        <!-- Col 1: Impact Preview (What will happen when you delete a node) -->
+        <div class="dock-col-impact">
+          <div class="impact-header">
+            <div class="impact-title">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+              <span>What Happens When You Delete A Node</span>
+            </div>
+            <div id="impact-target-badge" style="display:none;"></div>
+          </div>
+          <div id="impact-preview-body" class="impact-content">
+            <!-- Populated dynamically via JS -->
+          </div>
+        </div>
+
+        <!-- Col 2: Action & Timing Log -->
+        <div class="dock-col-log">
+          <div class="log-title">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <span>Operation &amp; Timing Log</span>
+          </div>
+          <div id="dock-log-list" class="log-list">
+            <!-- Dynamic log entries -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tooltip -->
+  <div id="tooltip"></div>
+
+  <!-- ─── Small Undo Timing Popup (Shows for 5 seconds on Undo) ─── -->
+  <div id="undo-timing-popup">
+    <div class="undo-popup-head">
+      <div class="undo-popup-head-left">
+        <div class="undo-popup-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+        </div>
+        <div>
+          <div class="undo-popup-title">Undo Successful — Node Restored</div>
+          <div class="undo-popup-subtitle">Graph reverted to previous state</div>
+        </div>
+      </div>
+      <div class="undo-timer-tag" id="undo-timer-countdown">5.0s</div>
+    </div>
+
+    <div class="undo-popup-body">
+      <!-- Restored node -->
+      <div class="undo-stat-card">
+        <span class="undo-stat-title">Restored Node</span>
+        <div class="undo-stat-value" id="undo-stat-node">—</div>
+      </div>
+
+      <!-- Time taken to delete that node -->
+      <div class="undo-stat-card">
+        <span class="undo-stat-title">Time Taken To Delete That Node</span>
+        <div class="undo-stat-value highlight-cyan" id="undo-stat-delete-time">0.000 ms</div>
+      </div>
+
+      <!-- Time complexity -->
+      <div class="undo-stat-card featured">
+        <span class="undo-stat-title">Time Complexity</span>
+        <div class="undo-stat-value highlight-cyan">
+          <span class="complexity-tag" id="undo-stat-complexity">O(V + E)</span>
+        </div>
+        <span class="undo-stat-desc" id="undo-stat-complexity-desc">NetworkX Breadth-First Search (BFS) graph traversal &amp; cascading deletion</span>
+      </div>
+
+      <!-- Undo restoration time -->
+      <div class="undo-stat-card">
+        <span class="undo-stat-title">Undo Restoration Time</span>
+        <div class="undo-stat-value" id="undo-stat-undo-time">0.000 ms</div>
+      </div>
+
+      <!-- Entities restored -->
+      <div class="undo-stat-card">
+        <span class="undo-stat-title">Entities Restored</span>
+        <div class="undo-stat-value" id="undo-stat-count">0 nodes, 0 edges</div>
+      </div>
+    </div>
+
+    <div class="undo-bar-container">
+      <div class="undo-progress-bar" id="undo-progress-bar"></div>
+    </div>
+  </div>
+
+  <!-- Toast container -->
+  <div id="toast-container"></div>
+
+
+  <!-- RE:Flow Sprint 1 Client Driver -->
+  <script src="/static/js/sprint-1-demo.js"></script>
 </body>
 </html>

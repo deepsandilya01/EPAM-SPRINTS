@@ -1,25 +1,62 @@
-"""
-Project: RE:Flow
-Sprint: 1
-File: backend/app/services/validation_service.py
+from __future__ import annotations
 
-Primary Owner: Soumya
-Role: Graph and Data Validation
+from typing import Any
 
-Purpose:
-Service layer executing multi-level graph integrity audits.
+from backend.app.services.graph_service import GraphService, service_instance
+from backend.app.validation import (
+    AcyclicityPolicy,
+    ValidationPolicy,
+    validate_networkx_graph,
+    validate_raw_graph_data,
+)
 
-Responsibilities:
-- Execute full audit pipeline: schema validation, edge validation, and topological validation.
-- Consolidate rule results, pass/fail status, and timestamp into unified validation report.
-- Format report matching ValidationReportResponseSchema.
 
-Dependencies:
-- Soumya: graph_validator.py, schema_validator.py, edge_validator.py.
-- Validation Schemas: backend/app/schemas/validation.py (Implemented by Deep; Team Maintained).
+class ValidationService:
+    """Service executing graph and raw dataset integrity validations."""
 
-Deliverables:
-- ValidationService class with run_full_validation() method.
+    def __init__(self, graph_service: GraphService | None = None) -> None:
+        self.graph_service = graph_service or service_instance
 
-Status: NOT STARTED
-"""
+    def validate_graph(
+        self,
+        mode_param: str | None = None,
+        strict: bool = False,
+    ) -> tuple[dict[str, Any], int]:
+        """Validate live in-memory graph under baseline or integrity policies."""
+        graph = self.graph_service.get_graph()
+
+        if mode_param:
+            mode_clean = mode_param.strip().lower()
+            if mode_clean not in ("baseline", "integrity"):
+                return {
+                    "error": f"Invalid mode '{mode_param}'. Allowed modes: baseline, integrity",
+                    "valid": False,
+                }, 400
+            is_baseline = mode_clean == "baseline"
+            mode = "baseline" if is_baseline else "integrity"
+        else:
+            # Auto-detect mode based on node/edge counts
+            is_baseline = graph.number_of_nodes() == 19 and graph.number_of_edges() == 21
+            mode = "baseline" if is_baseline else "integrity"
+
+        policy = ValidationPolicy(
+            check_baseline_counts=is_baseline,
+            acyclicity_policy=AcyclicityPolicy.REQUIRE_DAG,
+        )
+        report = validate_networkx_graph(graph, policy=policy)
+        report.mode = mode
+
+        status_code = 200
+        if strict and not report.valid:
+            status_code = 422
+
+        return report.to_dict(), status_code
+
+    def validate_raw_data(self, raw_data: dict[str, Any]) -> dict[str, Any]:
+        """Validate raw dictionary dataset before graph construction."""
+        report = validate_raw_graph_data(raw_data)
+        return report.to_dict()
+
+
+# Module-level singleton
+validation_service = ValidationService()

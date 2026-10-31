@@ -1,26 +1,44 @@
-"""
-Project: RE:Flow
-Sprint: 1
-File: backend/app/benchmarks/benchmark_graph.py
+from __future__ import annotations
 
-Primary Owner: Kanak
-Role: Performance Benchmarking
+import pathlib
+import platform
+import sys
+import time
+from typing import Any
 
-Purpose:
-Benchmark runner for measuring graph construction latency and memory overhead.
+from backend.app.benchmarks.benchmark_results import BenchmarkResultAggregator
+from backend.app.data.loader import load_scenario_dataset
+from backend.app.graph.builder import build_graph
 
-Responsibilities:
-- Benchmark graph builder execution across multiple iterations (e.g. 100 runs).
-- Measure construction latency using high-precision time.perf_counter_ns.
-- Measure approximate memory footprint of NetworkX DiGraph.
-- Record execution environment (OS, CPU, Python version).
 
-Dependencies:
-- Ansh: Graph builder in backend/app/graph/builder.py.
-- Aadee: Normalized scenario dataset.
+def run_graph_construction_benchmark(
+    iterations: int = 100,
+    dataset_path: str | pathlib.Path | None = None,
+) -> dict[str, Any]:
+    """
+    Measure NetworkX DiGraph construction latency over multiple iterations.
+    """
+    raw_data = load_scenario_dataset(dataset_path)
+    aggregator = BenchmarkResultAggregator(
+        operation_name="Graph Construction (build_graph)",
+        sla_threshold_ms=50.0,
+    )
 
-Deliverables:
-- run_graph_construction_benchmark() function returning latency statistics.
+    # Warmup run
+    build_graph(raw_data)
 
-Status: NOT STARTED
-"""
+    for _ in range(iterations):
+        t0 = time.perf_counter_ns()
+        G = build_graph(raw_data)
+        t1 = time.perf_counter_ns()
+        aggregator.record((t1 - t0) / 1_000_000.0)
+
+    stats = aggregator.compute_statistics()
+    stats["environment"] = {
+        "python_version": sys.version.split()[0],
+        "system": platform.system(),
+        "release": platform.release(),
+    }
+    stats["node_count"] = G.number_of_nodes()
+    stats["edge_count"] = G.number_of_edges()
+    return stats

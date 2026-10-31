@@ -1,23 +1,47 @@
-"""
-Project: RE:Flow
-Sprint: 1
-File: backend/app/utils/helpers.py
+from __future__ import annotations
 
-Ownership: Team Maintained
-Role: General Utility Helpers
+import functools
+import time
+from typing import Any, Callable, TypeVar
 
-Purpose:
-General helper functions and utility routines.
+T = TypeVar("T")
 
-Responsibilities:
-- Provide dictionary sanitization and safe nested access helpers.
-- Provide timing and execution profiling utility decorators.
 
-Dependencies:
-- None
+def safe_get(data: dict[str, Any], path: str, default: Any = None) -> Any:
+    """Safely traverse a nested dictionary using dot-separated keys."""
+    keys = path.split(".")
+    curr: Any = data
+    for k in keys:
+        if isinstance(curr, dict) and k in curr:
+            curr = curr[k]
+        else:
+            return default
+    return curr
 
-Deliverables:
-- Reusable utility functions module.
 
-Status: NOT STARTED
-"""
+def sanitize_dict(data: dict[str, Any]) -> dict[str, Any]:
+    """Sanitize dictionary keys and strip leading/trailing string whitespace."""
+    clean: dict[str, Any] = {}
+    for k, v in data.items():
+        clean_k = str(k).strip()
+        if isinstance(v, str):
+            clean[clean_k] = v.strip()
+        elif isinstance(v, dict):
+            clean[clean_k] = sanitize_dict(v)
+        elif isinstance(v, list):
+            clean[clean_k] = [sanitize_dict(item) if isinstance(item, dict) else item for item in v]
+        else:
+            clean[clean_k] = v
+    return clean
+
+
+def timer_decorator(func: Callable[..., T]) -> Callable[..., tuple[T, float]]:
+    """Decorator measuring execution time in milliseconds."""
+    @functools.wraps(func)
+    def wrapper(*args: Any, **kwargs: Any) -> tuple[T, float]:
+        t0 = time.perf_counter_ns()
+        result = func(*args, **kwargs)
+        t1 = time.perf_counter_ns()
+        elapsed_ms = (t1 - t0) / 1_000_000.0
+        return result, round(elapsed_ms, 6)
+    return wrapper

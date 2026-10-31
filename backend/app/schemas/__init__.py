@@ -1,20 +1,3 @@
-"""
-Project: RE:Flow
-Sprint: 1
-File: backend/app/schemas/__init__.py
-
-Ownership: Team Maintained
-Role: Graph Domain Models and Data Contracts
-Status: COMPLETED
-
-Ownership: Team Maintained (Implemented by Deep during Sprint 1)
-Role: Graph Domain Models and Data Contracts
-Status: COMPLETED
-
-Purpose:
-Schemas package initializer exposing serialization contracts and request/response models.
-"""
-
 from backend.app.schemas.graph import (
     EdgeResponseSchema,
     GraphFilterParamsSchema,

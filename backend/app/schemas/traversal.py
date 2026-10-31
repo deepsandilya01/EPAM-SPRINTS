@@ -1,21 +1,3 @@
-"""
-Project: RE:Flow
-Sprint: 1
-File: backend/app/schemas/traversal.py
-
-Ownership: Team Maintained
-Role: Graph Domain Models and Data Contracts
-Status: COMPLETED
-
-Ownership: Team Maintained (Implemented by Deep during Sprint 1)
-Role: Graph Domain Models and Data Contracts
-Status: COMPLETED
-
-Purpose:
-Request and response validation contracts for graph traversal and downstream
-blast-radius impact analysis (POST /api/traversal).
-"""
-
 from enum import Enum
 from typing import Dict, List, Optional
 

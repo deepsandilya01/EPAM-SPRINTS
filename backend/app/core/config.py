@@ -1,26 +1,40 @@
-"""
-Project: RE:Flow
-Sprint: 1
-File: backend/app/core/config.py
+from __future__ import annotations
 
-Ownership: Team Maintained
-Role: Application Configuration
+import os
+import pathlib
+from dataclasses import dataclass, field
 
-Purpose:
-Application configuration settings and environment variable definitions.
+BASE_DIR = pathlib.Path(__file__).resolve().parent.parent
+REPO_ROOT = BASE_DIR.parent.parent
 
-Responsibilities:
-- Define application settings schema using environment variables.
-- Provide default configurations for development, testing, and production (Render).
-- Define file path resolution for datasets and static directories.
 
-Dependencies:
-- Aadee: Raw dataset file path requirements.
-- Team Maintained: Deployment configuration in render.yaml.
+@dataclass(frozen=True)
+class Settings:
+    """Type-safe application configuration settings."""
 
-Deliverables:
-- Type-safe configuration object.
-- Environment-driven settings management.
+    app_name: str = "RE:Flow — Supply Chain Graph"
+    version: str = "1.0.0"
+    environment: str = field(default_factory=lambda: os.getenv("FLASK_ENV", "development"))
+    host: str = field(default_factory=lambda: os.getenv("HOST", "127.0.0.1"))
+    port: int = field(default_factory=lambda: int(os.getenv("PORT", "5050")))
+    debug: bool = field(default_factory=lambda: os.getenv("FLASK_DEBUG", "0") == "1")
 
-Status: NOT STARTED
-"""
+    # Canonical dataset path
+    dataset_path: pathlib.Path = field(
+        default_factory=lambda: REPO_ROOT / "data" / "raw" / "scenario_dataset.json"
+    )
+
+    # Static assets path
+    static_dir: pathlib.Path = field(default_factory=lambda: BASE_DIR / "static")
+
+    # SLA Performance Thresholds
+    max_traversal_latency_ms: float = 10.0
+
+
+# Global singleton settings instance
+settings = Settings()
+
+
+def get_settings() -> Settings:
+    """Retrieve global settings object."""
+    return settings

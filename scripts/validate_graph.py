@@ -1,24 +1,28 @@
-"""
-Project: RE:Flow
-Sprint: 1
-File: scripts/validate_graph.py
+from __future__ import annotations
 
-Primary Owner: Soumya
-Role: Graph and Data Validation
+import pathlib
+import sys
 
-Purpose:
-Standalone CLI script to execute graph validation against the scenario dataset.
+_REPO_ROOT = pathlib.Path(__file__).resolve().parent.parent
+if str(_REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(_REPO_ROOT))
 
-Responsibilities:
-- Run validation suite from command line.
-- Print clear pass/fail report table to terminal with color-coded results.
-- Exit with code 0 on success or code 1 on validation violations.
+from backend.app.services.graph_service import service_instance  # noqa: E402
+from backend.app.validation import (  # noqa: E402
+    ValidationPolicy,
+    format_console_report,
+    validate_networkx_graph,
+)
 
-Dependencies:
-- Soumya: ValidationService (backend/app/services/validation_service.py).
 
-Deliverables:
-- Executable CLI script for CI and pre-commit graph validation.
+def main():
+    graph = service_instance.get_graph()
+    policy = ValidationPolicy(check_baseline_counts=True)
+    report = validate_networkx_graph(graph, policy=policy)
+    report_text = format_console_report(report)
+    print(report_text)
+    sys.exit(0 if report.valid else 1)
 
-Status: NOT STARTED
-"""
+
+if __name__ == "__main__":
+    main()

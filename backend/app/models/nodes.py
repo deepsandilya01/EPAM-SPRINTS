@@ -1,24 +1,3 @@
-"""
-Project: RE:Flow
-Sprint: 1
-File: backend/app/models/nodes.py
-
-Ownership: Team Maintained
-Role: Graph Domain Models and Data Contracts
-Status: COMPLETED
-
-Ownership: Team Maintained (Implemented by Deep during Sprint 1)
-Role: Graph Domain Models and Data Contracts
-Status: COMPLETED
-
-Purpose:
-Domain models representing the 4 tiers of supply chain nodes:
-1. Supplier (Tier 1) - Component and raw material vendors
-2. BOM Part (Tier 2) - Bill of Materials inventory items
-3. Finished Product (Tier 3) - Manufactured goods ready for dispatch
-4. Customer Order (Tier 4) - Customer purchase orders with quantity & deadline
-"""
-
 from abc import ABC
 from dataclasses import dataclass, field
 from typing import Any, Dict, Optional, Union

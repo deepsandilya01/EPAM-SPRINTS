@@ -1,17 +1,3 @@
-"""
-Project: RE:Flow
-Sprint: 1
-File: backend/app/schemas/validation.py
-
-Ownership: Team Maintained
-Role: Graph Domain Models and Data Contracts
-Status: COMPLETED
-
-Purpose:
-Pydantic schemas for graph structural integrity audit results, rule violations,
-and validation API responses (GET /api/validation).
-"""
-
 from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel, ConfigDict, Field

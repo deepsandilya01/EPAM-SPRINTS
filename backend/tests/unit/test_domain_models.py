@@ -1,12 +1,3 @@
-"""
-Unit tests for RE:Flow Graph Domain Models (Sprint 1 domain entity layer).
-Tests cover:
-- Valid and invalid node creation across all 4 tiers
-- Valid and invalid edge types, self-loops, and tier transition verification
-- SupplyChainGraph in-memory container operations, queries, and serialization
-- Canonical baseline scenario dataset compatibility (19 nodes, 21 edges)
-"""
-
 import json
 import subprocess
 

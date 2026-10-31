@@ -1,23 +1,20 @@
-"""
-Project: RE:Flow
-Sprint: 1
-File: backend/app/utils/logging.py
+from __future__ import annotations
 
-Ownership: Team Maintained
-Role: Structured Logging Configuration
+import logging
+import sys
 
-Purpose:
-Structured logging configuration and logger instance provider.
 
-Responsibilities:
-- Configure standard Python logging format with timestamps, log level, and module name.
-- Provide get_logger(name) helper function for consistent logging across backend modules.
+def configure_logging(level: int = logging.INFO) -> None:
+    """Configure unified logging format for the application."""
+    format_str = "[%(asctime)s] [%(levelname)s] [%(name)s]: %(message)s"
+    logging.basicConfig(
+        level=level,
+        format=format_str,
+        datefmt="%Y-%m-%d %H:%M:%S",
+        handlers=[logging.StreamHandler(sys.stdout)],
+    )
 
-Dependencies:
-- Configured LOG_LEVEL from config.py.
 
-Deliverables:
-- Structured logger module with standardized formatting.
-
-Status: NOT STARTED
-"""
+def get_logger(name: str) -> logging.Logger:
+    """Provide a named logger instance with standardized formatting."""
+    return logging.getLogger(name)

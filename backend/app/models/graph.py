@@ -1,22 +1,3 @@
-"""
-Project: RE:Flow
-Sprint: 1
-File: backend/app/models/graph.py
-
-Ownership: Team Maintained
-Role: Graph Domain Models and Data Contracts
-Status: COMPLETED
-
-Ownership: Team Maintained (Implemented by Deep during Sprint 1)
-Role: Graph Domain Models and Data Contracts
-Status: COMPLETED
-
-Purpose:
-Domain container representing the complete supply chain network.
-Encapsulates node and edge collections in memory, providing lookup,
-filtering, neighbor queries, and JSON serialization.
-"""
-
 from typing import Any, Dict, List, Optional, Set, Union
 
 from backend.app.core.constants import EdgeType, TierType

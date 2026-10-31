@@ -1,23 +1,22 @@
-"""
-Project: RE:Flow
-Sprint: 1
-File: scripts/run_local.py
+from __future__ import annotations
 
-Ownership: Team Maintained
-Role: Local Development Runner
+import os
+import pathlib
+import sys
 
-Purpose:
-Script to run the RE:Flow backend application locally.
+_REPO_ROOT = pathlib.Path(__file__).resolve().parent.parent
+if str(_REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(_REPO_ROOT))
 
-Responsibilities:
-- Bootstrap environment, import app from backend.app.main, and start Flask dev server on PORT 5000.
-- Print clear diagnostic URL banners for API and static demo.
+from backend.app.main import app  # noqa: E402
 
-Dependencies:
-- Application instance (backend/app/main.py).
-
-Deliverables:
-- One-command local development runner.
-
-Status: NOT STARTED
-"""
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5050))
+    print("=" * 60)
+    print(f"  RE:Flow Supply Chain Engine running on http://127.0.0.1:{port}")
+    print(f"  Interactive Demo UI : http://127.0.0.1:{port}/")
+    print(f"  Graph API           : http://127.0.0.1:{port}/api/graph")
+    print(f"  Validation Audit    : http://127.0.0.1:{port}/api/validation")
+    print(f"  Benchmark API       : http://127.0.0.1:{port}/api/benchmark/tracing")
+    print("=" * 60)
+    app.run(host="0.0.0.0", port=port, debug=True)

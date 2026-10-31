@@ -1,25 +1,3 @@
-# =============================================================================
-# Project: RE:Flow
-# Sprint: 1
-# File: render.yaml
-#
-# Ownership: Team Maintained
-# Role: Render Deployment Infrastructure Specification
-#
-# Purpose:
-# Render deployment configuration for unified backend and static demo hosting.
-#
-# Responsibilities:
-# - Configure web service for Python runtime.
-# - Specify buildCommand and startCommand.
-# - Configure environment variables (PORT, FLASK_ENV).
-#
-# Deliverables:
-# - Valid Render infrastructure-as-code deployment configuration.
-#
-# Status: NOT STARTED
-# =============================================================================
-
 services:
   - type: web
     name: reflow

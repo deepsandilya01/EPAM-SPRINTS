@@ -4,19 +4,17 @@ Sprint: 1
 File: backend/app/api/__init__.py
 
 Ownership: Team Maintained
-Role: API Module Initialization
+Role: API Package Initialization
 
 Purpose:
-API module package initializer.
+API package initializer exposing unified api_bp blueprint.
 
-Responsibilities:
-- Package initializer for API endpoints.
-
-Dependencies:
-- Route blueprints (backend/app/api/router.py).
-
-Deliverables:
-- Clean API package exports.
-
-Status: NOT STARTED
+Status: COMPLETED
 """
+
+from __future__ import annotations
+
+from backend.app.api.router import api_bp
+
+__all__ = ["api_bp"]
+

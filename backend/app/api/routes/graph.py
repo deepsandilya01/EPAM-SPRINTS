@@ -1,25 +1,45 @@
-"""
-Project: RE:Flow
-Sprint: 1
-File: backend/app/api/routes/graph.py
+from __future__ import annotations
 
-Primary Owner: Ansh
-Role: NetworkX Graph Builder
+from flask import Blueprint, jsonify
 
-Purpose:
-Graph query and topological data retrieval route definitions.
+from backend.app.services.graph_service import service_instance
 
-Responsibilities:
-- Implement GET /api/graph endpoint.
-- Query GraphService to retrieve active graph topology.
-- Return validated JSON response with all 19 nodes, 21 edges, and tier groupings.
+graph_bp = Blueprint("graph", __name__)
+graph_service = service_instance
 
-Dependencies:
-- Ansh: Graph service (backend/app/services/graph_service.py).
-- Graph response schema in backend/app/schemas/graph.py (Implemented by Deep; Team Maintained).
 
-Deliverables:
-- Working GET /api/graph endpoint returning HTTP 200 with complete graph payload.
+@graph_bp.route("/graph", methods=["GET"])
+def api_graph():
+    """Return active graph structure formatted for UI visualization."""
+    return jsonify(graph_service.get_graph_json())
 
-Status: NOT STARTED
-"""
+
+@graph_bp.route("/node/<node_id>", methods=["DELETE"])
+def api_delete_node(node_id: str):
+    """
+    Simulate supplier disruption or component deletion.
+    Cascades removal to all downstream dependent parts, assemblies, and customer orders.
+    """
+    graph = graph_service.get_graph()
+    if node_id not in graph:
+        return jsonify({"error": f"Node '{node_id}' not found"}), 404
+
+    result = graph_service.apply_delete(node_id)
+    return jsonify(result)
+
+
+@graph_bp.route("/undo", methods=["POST"])
+def api_undo():
+    """Undo the last deletion by restoring the previous graph snapshot."""
+    restored = graph_service.undo()
+    if restored is None:
+        return jsonify({"error": "Nothing to undo"}), 400
+
+    return jsonify(restored)
+
+
+@graph_bp.route("/reset", methods=["POST"])
+def api_reset():
+    """Reset graph to the canonical baseline dataset."""
+    result = graph_service.reset()
+    return jsonify(result)

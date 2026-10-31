@@ -1,12 +1,3 @@
-"""
-Unit tests for RE:Flow API Schemas (Sprint 1 API serialization contracts).
-Tests cover:
-- Graph Response Schemas (nodes, edges, summary, full graph response)
-- Traversal Request and Response Schemas (node_id validation, direction enums, serialization)
-- Validation Request and Response Schemas (error items, warning items, audit response contracts)
-- JSON serialization and model dumping compatible with Flask jsonify()
-"""
-
 import pytest
 from pydantic import ValidationError
 

@@ -1,21 +1,3 @@
-"""
-Project: RE:Flow
-Sprint: 1
-File: backend/app/schemas/graph.py
-
-Ownership: Team Maintained
-Role: Graph Domain Models and Data Contracts
-Status: COMPLETED
-
-Ownership: Team Maintained (Implemented by Deep during Sprint 1)
-Role: Graph Domain Models and Data Contracts
-Status: COMPLETED
-
-Purpose:
-Pydantic schemas defining the API data contracts for graph endpoints.
-Used by Flask routes to validate query parameters and serialize graph responses to JSON.
-"""
-
 from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel, ConfigDict, Field

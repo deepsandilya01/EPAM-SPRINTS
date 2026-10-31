@@ -1,23 +1,19 @@
-"""
-Project: RE:Flow
-Sprint: 1
-File: backend/app/api/routes/health.py
+from __future__ import annotations
 
-Ownership: Team Maintained
-Role: Service Health and Diagnostics Endpoint
+from flask import Blueprint, jsonify
 
-Purpose:
-Health check and service status diagnostic route definitions.
+from backend.app.services.graph_service import service_instance
 
-Responsibilities:
-- Implement GET /api/health endpoint.
-- Return service status, version, uptime, and loaded graph node/edge counts.
+health_bp = Blueprint("health", __name__)
 
-Dependencies:
-- Ansh: Graph service state check.
-
-Deliverables:
-- Working health check endpoint returning 200 OK.
-
-Status: NOT STARTED
-"""
+@health_bp.route("/health", methods=["GET"])
+def api_health():
+    """Return service health status and active graph counts."""
+    graph = service_instance.get_graph()
+    return jsonify({
+        "status": "healthy",
+        "service": "RE:Flow — Supply Chain Graph",
+        "version": "1.0.0",
+        "node_count": graph.number_of_nodes(),
+        "edge_count": graph.number_of_edges(),
+    }), 200

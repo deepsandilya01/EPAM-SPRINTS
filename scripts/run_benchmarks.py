@@ -1,24 +1,13 @@
-"""
-Project: RE:Flow
-Sprint: 1
-File: scripts/run_benchmarks.py
+from __future__ import annotations
 
-Primary Owner: Kanak
-Role: Performance Benchmarking
+import pathlib
+import sys
 
-Purpose:
-Standalone CLI script to run performance benchmarks and generate reports.
+_REPO_ROOT = pathlib.Path(__file__).resolve().parent.parent
+if str(_REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(_REPO_ROOT))
 
-Responsibilities:
-- Execute graph and traversal benchmarks from command line.
-- Print formatted performance summary table to terminal.
-- Write results to docs/reports/performance_report.md or JSON export.
+from backend.app.benchmarks.benchmark_traversal import main  # noqa: E402
 
-Dependencies:
-- Kanak: Benchmark service (backend/app/services/benchmark_service.py).
-
-Deliverables:
-- Executable CLI script for automated benchmarking and SLA verification.
-
-Status: NOT STARTED
-"""
+if __name__ == "__main__":
+    main()

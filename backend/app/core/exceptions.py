@@ -1,32 +1,17 @@
-"""
-Project: RE:Flow
-Sprint: 1
-File: backend/app/core/exceptions.py
+from __future__ import annotations
 
-Ownership: Team Maintained
-Role: Custom Domain Exceptions
-Status: COMPLETED
-
-Ownership: Team Maintained (Implemented by Deep during Sprint 1)
-Role: Custom Domain Exceptions
-Status: COMPLETED
-
-Purpose:
-Custom domain exception classes for RE:Flow error handling.
-"""
-
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 
 class ReflowException(Exception):
     """Base exception class for all RE:Flow domain errors."""
-    def __init__(self, message: str, code: str = "INTERNAL_ERROR", details: Optional[Dict[str, Any]] = None):
+    def __init__(self, message: str, code: str = "INTERNAL_ERROR", details: dict[str, Any] | None = None):
         super().__init__(message)
         self.message = message
         self.code = code
         self.details = details or {}
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert exception to structured dictionary for API responses."""
         return {
             "error": {
@@ -39,7 +24,7 @@ class ReflowException(Exception):
 
 class ModelValidationError(ReflowException):
     """Raised when node or edge attributes fail domain model validation."""
-    def __init__(self, message: str, field: Optional[str] = None, details: Optional[Dict[str, Any]] = None):
+    def __init__(self, message: str, field: str | None = None, details: dict[str, Any] | None = None):
         super().__init__(message, code="MODEL_VALIDATION_ERROR", details=details)
         self.field = field
 
@@ -57,7 +42,13 @@ class NodeNotFoundError(ReflowException):
 
 class InvalidEdgeError(ReflowException):
     """Raised when an edge definition violates relationship rules or creates illegal transitions."""
-    def __init__(self, message: str, source: Optional[str] = None, target: Optional[str] = None, details: Optional[Dict[str, Any]] = None):
+    def __init__(
+        self,
+        message: str,
+        source: str | None = None,
+        target: str | None = None,
+        details: dict[str, Any] | None = None,
+    ):
         super().__init__(message, code="INVALID_EDGE", details=details)
         self.source = source
         self.target = target
@@ -65,17 +56,18 @@ class InvalidEdgeError(ReflowException):
 
 class SchemaValidationError(ReflowException):
     """Raised when incoming dataset payloads fail schema validation against graph_schema.json."""
-    def __init__(self, message: str, errors: Optional[List[Any]] = None):
+    def __init__(self, message: str, errors: list[Any] | None = None):
         super().__init__(message, code="SCHEMA_VALIDATION_ERROR", details={"errors": errors or []})
         self.errors = errors or []
 
 
 class GraphCycleDetectedError(ReflowException):
     """Raised when an operation would introduce or detect a cycle in the DAG."""
-    def __init__(self, cycle_path: Optional[List[str]] = None):
+    def __init__(self, cycle_path: list[str] | None = None):
         super().__init__(
             f"Cycle detected in Directed Acyclic Graph: {' -> '.join(cycle_path or [])}",
             code="CYCLE_DETECTED",
             details={"cycle_path": cycle_path or []},
         )
         self.cycle_path = cycle_path or []
+

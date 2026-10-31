@@ -1,13 +1,3 @@
-# =============================================================================
-# Project: RE:Flow
-# Sprint: 1
-# File: pyproject.toml
-#
-# Ownership: Team Maintained
-# Role: Python Project Configuration and Dependencies
-# Status: ACTIVE
-# =============================================================================
-
 [project]
 name = "reflow"
 version = "0.1.0"
