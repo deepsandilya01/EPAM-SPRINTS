@@ -16,7 +16,7 @@ Responsibilities:
 
 Dependencies:
 - Kanak: Benchmark service (backend/app/services/benchmark_service.py).
-- Deep: Benchmark response schema.
+- Benchmark response schema.
 
 Deliverables:
 - Working GET /api/benchmarks endpoint returning benchmark metrics.

@@ -3,8 +3,8 @@ Project: RE:Flow
 Sprint: 1
 File: backend/app/main.py
 
-Primary Owner: Deep
-Role: Graph Domain Models and Data Contracts
+Ownership: Team Maintained
+Role: Application Entry Point & Server Bootstrap
 
 Purpose:
 Application entry point and server startup for the RE:Flow backend service.
@@ -16,8 +16,8 @@ Responsibilities:
 - Configure local development server and host settings.
 
 Dependencies:
-- Deep: Central API router (backend/app/api/router.py).
-- Deep: Application configuration (backend/app/core/config.py).
+- Central API router (backend/app/api/router.py).
+- Application configuration (backend/app/core/config.py).
 - Sumit: Static demo assets (backend/app/static/).
 
 Deliverables:

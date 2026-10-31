@@ -17,7 +17,7 @@ Responsibilities:
 
 Dependencies:
 - Ansh: NetworkX DiGraph instance from builder.py.
-- Deep: Node and edge models.
+- Domain Models: Node and edge models (Implemented by Deep; Team Maintained).
 
 Deliverables:
 - High-performance bfs_downstream_traversal(graph, start_node_id, max_depth) function.

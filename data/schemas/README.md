@@ -1,11 +1,11 @@
 # Graph Schema JSON Specification Ownership
 
 > **Sprint 1 Ownership & Task Assignment**
-> - **Primary Owner**: Deep
+> - **Ownership**: Team Maintained (Implemented by Deep during Sprint 1)
 > - **Role**: Graph Domain Models and Data Contracts
 > - **Target File**: `data/schemas/graph_schema.json`
 > - **Companion Doc**: `data/schemas/README.md`
-> - **Status**: NOT STARTED
+> - **Status**: COMPLETED / ACTIVE
 
 ## Purpose
 Holds the formal JSON Schema specification for validating scenario datasets. `graph_schema.json` enforces structural validation rules prior to ingestion.

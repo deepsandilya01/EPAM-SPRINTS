@@ -3,8 +3,8 @@ Project: RE:Flow
 Sprint: 1
 File: backend/app/utils/helpers.py
 
-Primary Owner: Deep
-Role: Graph Domain Models and Data Contracts
+Ownership: Team Maintained
+Role: General Utility Helpers
 
 Purpose:
 General helper functions and utility routines.

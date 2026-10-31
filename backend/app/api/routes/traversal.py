@@ -17,7 +17,7 @@ Responsibilities:
 
 Dependencies:
 - Preetam: Traversal service (backend/app/services/traversal_service.py).
-- Deep: Traversal schemas (backend/app/schemas/traversal.py).
+- Traversal schemas in backend/app/schemas/traversal.py (Implemented by Deep; Team Maintained).
 
 Deliverables:
 - Working POST /api/traversal endpoint with complete schema validation and error responses.

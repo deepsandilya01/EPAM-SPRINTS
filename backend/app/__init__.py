@@ -3,8 +3,8 @@ Project: RE:Flow
 Sprint: 1
 File: backend/app/__init__.py
 
-Primary Owner: Deep
-Role: Graph Domain Models and Data Contracts
+Ownership: Team Maintained
+Role: Backend Application Package Initialization
 
 Purpose:
 Package initializer for the RE:Flow backend application.
@@ -14,7 +14,7 @@ Responsibilities:
 - Expose package version and metadata.
 
 Dependencies:
-- Deep: Core configurations.
+- Team Maintained: Core configurations.
 
 Deliverables:
 - Clean application package initialization.

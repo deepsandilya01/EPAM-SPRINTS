@@ -18,7 +18,7 @@ Responsibilities:
 Dependencies:
 - Preetam: Traversal algorithm (backend/app/graph/traversal.py).
 - Ansh: Graph service (backend/app/services/graph_service.py).
-- Deep: TraversalResponseSchema (backend/app/schemas/traversal.py).
+- Traversal Response Schema: backend/app/schemas/traversal.py (Implemented by Deep; Team Maintained).
 
 Deliverables:
 - TraversalService class with trace_downstream_impact(start_node_id) method.

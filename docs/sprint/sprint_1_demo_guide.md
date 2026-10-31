@@ -18,7 +18,7 @@ Provides instructions and operational procedures for launching, testing, and dem
 
 ### Dependencies
 - Sumit: Static demo interface (backend/app/static/).
-- Deep: Local startup runner (scripts/run_local.py) and Render configuration (render.yaml).
+- Startup runner (scripts/run_local.py) and Render configuration (render.yaml; Team Maintained).
 - Ansh & Preetam: Backend graph and traversal APIs.
 
 ### Expected Deliverables

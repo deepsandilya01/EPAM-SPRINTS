@@ -15,7 +15,7 @@ Responsibilities:
 - Detect duplicate node IDs and duplicate edge definitions.
 
 Dependencies:
-- Deep: JSON schema (data/schemas/graph_schema.json).
+- JSON schema specification in data/schemas/graph_schema.json (Implemented by Deep; Team Maintained).
 - Anushka: Raw scenario dataset (data/raw/scenario_dataset.json).
 
 Deliverables:

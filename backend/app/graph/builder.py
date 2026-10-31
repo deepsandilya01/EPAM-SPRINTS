@@ -16,7 +16,7 @@ Responsibilities:
 - Validate node count (19) and edge count (21) against baseline scenario requirements.
 
 Dependencies:
-- Deep: Graph models and contracts (backend/app/models/).
+- Domain Models & Contracts: backend/app/models/ (Implemented by Deep; Team Maintained).
 - Aadee: Normalized scenario data (backend/app/data/normalizer.py).
 - Anushka: Approved dataset (data/raw/scenario_dataset.json).
 

@@ -16,7 +16,7 @@ Responsibilities:
 - Detect dangling edges referencing non-existent source or target node IDs.
 
 Dependencies:
-- Deep: Tier constants and edge models (backend/app/core/constants.py).
+- Tier constants and edge models (backend/app/core/constants.py; Implemented by Deep, Team Maintained).
 
 Deliverables:
 - validate_edge_relationships(graph) function returning edge direction audit results.

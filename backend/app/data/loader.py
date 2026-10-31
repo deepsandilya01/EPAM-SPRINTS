@@ -16,7 +16,7 @@ Responsibilities:
 
 Dependencies:
 - Anushka: Approved raw dataset (data/raw/scenario_dataset.json).
-- Deep: Configuration path in core/config.py.
+- Application configuration (backend/app/core/config.py).
 
 Deliverables:
 - Robust load_scenario_dataset(path) function with error handling.

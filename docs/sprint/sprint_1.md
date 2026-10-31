@@ -17,7 +17,7 @@ Defines the objectives, scope, acceptance criteria, and deliverables for Sprint 
 - Track pending work and integration status.
 
 ### Dependencies
-- Deep: System architecture and domain data contracts.
+- Architecture & Data Contracts: RE:Flow's overall system architecture and repository structure were collaboratively designed and discussed by the entire project team. Deep and Divyanshu contributed to architecture coordination and review, while the final architectural decisions reflect collective team discussions and requirements. Domain models and data contracts were implemented by Deep (Team Maintained).
 - Sumit: Documentation and demo guide alignment.
 
 ### Expected Deliverables

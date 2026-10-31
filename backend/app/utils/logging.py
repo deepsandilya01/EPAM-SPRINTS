@@ -3,8 +3,8 @@ Project: RE:Flow
 Sprint: 1
 File: backend/app/utils/logging.py
 
-Primary Owner: Deep
-Role: Graph Domain Models and Data Contracts
+Ownership: Team Maintained
+Role: Structured Logging Configuration
 
 Purpose:
 Structured logging configuration and logger instance provider.
@@ -14,7 +14,7 @@ Responsibilities:
 - Provide get_logger(name) helper function for consistent logging across backend modules.
 
 Dependencies:
-- Deep: Configured LOG_LEVEL from config.py.
+- Configured LOG_LEVEL from config.py.
 
 Deliverables:
 - Structured logger module with standardized formatting.

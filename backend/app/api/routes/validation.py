@@ -16,7 +16,7 @@ Responsibilities:
 
 Dependencies:
 - Soumya: Validation service (backend/app/services/validation_service.py).
-- Deep: Validation schemas (backend/app/schemas/validation.py).
+- Validation schemas in backend/app/schemas/validation.py (Implemented by Deep; Team Maintained).
 
 Deliverables:
 - Working GET /api/validation endpoint returning structured audit report.

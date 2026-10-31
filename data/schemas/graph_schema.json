@@ -1,1 +1,193 @@
-{}
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "RE:Flow Supply Chain Graph Schema",
+  "description": "JSON Schema specification for validating canonical RE:Flow multi-tier supply chain scenario datasets.",
+  "type": "object",
+  "required": ["nodes", "edges"],
+  "properties": {
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "project": { "type": "string" },
+        "description": { "type": "string" },
+        "graph_type": { "type": "string" },
+        "summary": {
+          "type": "object",
+          "required": ["total_nodes", "total_edges", "node_counts", "edge_counts"],
+          "properties": {
+            "total_nodes": { "type": "integer", "minimum": 1 },
+            "total_edges": { "type": "integer", "minimum": 1 },
+            "node_counts": {
+              "type": "object",
+              "required": ["suppliers", "parts", "products", "orders"],
+              "properties": {
+                "suppliers": { "type": "integer", "minimum": 1 },
+                "parts": { "type": "integer", "minimum": 1 },
+                "products": { "type": "integer", "minimum": 1 },
+                "orders": { "type": "integer", "minimum": 1 }
+              }
+            },
+            "edge_counts": {
+              "type": "object",
+              "required": ["supplies", "used_in", "fulfills"],
+              "properties": {
+                "supplies": { "type": "integer", "minimum": 1 },
+                "used_in": { "type": "integer", "minimum": 1 },
+                "fulfills": { "type": "integer", "minimum": 1 }
+              }
+            }
+          }
+        }
+      }
+    },
+    "nodes": {
+      "type": "object",
+      "required": ["suppliers", "parts", "products", "orders"],
+      "properties": {
+        "suppliers": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["id", "name"],
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^SUP-[0-9A-Za-z_-]+$"
+              },
+              "name": { "type": "string", "minLength": 1 },
+              "kind": { "type": "string", "enum": ["supplier", "SUPPLIER"] },
+              "label": { "type": "string" },
+              "location": { "type": "string" },
+              "note": { "type": "string" }
+            }
+          }
+        },
+        "parts": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["id", "name"],
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^PART-[0-9A-Za-z_-]+$"
+              },
+              "name": { "type": "string", "minLength": 1 },
+              "kind": { "type": "string", "enum": ["part", "BOM_PART", "part_bom"] },
+              "label": { "type": "string" },
+              "stock_on_hand": { "type": "integer", "minimum": 0 },
+              "daily_consumption": { "type": "integer", "minimum": 0 },
+              "days_of_supply": { "type": "number", "minimum": 0.0 }
+            }
+          }
+        },
+        "products": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["id", "name"],
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^PROD-[0-9A-Za-z_-]+$"
+              },
+              "name": { "type": "string", "minLength": 1 },
+              "kind": { "type": "string", "enum": ["product", "FINISHED_PRODUCT"] },
+              "label": { "type": "string" },
+              "parts_needed": { "type": "string" }
+            }
+          }
+        },
+        "orders": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["id", "quantity"],
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^ORD-[0-9A-Za-z_-]+$"
+              },
+              "kind": { "type": "string", "enum": ["order", "CUSTOMER_ORDER"] },
+              "label": { "type": "string" },
+              "customer": { "type": "string" },
+              "product_id": {
+                "type": "string",
+                "pattern": "^PROD-[0-9A-Za-z_-]+$"
+              },
+              "quantity": { "type": "integer", "minimum": 1 },
+              "deadline": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "edges": {
+      "type": "object",
+      "required": ["supplies", "used_in", "fulfills"],
+      "properties": {
+        "supplies": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["source", "target"],
+            "properties": {
+              "source": {
+                "type": "string",
+                "pattern": "^SUP-[0-9A-Za-z_-]+$"
+              },
+              "target": {
+                "type": "string",
+                "pattern": "^PART-[0-9A-Za-z_-]+$"
+              },
+              "relation": { "type": "string", "enum": ["SUPPLIES", "supplies"] },
+              "lead_time_hours": { "type": "integer", "minimum": 0 },
+              "max_capacity_units_per_day": { "type": "integer", "minimum": 0 }
+            }
+          }
+        },
+        "used_in": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["source", "target"],
+            "properties": {
+              "source": {
+                "type": "string",
+                "pattern": "^PART-[0-9A-Za-z_-]+$"
+              },
+              "target": {
+                "type": "string",
+                "pattern": "^PROD-[0-9A-Za-z_-]+$"
+              },
+              "relation": { "type": "string", "enum": ["USED_IN", "used_in"] },
+              "quantity_per_unit": { "type": "integer", "minimum": 1 }
+            }
+          }
+        },
+        "fulfills": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["source", "target"],
+            "properties": {
+              "source": {
+                "type": "string",
+                "pattern": "^PROD-[0-9A-Za-z_-]+$"
+              },
+              "target": {
+                "type": "string",
+                "pattern": "^ORD-[0-9A-Za-z_-]+$"
+              },
+              "relation": { "type": "string", "enum": ["FULFILLS", "fulfills"] }
+            }
+          }
+        }
+      }
+    }
+  }
+}

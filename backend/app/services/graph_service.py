@@ -18,7 +18,7 @@ Responsibilities:
 Dependencies:
 - Aadee: Data repository (backend/app/data/repository.py).
 - Ansh: Graph builder (backend/app/graph/builder.py).
-- Deep: Graph response schema (backend/app/schemas/graph.py).
+- Graph Response Schema: backend/app/schemas/graph.py (Implemented by Deep; Team Maintained).
 
 Deliverables:
 - GraphService class providing unified graph access for API routes and services.

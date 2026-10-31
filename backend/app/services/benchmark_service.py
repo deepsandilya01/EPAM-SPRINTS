@@ -16,7 +16,7 @@ Responsibilities:
 
 Dependencies:
 - Kanak: benchmark_results.py.
-- Deep: Benchmark response schema.
+- Benchmark response schema.
 
 Deliverables:
 - BenchmarkService class managing performance telemetry.

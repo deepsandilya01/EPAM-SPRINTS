@@ -22,7 +22,7 @@ Holds test fixtures for automated Pytest unit and integration suites. `sample_sc
 
 ## Dependencies
 - **Shanu**: Test fixture requirements in `backend/tests/conftest.py`.
-- **Deep**: Domain models in `backend/app/models/`.
+- **Domain Models**: Domain models in `backend/app/models/` (Implemented by Deep; Team Maintained).
 
 ## Verification
 - Verified during Pytest fixture loading in `backend/tests/conftest.py`.

@@ -16,7 +16,7 @@ Responsibilities:
 
 Dependencies:
 - Ansh: Graph service (backend/app/services/graph_service.py).
-- Deep: Graph response schema (backend/app/schemas/graph.py).
+- Graph response schema in backend/app/schemas/graph.py (Implemented by Deep; Team Maintained).
 
 Deliverables:
 - Working GET /api/graph endpoint returning HTTP 200 with complete graph payload.

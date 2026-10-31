@@ -10,6 +10,8 @@
 
 To ensure zero blocking bottlenecks, high software quality, and seamless parallel collaboration across the 12 team members, Sprint 1 execution is organized into **7 structured phases**.
 
+RE:Flow's overall system architecture and repository structure were collaboratively designed and discussed by the entire project team. Deep and Divyanshu contributed to architecture coordination and review, while the final architectural decisions reflect collective team discussions and requirements.
+
 Each phase defines:
 1. **Responsible Members** (Primary and Supporting).
 2. **Files Involved**.
@@ -21,10 +23,10 @@ Each phase defines:
 
 ## 2. Phase Breakdown
 
-### Phase 1 — Requirements and Data Contracts
+### Phase 1 — Requirements and Data Contracts (COMPLETED)
 - **Objective**: Establish Sprint 1 scope, domain model definitions, JSON schemas, serialization contracts, and core configurations before any data or graph logic is written.
 - **Responsible Members**:
-  - **Primary**: Mishti, Deep
+  - **Primary**: Mishti, Development Team (Implemented by Deep during Sprint 1; Team Maintained)
   - **Supporting**: Anushka, Ansh, Sonal
 - **Files Involved**:
   - `docs/sprint/sprint_1.md`
@@ -48,10 +50,10 @@ Each phase defines:
   - Frozen edge definitions (`SUPPLIES`, `USED_IN`, `FULFILLS`).
   - Request/response Pydantic/dataclass schemas for `/api/graph`, `/api/traversal`, `/api/validation`.
 - **Completion Criteria**:
-  - [ ] All 4 tier models and 3 edge models defined with complete field types.
-  - [ ] JSON Schema validated against Draft-07 specification.
-  - [ ] Core constants (`TierType`, `EdgeType`) exported and importable.
-  - [ ] Model contract signed off by Ansh, Aadee, and Preetam.
+  - [x] All 4 tier models and 3 edge models defined with complete field types (COMPLETED).
+  - [x] JSON Schema validated against Draft-07 specification (COMPLETED).
+  - [x] Core constants (`TierType`, `EdgeType`) exported and importable (COMPLETED).
+  - [x] Model contract signed off by Ansh, Aadee, and Preetam (COMPLETED).
 
 ---
 
@@ -146,7 +148,7 @@ Each phase defines:
 ### Phase 5 — API Integration
 - **Objective**: Connect domain services to REST API endpoints, wire central router, configure static demo serving, and test HTTP communication.
 - **Responsible Members**:
-  - **Primary**: Deep, Ansh, Preetam, Soumya, Kanak
+  - **Primary**: Divyanshu, Ansh, Preetam, Soumya, Kanak
   - **Supporting**: Sumit, Shanu
 - **Files Involved**:
   - `backend/app/main.py`
@@ -216,7 +218,7 @@ Each phase defines:
 - **Objective**: Complete end-to-end user documentation, finalize the static browser demonstration interface, verify Render deployment configuration, and secure Sprint 1 sign-off.
 - **Responsible Members**:
   - **Primary**: Sumit, Mishti
-  - **Supporting**: Deep, All Members
+  - **Supporting**: Architecture Team, All Members
 - **Files Involved**:
   - `README.md`
   - `docs/api/api_documentation.md`
@@ -249,10 +251,10 @@ Each phase defines:
 
 ```mermaid
 flowchart TD
-    subgraph P1["Phase 1: Requirements & Data Contracts"]
+    subgraph P1["Phase 1: Requirements & Data Contracts (COMPLETED)"]
         P1_Req["docs/sprint/sprint_1.md<br/>(Mishti)"]
-        P1_Mod["models & schemas<br/>(Deep)"]
-        P1_Cfg["core/config & constants<br/>(Deep)"]
+        P1_Mod["models & schemas<br/>(Implemented by Deep; Team Maintained)"]
+        P1_Cfg["core constants & exceptions<br/>(Implemented by Deep; Team Maintained)"]
     end
 
     subgraph P2["Phase 2: Dataset & Loading"]
@@ -272,8 +274,8 @@ flowchart TD
     end
 
     subgraph P5["Phase 5: API Integration"]
-        P5_API["API routes & router<br/>(Deep, Ansh, Preetam, Soumya, Kanak)"]
-        P5_Main["backend/app/main.py<br/>(Deep)"]
+        P5_API["API routes & router<br/>(Divyanshu, Ansh, Preetam, Soumya, Kanak)"]
+        P5_Main["backend/app/main.py<br/>(Team Maintained)"]
     end
 
     subgraph P6["Phase 6: Testing & Benchmarking"]

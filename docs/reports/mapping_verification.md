@@ -15,11 +15,11 @@ Documents the structural verification of multi-tier entity mappings across the s
 - Verify Finished Product -> Customer Order (`FULFILLS`) relationships.
 - Cross-check dataset mappings against the approved baseline scenario specification.
 - Record missing, incorrect, dangling, or inverted relationships.
-- Coordinate verification findings with Anushka, Deep, and Ansh.
+- Coordinate verification findings with Anushka, Ansh, and the Architecture Team.
 
 ### Dependencies
 - Anushka: Approved raw scenario dataset (data/raw/scenario_dataset.json).
-- Deep: Graph schema definition (docs/architecture/graph_schema.md).
+- Graph schema specification (docs/architecture/graph_schema.md).
 - Ansh: NetworkX DiGraph builder (backend/app/graph/builder.py).
 
 ### Expected Deliverables

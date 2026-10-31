@@ -3,8 +3,8 @@ Project: RE:Flow
 Sprint: 1
 File: backend/app/services/__init__.py
 
-Primary Owner: Deep
-Role: Graph Domain Models and Data Contracts
+Ownership: Team Maintained
+Role: Services Package Initialization
 
 Purpose:
 Services package initializer.

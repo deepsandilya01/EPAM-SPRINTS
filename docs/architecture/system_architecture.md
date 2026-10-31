@@ -14,10 +14,11 @@ This document provides an overview of the RE:Flow system architecture, detailing
 - Document single Python backend design pattern using Flask.
 - Document static HTML/CSS/JS bundling and serving strategy.
 - Document Render unified deployment architecture.
-- Coordinate architectural documentation with Deep (Lead Architect).
+- Coordinate architectural documentation across the development team.
 
-### Dependencies
-- Deep: System architecture design and Render configuration.
+### Architecture Attribution & Dependencies
+RE:Flow's overall system architecture and repository structure were collaboratively designed and discussed by the entire project team. Deep and Divyanshu contributed to architecture coordination and review, while the final architectural decisions reflect collective team discussions and requirements.
+- Deployment configuration in render.yaml (Team Maintained).
 
 ### Expected Deliverables
 - Comprehensive system architecture document with component boundaries.
@@ -28,6 +29,9 @@ This document provides an overview of the RE:Flow system architecture, detailing
 This document provides an overview of the RE:Flow system architecture, detailing the design of the single Python backend service, graph representation engine, and static demo deployment.
 
 ## Architecture Overview
+
+RE:Flow's overall system architecture and repository structure were collaboratively designed and discussed by the entire project team. Deep and Divyanshu contributed to architecture coordination and review, while the final architectural decisions reflect collective team discussions and requirements.
+
 - **Backend Service**: Single Python backend application hosting REST APIs and serving static assets.
 - **Graph Representation**: Directed Graph (DiGraph) managed via NetworkX.
 - **Data Persistence**: JSON-based scenario datasets loaded into memory.

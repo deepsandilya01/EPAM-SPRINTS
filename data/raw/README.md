@@ -33,7 +33,7 @@ This directory holds the canonical raw supply chain scenario dataset for RE:Flow
 - Complete attribute fields for every node (id, name, tier, attributes) and edge (source, target, relationship_type, attributes).
 
 ## Dependencies
-- **Deep**: Graph models and schema constraints (`backend/app/models/` and `data/schemas/graph_schema.json`).
+- **Domain Models & Schemas**: Graph models and schema constraints (`backend/app/models/` and `data/schemas/graph_schema.json`; implemented by Deep, Team Maintained).
 - **Aadee**: Data loader and normalizer format requirements (`backend/app/data/`).
 - **Sonal**: Supply chain mapping verification (`docs/reports/mapping_verification.md`).
 

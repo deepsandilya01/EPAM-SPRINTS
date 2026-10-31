@@ -3,8 +3,8 @@ Project: RE:Flow
 Sprint: 1
 File: scripts/run_local.py
 
-Primary Owner: Deep
-Role: Graph Domain Models and Data Contracts
+Ownership: Team Maintained
+Role: Local Development Runner
 
 Purpose:
 Script to run the RE:Flow backend application locally.
@@ -14,7 +14,7 @@ Responsibilities:
 - Print clear diagnostic URL banners for API and static demo.
 
 Dependencies:
-- Deep: backend/app/main.py application instance.
+- Application instance (backend/app/main.py).
 
 Deliverables:
 - One-command local development runner.

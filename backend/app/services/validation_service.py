@@ -16,7 +16,7 @@ Responsibilities:
 
 Dependencies:
 - Soumya: graph_validator.py, schema_validator.py, edge_validator.py.
-- Deep: Validation schemas in backend/app/schemas/validation.py.
+- Validation Schemas: backend/app/schemas/validation.py (Implemented by Deep; Team Maintained).
 
 Deliverables:
 - ValidationService class with run_full_validation() method.

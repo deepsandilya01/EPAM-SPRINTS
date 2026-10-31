@@ -18,7 +18,7 @@ Responsibilities:
 Dependencies:
 - Anushka: Test fixture sample_scenario.json.
 - Ansh: Graph builder in backend/app/graph/builder.py.
-- Deep: Flask app factory in backend/app/main.py.
+- Flask app factory in backend/app/main.py.
 
 Deliverables:
 - Comprehensive, reusable Pytest fixtures for unit and integration testing.

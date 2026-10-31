@@ -14,10 +14,10 @@ Specifies the RESTful HTTP API contracts exposed by the RE:Flow backend service.
 - Document request parameters and request payload schemas.
 - Document response schemas, status codes (200, 400, 404, 500), and error payloads.
 - Provide copy-pasteable curl examples for each endpoint.
-- Coordinate documentation with route owners (Deep, Ansh, Preetam, Soumya, Kanak).
+- Coordinate documentation with route owners (Divyanshu, Ansh, Preetam, Soumya, Kanak).
 
 ### Dependencies
-- Deep: Schemas in backend/app/schemas/ and router in backend/app/api/router.py.
+- Schemas in backend/app/schemas/ (Implemented by Deep; Team Maintained) and router in backend/app/api/router.py (Divyanshu / Team Maintained).
 - Ansh: GET /api/graph endpoint.
 - Preetam: POST /api/traversal endpoint.
 - Soumya: GET /api/validation endpoint.

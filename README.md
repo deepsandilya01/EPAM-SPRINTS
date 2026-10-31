@@ -18,7 +18,7 @@ Main entry point and documentation hub for the RE:Flow supply chain dependency m
 
 ### Dependencies
 - Mishti: Sprint 1 objectives and scope.
-- Deep and Divyanshu : Architecture and data contracts.
+- Architecture Team: RE:Flow's overall system architecture and repository structure were collaboratively designed and discussed by the entire project team. Deep and Divyanshu contributed to architecture coordination and review, while the final architectural decisions reflect collective team discussions and requirements.
 - All 12 team members: Individual module deliverables.
 
 ### Expected Deliverables
@@ -29,6 +29,8 @@ Main entry point and documentation hub for the RE:Flow supply chain dependency m
 RE:Flow is a supply chain dependency mapping and impact analysis platform developed as part of the EPAM project. It models multi-tier supply chain networks as directed acyclic graphs (DAGs) to simulate disruption cascades, trace downstream impact, and validate topological integrity.
 
 ## Architecture
+
+RE:Flow's overall system architecture and repository structure were collaboratively designed and discussed by the entire project team. Deep and Divyanshu contributed to architecture coordination and review, while the final architectural decisions reflect collective team discussions and requirements.
 
 - **Backend**: Single Python backend service (Flask).
 - **Graph Representation**: Directed Graph (`DiGraph`) powered by NetworkX.

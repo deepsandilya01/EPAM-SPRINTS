@@ -17,7 +17,7 @@ Responsibilities:
 
 Dependencies:
 - Aadee: Raw data output from loader.py.
-- Deep: Core constants and domain models (backend/app/core/constants.py).
+- Domain constants and models (backend/app/core/constants.py; Implemented by Deep, Team Maintained).
 
 Deliverables:
 - normalize_scenario_data(raw_dict) function producing clean domain dictionaries.

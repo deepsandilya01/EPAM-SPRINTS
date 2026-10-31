@@ -15,7 +15,7 @@ Responsibilities:
 - Define required edge attribute keys for NetworkX edge data dictionaries.
 
 Dependencies:
-- Deep: models/nodes.py, models/edges.py, core/constants.py.
+- Domain Models & Constants: models/nodes.py, models/edges.py, core/constants.py (Implemented by Deep; Team Maintained).
 
 Deliverables:
 - Rule and constraint specification module for graph construction.

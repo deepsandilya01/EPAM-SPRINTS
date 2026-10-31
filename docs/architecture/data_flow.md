@@ -14,13 +14,13 @@ Outlines the data movement lifecycle within RE:Flow, from raw JSON scenario inge
 - Document Phase 2 graph construction flow (repository -> builder -> NetworkX DiGraph).
 - Document Phase 3 traversal flow (API request -> traversal service -> BFS engine -> response serialization).
 - Document Phase 4 validation flow (audit trigger -> validator pipeline -> validation report).
-- Coordinate data flow diagrams and descriptions with Aadee, Ansh, Preetam, and Deep.
+- Coordinate data flow diagrams and descriptions with module owners (Aadee, Ansh, Preetam, and Architecture Team).
 
 ### Dependencies
 - Aadee: Data loading pipeline.
 - Ansh: Graph construction pipeline.
 - Preetam: Traversal pipeline.
-- Deep: Schemas and serialization contracts.
+- Schemas and serialization contracts (Implemented by Deep; Team Maintained).
 
 ### Expected Deliverables
 - End-to-end data lifecycle specification document.

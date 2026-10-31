@@ -3,8 +3,8 @@
 # Sprint: 1
 # File: render.yaml
 #
-# Primary Owner: Deep
-# Role: Graph Domain Models and Data Contracts (Lead Architect)
+# Ownership: Team Maintained
+# Role: Render Deployment Infrastructure Specification
 #
 # Purpose:
 # Render deployment configuration for unified backend and static demo hosting.

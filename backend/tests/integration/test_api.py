@@ -18,7 +18,7 @@ Responsibilities:
 - Test GET /api/benchmarks returns 200 OK with latency metrics.
 
 Dependencies:
-- Deep, Ansh, Preetam, Soumya, Kanak: Route implementations in backend/app/api/routes/.
+- Divyanshu, Ansh, Preetam, Soumya, Kanak: Route implementations in backend/app/api/routes/.
 - Shanu: test_client fixture from conftest.py.
 
 Deliverables:

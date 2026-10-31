@@ -18,7 +18,7 @@ Summarizes the structural, schema, and topological integrity audit for the RE:Fl
 
 ### Dependencies
 - Soumya: Validation service and validators (backend/app/validation/).
-- Deep: Validation schemas (backend/app/schemas/validation.py).
+- Validation schemas in backend/app/schemas/validation.py (Implemented by Deep; Team Maintained).
 
 ### Expected Deliverables
 - Formal validation report documenting full audit pass on the baseline scenario.

@@ -11,6 +11,8 @@
 
 This central document defines the roles, file ownership, primary responsibilities, deliverables, dependencies, and execution status for all **12 team members** participating in **RE:Flow Sprint 1**.
 
+RE:Flow's overall system architecture and repository structure were collaboratively designed and discussed by the entire project team. Deep and Divyanshu contributed to architecture coordination and review, while the final architectural decisions reflect collective team discussions and requirements.
+
 Sprint 1 focuses on building the core Supply Chain Graph representation (NetworkX `DiGraph`), dataset ingestion, BFS downstream impact traversal, multi-tier validation, automated testing, benchmarking, and a static browser demonstration.
 
 ---
@@ -33,15 +35,15 @@ Sprint 1 focuses on building the core Supply Chain Graph representation (Network
   - Completed `docs/sprint/sprint_1.md` with finalized scope and acceptance checklist.
   - Weekly task alignment and dependency log.
 - **Dependencies**:
-  - Deep (Architecture & Data Contracts).
+  - Deep (Domain Models & Data Contracts).
   - Sumit (Documentation and Demo Guide).
 - **Task Status**: `NOT STARTED`
 
 ---
 
 ### Member 2 — Deep
-- **Role**: Graph Domain Models and Data Contracts (Lead Architect)
-- **Primary Assigned Files**:
+- **Role**: Graph Domain Models and Data Contracts (Sprint 1 Implementation Completed)
+- **Completed Implementation Files**:
   - `backend/app/models/nodes.py`
   - `backend/app/models/edges.py`
   - `backend/app/models/graph.py`
@@ -50,11 +52,14 @@ Sprint 1 focuses on building the core Supply Chain Graph representation (Network
   - `backend/app/schemas/traversal.py`
   - `backend/app/schemas/validation.py`
   - `backend/app/schemas/__init__.py`
-  - `data/schemas/graph_schema.json` *(companion: `data/schemas/README.md`)*
-  - `docs/architecture/graph_schema.md`
-  - `backend/app/core/config.py`
   - `backend/app/core/constants.py`
   - `backend/app/core/exceptions.py`
+  - `data/schemas/graph_schema.json` *(companion: `data/schemas/README.md`)*
+  - `docs/architecture/graph_schema.md`
+- **Current Maintenance Ownership**:
+  - `Team Maintained`
+- **Core Repository Scaffolding (Team Maintained)**:
+  - `backend/app/core/config.py`
   - `backend/app/core/__init__.py`
   - `backend/app/main.py`
   - `backend/app/api/router.py`
@@ -76,23 +81,23 @@ Sprint 1 focuses on building the core Supply Chain Graph representation (Network
   - Traversal schemas with Preetam.
   - Validation schemas with Soumya.
   - Render deployment and server configuration.
-- **Exact Responsibilities**:
-  1. Define domain models for Suppliers, BOM Parts, Finished Products, and Customer Orders.
-  2. Define directed dependency edge models (`SUPPLIES`, `USED_IN`, `FULFILLS`).
-  3. Define unified graph domain representation.
-  4. Define Pydantic / dataclass request and response serialization schemas.
-  5. Author the canonical JSON Schema (`data/schemas/graph_schema.json`).
-  6. Document the canonical graph specification in `docs/architecture/graph_schema.md`.
-  7. Maintain core application runtime, configuration, logging, exceptions, and router.
-- **Expected Deliverables**:
-  - Complete, strongly-typed domain model layer in `backend/app/models/`.
-  - Complete request/response schemas in `backend/app/schemas/`.
-  - JSON schema specification in `data/schemas/graph_schema.json`.
-  - Server entry point and deployment configuration (`render.yaml`).
+- **Exact Responsibilities (Completed in Sprint 1)**:
+  1. Defined domain models for Suppliers, BOM Parts, Finished Products, and Customer Orders.
+  2. Defined directed dependency edge models (`SUPPLIES`, `USED_IN`, `FULFILLS`).
+  3. Defined unified graph domain representation (`SupplyChainGraph`).
+  4. Defined Pydantic request and response serialization schemas for all REST endpoints.
+  5. Authored the canonical JSON Schema (`data/schemas/graph_schema.json`).
+  6. Documented the canonical graph specification in `docs/architecture/graph_schema.md`.
+  7. Contributed to core domain constants and custom exceptions.
+- **Deliverables**:
+  - Complete, strongly-typed domain model layer in `backend/app/models/` (COMPLETED).
+  - Complete request/response schemas in `backend/app/schemas/` (COMPLETED).
+  - JSON schema specification in `data/schemas/graph_schema.json` (COMPLETED).
+  - 34 passing unit tests verifying models and schemas (COMPLETED).
 - **Dependencies**:
   - Anushka (Approved scenario dataset attributes).
   - Mishti (Baseline requirements: 19 nodes, 21 edges).
-- **Task Status**: `NOT STARTED`
+- **Task Status**: `COMPLETED` (Sprint 1 Implementation Delivered; Ongoing maintenance: Team Maintained)
 
 ---
 
@@ -390,7 +395,7 @@ Sprint 1 focuses on building the core Supply Chain Graph representation (Network
   - `backend/app/static/js/sprint-1-demo.js`
 - **Supporting Areas**:
   - Sprint documentation coordination with Mishti.
-  - Architecture documentation alignment with Deep.
+  - Architecture documentation alignment with the team.
   - API endpoint verification with all route owners.
 - **Exact Responsibilities**:
   1. Maintain root `README.md` with project overview, architecture, quickstart, and team links.
@@ -403,7 +408,7 @@ Sprint 1 focuses on building the core Supply Chain Graph representation (Network
   - Comprehensive documentation suite (README, API docs, architecture, data flow, demo guide).
   - Interactive static browser visualization demo served by the backend.
 - **Dependencies**:
-  - Deep (Architecture and Render deployment specs).
+  - Architecture Team (Collaborative system architecture).
   - Ansh (Graph API).
   - Preetam (Traversal API).
   - Soumya (Validation API).
@@ -416,7 +421,7 @@ Sprint 1 focuses on building the core Supply Chain Graph representation (Network
 | Member | Primary Output | Depends On | Needed By |
 |---|---|---|---|
 | **Mishti** | Sprint objectives & criteria | Deep, Sumit | All 12 members |
-| **Deep** | Models, schemas, core config, main | Anushka, Mishti | Ansh, Aadee, Preetam, Soumya, Kanak, Sumit |
+| **Deep** | Domain models, schemas, constants, exceptions (COMPLETED; Team Maintained) | Anushka, Mishti | Ansh, Aadee, Preetam, Soumya, Kanak, Sumit |
 | **Anushka** | Baseline dataset & fixtures | Deep, Aadee | Aadee, Ansh, Sonal, Soumya, Shanu |
 | **Ansh** | NetworkX builder & GraphService | Deep, Aadee, Anushka | Preetam, Soumya, Shanu, Kanak, Sumit |
 | **Aadee** | Data loader & Repository | Anushka, Deep | Ansh, Soumya |
@@ -426,4 +431,4 @@ Sprint 1 focuses on building the core Supply Chain Graph representation (Network
 | **Divyanshu** | Edge cases tests & complexity doc | Preetam, Ansh, Soumya, Shanu | Shanu, Kanak, Sumit |
 | **Shanu** | Test suite & conftest fixtures | Anushka, Ansh, Preetam, Soumya, Deep | All members (CI quality gate) |
 | **Kanak** | Benchmarking suite & perf report | Ansh, Preetam, Deep | Mishti, Sumit, Shanu |
-| **Sumit** | Documentation, demo guide & static UI | All route owners, Deep | Evaluators, Team, Render deployment |
+| **Sumit** | Documentation, demo guide & static UI | All route owners, Architecture Team | Evaluators, Team, Render deployment |
