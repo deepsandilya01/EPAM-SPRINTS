@@ -21,7 +21,7 @@ class Settings:
 
     # Canonical dataset path
     dataset_path: pathlib.Path = field(
-        default_factory=lambda: REPO_ROOT / "data" / "raw" / "scenario_dataset.json"
+        default_factory=lambda: BASE_DIR / "data" / "datasets" / "scenario_dataset.json"
     )
 
     # Static assets path

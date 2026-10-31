@@ -17,13 +17,16 @@ def _iso_now() -> str:
 
 
 class AcyclicityPolicy(str, Enum):
-    """How strictly to enforce DAG acyclicity."""
+    """Policy options for enforcing acyclicity on the dependency graph."""
+
     REQUIRE_DAG = "require_dag"
     ALLOW_CYCLES = "allow_cycles"
     UNSPECIFIED = "unspecified"
 
 
 class CheckStatus(str, Enum):
+    """Outcome status for an individual validation assertion."""
+
     PASS = "PASS"
     FAIL = "FAIL"
     WARN = "WARN"
@@ -31,6 +34,8 @@ class CheckStatus(str, Enum):
 
 
 class Severity(str, Enum):
+    """Severity classification for validation findings."""
+
     INFO = "INFO"
     WARNING = "WARNING"
     ERROR = "ERROR"
@@ -39,7 +44,8 @@ class Severity(str, Enum):
 
 @dataclass(frozen=True)
 class BaselineCounts:
-    """Expected counts for the canonical Sprint 1 dataset (19 nodes, 21 edges)."""
+    """Expected entity and relationship counts for the canonical Sprint 1 graph."""
+
     total_nodes: int = 19
     suppliers: int = 2
     parts: int = 5
@@ -56,23 +62,26 @@ class BaselineCounts:
 
 @dataclass
 class ValidationPolicy:
-    """
-    Configures which checks to run.
-    Allows toggling between baseline checks (exact count enforcement)
-    and live integrity checks (valid endpoints, directions, DAG).
-    """
+    """Configuration governing validation rules, assertions, and strictness."""
+
     check_baseline_counts: bool = True
     acyclicity_policy: AcyclicityPolicy = AcyclicityPolicy.REQUIRE_DAG
     baseline_counts: BaselineCounts = field(default_factory=BaselineCounts)
-    allowed_node_categories: tuple[str, ...] = ("suppliers", "parts", "products", "orders")
+    allowed_node_categories: tuple[str, ...] = (
+        "suppliers",
+        "parts",
+        "products",
+        "orders",
+    )
     allowed_edge_types: tuple[str, ...] = ("supplies", "used_in", "fulfills")
 
-    # Allowed direction rules: (expected_source_kind, expected_target_kind, relation_name)
-    direction_rules: dict[str, tuple[str, str, str]] = field(default_factory=lambda: {
-        "supplies": ("supplier", "part", "SUPPLIES"),
-        "used_in": ("part", "product", "USED_IN"),
-        "fulfills": ("product", "order", "FULFILLS"),
-    })
+    direction_rules: dict[str, tuple[str, str, str]] = field(
+        default_factory=lambda: {
+            "supplies": ("supplier", "part", "SUPPLIES"),
+            "used_in": ("part", "product", "USED_IN"),
+            "fulfills": ("product", "order", "FULFILLS"),
+        }
+    )
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -90,7 +99,8 @@ class ValidationPolicy:
 
 @dataclass
 class ValidationError:
-    """Details of an individual validation finding or failure."""
+    """Structured details of an individual validation finding or failure."""
+
     code: str
     severity: str
     message: str
@@ -98,24 +108,34 @@ class ValidationError:
     entity_id: str | list[Any] | tuple[Any, ...] | None = None
     expected: Any = None
     actual: Any = None
-    suggested_action: str = ""
+    suggested_action: str | None = None
 
     def to_dict(self) -> dict[str, Any]:
-        return {
+        data: dict[str, Any] = {
             "code": self.code,
             "severity": self.severity,
             "message": self.message,
             "entity_type": self.entity_type,
-            "entity_id": list(self.entity_id) if isinstance(self.entity_id, tuple) else self.entity_id,
-            "expected": self.expected,
-            "actual": self.actual,
-            "suggested_action": self.suggested_action,
         }
+        if self.entity_id is not None:
+            data["entity_id"] = (
+                list(self.entity_id)
+                if isinstance(self.entity_id, tuple)
+                else self.entity_id
+            )
+        if self.expected is not None:
+            data["expected"] = self.expected
+        if self.actual is not None:
+            data["actual"] = self.actual
+        if self.suggested_action is not None:
+            data["suggested_action"] = self.suggested_action
+        return data
 
 
 @dataclass
 class ValidationCheck:
-    """Summary of an individual validation check step."""
+    """Evaluation summary of an individual high-level validation assertion."""
+
     check_id: str
     status: str
     message: str
@@ -134,16 +154,17 @@ class ValidationCheck:
 
 @dataclass
 class ValidationReport:
-    """Structured report returned by the validator and API endpoints."""
+    """Structured audit report returned by validation routines."""
+
     valid: bool
     graph_name: str
     mode: str
     summary: dict[str, Any]
-    checks: list[ValidationCheck] = field(default_factory=list)
-    errors: list[ValidationError] = field(default_factory=list)
-    warnings: list[ValidationError] = field(default_factory=list)
-    policy: dict[str, Any] = field(default_factory=dict)
-    timestamp: str = ""
+    checks: list[ValidationCheck]
+    errors: list[ValidationError]
+    warnings: list[ValidationError]
+    policy: dict[str, Any]
+    timestamp: str
 
     def to_dict(self) -> dict[str, Any]:
         return {

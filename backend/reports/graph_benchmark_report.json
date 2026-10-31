@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-10-31T13:40:40.129873+00:00",
+  "timestamp": "2026-10-31T17:02:46.661550+00:00",
   "environment": {
     "python_version": "3.9.6",
     "python_implementation": "CPython",
@@ -18,19 +18,19 @@
       "SUP-02"
     ],
     "warmup_runs": 50,
-    "measured_runs_per_node": 10,
-    "total_measured_runs": 20,
+    "measured_runs_per_node": 1000,
+    "total_measured_runs": 2000,
     "acceptance_criterion": "p95 latency <= 10.0 ms",
     "threshold_ms": 10.0
   },
   "aggregate_metrics": {
-    "min_ms": 0.003417,
-    "max_ms": 0.004292,
-    "mean_ms": 0.003856,
-    "median_ms": 0.003896,
-    "p90_ms": 0.004254,
-    "p95_ms": 0.004291,
-    "p99_ms": 0.004292
+    "min_ms": 0.003,
+    "max_ms": 0.038,
+    "mean_ms": 0.003584,
+    "median_ms": 0.003833,
+    "p90_ms": 0.003959,
+    "p95_ms": 0.004,
+    "p99_ms": 0.004166
   },
   "node_benchmarks": {
     "SUP-01": {
@@ -44,15 +44,15 @@
         "ORD-05",
         "ORD-06"
       ],
-      "iterations": 10,
-      "min_ms": 0.003417,
-      "max_ms": 0.003625,
-      "mean_ms": 0.003471,
-      "median_ms": 0.003458,
-      "p90_ms": 0.003512,
-      "p95_ms": 0.003569,
-      "p99_ms": 0.003614,
-      "std_dev_ms": 5.9e-05,
+      "iterations": 1000,
+      "min_ms": 0.003,
+      "max_ms": 0.038,
+      "mean_ms": 0.003249,
+      "median_ms": 0.003125,
+      "p90_ms": 0.003375,
+      "p95_ms": 0.003461,
+      "p99_ms": 0.004208,
+      "std_dev_ms": 0.001148,
       "threshold_ms": 10.0,
       "passed_threshold": true
     },
@@ -67,15 +67,15 @@
         "ORD-05",
         "ORD-06"
       ],
-      "iterations": 10,
-      "min_ms": 0.004166,
-      "max_ms": 0.004292,
-      "mean_ms": 0.004242,
-      "median_ms": 0.00425,
-      "p90_ms": 0.004291,
-      "p95_ms": 0.004292,
-      "p99_ms": 0.004292,
-      "std_dev_ms": 3.6e-05,
+      "iterations": 1000,
+      "min_ms": 0.003791,
+      "max_ms": 0.007958,
+      "mean_ms": 0.00392,
+      "median_ms": 0.003917,
+      "p90_ms": 0.004,
+      "p95_ms": 0.004,
+      "p99_ms": 0.004083,
+      "std_dev_ms": 0.000145,
       "threshold_ms": 10.0,
       "passed_threshold": true
     }

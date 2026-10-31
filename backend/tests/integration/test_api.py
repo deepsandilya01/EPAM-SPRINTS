@@ -15,6 +15,18 @@ def test_root_serves_html(app_client):
 
 
 @pytest.mark.integration
+def test_static_assets_serve_successfully(app_client):
+    """Verify Flask natively serves both CSS and JavaScript assets with 200 OK."""
+    css_res = app_client.get("/static/css/sprint-1-demo.css")
+    assert css_res.status_code == 200
+    assert b"Photon Sprint 1" in css_res.data or b"glassmorphism" in css_res.data or len(css_res.data) > 100
+
+    js_res = app_client.get("/static/js/sprint-1-demo.js")
+    assert js_res.status_code == 200
+    assert b"fetchGraph" in js_res.data or b"/api/graph" in js_res.data
+
+
+@pytest.mark.integration
 def test_api_graph_returns_canonical_counts(app_client):
     """GET /api/graph must return 19 nodes and 21 edges."""
     res = app_client.get("/api/graph")
@@ -169,11 +181,11 @@ def test_reset_endpoint(app_client):
 
 
 @pytest.mark.integration
-def test_vercel_serverless_entrypoint():
-    """Verify api/index.py exports a functional WSGI Flask application."""
-    from backend.app.main import app as vercel_app
+def test_wsgi_application_entrypoint():
+    """Verify backend/app/main.py exports a functional WSGI Flask application."""
+    from backend.app.main import app
 
-    client = vercel_app.test_client()
+    client = app.test_client()
     res = client.get("/api/graph")
     assert res.status_code == 200
     data = res.get_json()
@@ -293,7 +305,7 @@ def test_cold_start_simulation_demonstrates_in_memory_reset(monkeypatch):
     assert len(client1.get("/api/graph").get_json()["nodes"]) < 19
 
     # 2. Simulate Cold Start: Fresh module / container instantiation
-    # (In Vercel/Lambda, a new microVM/process initializes global variables from scratch)
+    # (In web worker processes, a new process initializes global variables from scratch)
     reloaded_module = importlib.reload(app_module)
     client2 = reloaded_module.app.test_client()
 

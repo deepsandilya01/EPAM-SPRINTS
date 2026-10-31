@@ -8,16 +8,15 @@ from typing import Any
 logger = logging.getLogger(__name__)
 
 BASE_DIR = pathlib.Path(__file__).resolve().parent
-REPO_ROOT = BASE_DIR.parent.parent.parent
+BACKEND_DIR = BASE_DIR.parent.parent
 
-
-CANONICAL_DATASET_PATH = REPO_ROOT / "data" / "raw" / "scenario_dataset.json"
+CANONICAL_DATASET_PATH = BASE_DIR / "datasets" / "scenario_dataset.json"
 
 
 def get_data_file_path(custom_path: str | pathlib.Path | None = None) -> pathlib.Path:
     """
     Resolve scenario dataset location.
-    Defaults directly to the canonical root dataset: data/raw/scenario_dataset.json.
+    Defaults directly to the canonical backend dataset: backend/app/data/datasets/scenario_dataset.json.
     """
     if custom_path:
         p = pathlib.Path(custom_path)
@@ -28,7 +27,7 @@ def get_data_file_path(custom_path: str | pathlib.Path | None = None) -> pathlib
         return CANONICAL_DATASET_PATH
 
     # Fallback to test fixture if running in isolated test directory
-    fixture_path = REPO_ROOT / "backend" / "tests" / "fixtures" / "sample_scenario.json"
+    fixture_path = BACKEND_DIR / "tests" / "fixtures" / "sample_scenario.json"
     if fixture_path.exists():
         return fixture_path
 
@@ -51,4 +50,5 @@ def load_scenario_dataset(data_path: str | pathlib.Path | None = None) -> dict[s
 
 # Aliases for compatibility with original PHOTON source code
 _load_raw_data = load_scenario_dataset
+get_dataset_path = get_data_file_path
 DATA_FILE = get_data_file_path()

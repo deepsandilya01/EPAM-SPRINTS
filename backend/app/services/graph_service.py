@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import logging
+import pathlib
 import threading
 import time
 from typing import Any
@@ -9,7 +10,7 @@ from typing import Any
 import networkx as nx
 from flask import request
 
-from backend.app.data.repository import ScenarioRepository
+from backend.app.data.loader import load_scenario_dataset
 from backend.app.graph.builder import build_graph
 from backend.app.graph.operations import graph_to_json, restore_graph, snapshot_graph
 from backend.app.graph.traversal import get_downstream
@@ -23,11 +24,11 @@ _STATE_LOCK = threading.RLock()
 
 
 class GraphService:
-    """Service managing in-memory graph state, undo stack, and mutations."""
+    """Service managing in-memory graph state, undo stack, mutations, and traversals."""
 
-    def __init__(self, repository: ScenarioRepository | None = None) -> None:
-        self.repository = repository or ScenarioRepository()
-        self.raw_data = self.repository.get_raw_data()
+    def __init__(self, data_path: str | pathlib.Path | None = None) -> None:
+        self.data_path = data_path
+        self.raw_data = load_scenario_dataset(self.data_path)
         self.startup_report = validate_raw_graph_data(self.raw_data)
         if not self.startup_report.valid:
             logger.warning(
@@ -50,6 +51,86 @@ class GraphService:
         """Return graph nodes and edges serializable to JSON."""
         return graph_to_json(self.graph)
 
+    def get_downstream_reachability(self, node_id: str) -> dict[str, Any] | None:
+        """Compute downstream reachable node IDs from starting node."""
+        if node_id not in self.graph:
+            return None
+
+        reachable = get_downstream(self.graph, node_id)
+        downstream_list = sorted(list(reachable))
+        return {
+            "root": node_id,
+            "node_id": node_id,
+            "downstream": downstream_list,
+            "count": len(downstream_list),
+        }
+
+    def get_downstream_impact(self, node_id: str) -> dict[str, Any] | None:
+        """Compute comprehensive blast-radius and cascading deletion impact preview."""
+        if node_id not in self.graph:
+            return None
+
+        node_attrs = dict(self.graph.nodes[node_id])
+        direct_outgoing = [
+            {"source": u, "target": v, **d}
+            for u, v, d in self.graph.out_edges(node_id, data=True)
+        ]
+        direct_incoming = [
+            {"source": u, "target": v, **d}
+            for u, v, d in self.graph.in_edges(node_id, data=True)
+        ]
+
+        downstream_nodes = get_downstream(self.graph, node_id)
+        downstream_details = []
+        for nid in sorted(downstream_nodes):
+            attrs = dict(self.graph.nodes[nid])
+            downstream_details.append(
+                {
+                    "id": nid,
+                    "kind": attrs.get("kind", ""),
+                    "label": attrs.get("label", nid),
+                    **attrs,
+                }
+            )
+
+        all_impacted_nodes = downstream_nodes | {node_id}
+        edges_to_remove = []
+        for u, v, attrs in self.graph.edges(data=True):
+            if u in all_impacted_nodes or v in all_impacted_nodes:
+                edges_to_remove.append(
+                    {
+                        "source": u,
+                        "target": v,
+                        "relation": attrs.get("relation", ""),
+                    }
+                )
+
+        return {
+            "node": {"id": node_id, **node_attrs},
+            "target_node": {
+                "id": node_id,
+                "kind": node_attrs.get("kind", ""),
+                "label": node_attrs.get("label", node_id),
+                **node_attrs,
+            },
+            "outgoing_edges": direct_outgoing,
+            "incoming_edges": direct_incoming,
+            "direct_outgoing_edges": direct_outgoing,
+            "direct_incoming_edges": direct_incoming,
+            "downstream_nodes": sorted(list(downstream_nodes)),
+            "downstream_node_ids": sorted(list(downstream_nodes)),
+            "affected_nodes_details": downstream_details,
+            "downstream_nodes_detailed": downstream_details,
+            "total_nodes_affected": len(all_impacted_nodes),
+            "total_edges_affected": len(edges_to_remove),
+            "edges_to_remove": edges_to_remove,
+            "time_complexity": "O(V + E)",
+            "time_complexity_explanation": (
+                f"Traversal & cascade removal visits {len(all_impacted_nodes)} vertices "
+                f"and inspects {len(edges_to_remove)} edges in O(V + E) time."
+            ),
+        }
+
     def apply_delete(self, node_id: str) -> dict[str, Any]:
         """Delete node_id plus downstream cascade, push an undo snapshot, and return metrics."""
         t0 = time.perf_counter()
@@ -59,20 +140,24 @@ class GraphService:
         removed_nodes_info = []
         for nid in sorted(to_remove):
             attrs = dict(self.graph.nodes[nid])
-            removed_nodes_info.append({
-                "id": nid,
-                "kind": attrs.get("kind", ""),
-                "label": attrs.get("label", nid),
-            })
+            removed_nodes_info.append(
+                {
+                    "id": nid,
+                    "kind": attrs.get("kind", ""),
+                    "label": attrs.get("label", nid),
+                }
+            )
 
         edges_removed_list = []
         for u, v, attrs in list(self.graph.edges(data=True)):
             if u in to_remove or v in to_remove:
-                edges_removed_list.append({
-                    "source": u,
-                    "target": v,
-                    "relation": attrs.get("relation", ""),
-                })
+                edges_removed_list.append(
+                    {
+                        "source": u,
+                        "target": v,
+                        "relation": attrs.get("relation", ""),
+                    }
+                )
 
         target_attrs = dict(self.graph.nodes[node_id])
         target_label = target_attrs.get("label", node_id)

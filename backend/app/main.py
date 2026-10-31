@@ -5,7 +5,7 @@ import pathlib
 
 from flask import Flask, jsonify, request, send_from_directory
 
-from backend.app.api.router import api_bp
+from backend.app.api import api_bp
 
 BASE_DIR = pathlib.Path(__file__).resolve().parent
 REPO_ROOT = BASE_DIR.parent.parent

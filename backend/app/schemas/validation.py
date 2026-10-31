@@ -65,9 +65,8 @@ class ValidationResponseSchema(BaseModel):
     """
     Response schema for graph validation audit.
 
-    Why this exists:
     Standardizes the validation report returned to the frontend and other services
-    following Soumya's integrity validation checks.
+    following graph integrity validation checks.
 
     Canonical contract example:
     {
