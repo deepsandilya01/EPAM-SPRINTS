@@ -18,7 +18,7 @@ Main entry point and documentation hub for the RE:Flow supply chain dependency m
 
 ### Dependencies
 - Mishti: Sprint 1 objectives and scope.
-- Deep: Architecture and data contracts.
+- Deep and Divyanshu : Architecture and data contracts.
 - All 12 team members: Individual module deliverables.
 
 ### Expected Deliverables
