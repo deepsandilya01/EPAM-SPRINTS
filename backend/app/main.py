@@ -2,13 +2,16 @@ from __future__ import annotations
 
 import os
 import pathlib
+import sys
 
 from flask import Flask, jsonify, request, send_from_directory
 
-from backend.app.api import api_bp
-
 BASE_DIR = pathlib.Path(__file__).resolve().parent
 REPO_ROOT = BASE_DIR.parent.parent
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from backend.app.api import api_bp  # noqa: E402
 
 # Initialize Flask application
 app = Flask(__name__, static_folder=str(BASE_DIR / "static"), static_url_path="/static")
