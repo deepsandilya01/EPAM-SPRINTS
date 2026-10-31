@@ -86,11 +86,12 @@ EPAM-SPRINTS/
 │           └── validator.py         # High-level validation orchestrator
 └── docs/                            # Project documentation
     ├── README.md                    # Documentation index
+    ├── team-guide.md                # Complete team architecture & codebase guide (Hinglish)
+    ├── team-responsibilities.md     # 12-member individual study and role assignment guide
     ├── api-reference.md             # REST API endpoint reference
     ├── architecture.md              # System architecture and data flow
     ├── benchmarking.md              # Traversal latency benchmarks and SLA
     ├── configuration.md             # Environment variables and configuration options
-    ├── deployment.md                # Render deployment guide
     ├── frontend.md                  # D3.js frontend visualization architecture
     ├── graph-model.md               # 4-tier DAG domain model specification
     ├── installation-and-setup.md    # Local environment setup instructions

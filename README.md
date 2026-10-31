@@ -140,9 +140,11 @@ EPAM-SPRINTS/
 │
 ├── docs/                               # Comprehensive project documentation
 │   ├── README.md                       # Documentation index
+│   ├── team-guide.md                   # Complete team architecture & codebase guide (Hinglish)
+│   ├── team-responsibilities.md        # 12-member individual study and role assignment guide
 │   ├── architecture.md                 # System architecture and Mermaid flow diagram
 │   ├── project-structure.md            # Detailed file and directory inventory
-│   ├── installation-and-setup.md       # Setup, prerequisites, and virtualenv guide
+│   ├── installation-and-setup.md       # Setup, prerequisites, and repository guide
 │   ├── running-locally.md              # Local execution options and server commands
 │   ├── configuration.md                # Environment variables and configuration
 │   ├── graph-model.md                  # 4-tier DAG domain model and invariants
@@ -151,7 +153,6 @@ EPAM-SPRINTS/
 │   ├── frontend.md                     # D3.js frontend visualization architecture
 │   ├── testing.md                      # Pytest test suite architecture and execution
 │   ├── benchmarking.md                 # Traversal latency benchmarks and SLA
-│   ├── deployment.md                   # Render PaaS configuration and guide
 │   └── troubleshooting.md              # Debugging procedures and common issues
 │
 ├── scripts/

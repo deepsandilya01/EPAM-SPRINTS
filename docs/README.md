@@ -28,6 +28,8 @@ Supplier (Tier 1) ──[SUPPLIES]──> Part (Tier 2) ──[USED_IN]──> P
 
 | Document | Description |
 | :--- | :--- |
+| [Team Guide (Hinglish)](file:///Users/deepsandilya01/Projects/EPAM-SPRINTS/docs/team-guide.md) | Complete architecture, codebase explanation & learning order in simple Hinglish |
+| [Team Responsibilities (12 Members)](file:///Users/deepsandilya01/Projects/EPAM-SPRINTS/docs/team-responsibilities.md) | Individual file-wise study guide & question assignments for all 12 team members |
 | [Architecture](file:///Users/deepsandilya01/Projects/EPAM-SPRINTS/docs/architecture.md) | System layers, data flow, component interactions, and Mermaid architecture diagram |
 | [Project Structure](file:///Users/deepsandilya01/Projects/EPAM-SPRINTS/docs/project-structure.md) | Complete directory and module inventory with exact responsibilities |
 | [Installation & Setup](file:///Users/deepsandilya01/Projects/EPAM-SPRINTS/docs/installation-and-setup.md) | Prerequisites, repository setup, and dependency installation |
@@ -39,6 +41,5 @@ Supplier (Tier 1) ──[SUPPLIES]──> Part (Tier 2) ──[USED_IN]──> P
 | [Frontend](file:///Users/deepsandilya01/Projects/EPAM-SPRINTS/docs/frontend.md) | D3.js visualization layout, node styling, interactivity, and control panels |
 | [Testing](file:///Users/deepsandilya01/Projects/EPAM-SPRINTS/docs/testing.md) | Pytest test suite architecture (130 tests), execution instructions, and coverage |
 | [Benchmarking](file:///Users/deepsandilya01/Projects/EPAM-SPRINTS/docs/benchmarking.md) | Latency benchmarking methodology, 10ms SLA verification, and CLI scripts |
-| [Deployment](file:///Users/deepsandilya01/Projects/EPAM-SPRINTS/docs/deployment.md) | Render PaaS configuration, WSGI entrypoints, and runtime considerations |
 | [Troubleshooting](file:///Users/deepsandilya01/Projects/EPAM-SPRINTS/docs/troubleshooting.md) | Common errors, port conflicts, environment verification, and recovery steps |
 
