@@ -3,7 +3,7 @@ Project: RE:Flow
 Sprint: 1
 File: backend/app/models/edges.py
 
-Ownership: Team Maintained 
+Ownership: Team Maintained
 Role: Graph Domain Models and Data Contracts
 Status: COMPLETED
 

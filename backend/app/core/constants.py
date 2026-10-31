@@ -3,7 +3,7 @@ Project: RE:Flow
 Sprint: 1
 File: backend/app/core/constants.py
 
-Ownership: Team Maintained 
+Ownership: Team Maintained
 Role: Domain Constants and System Enums
 Status: COMPLETED
 
