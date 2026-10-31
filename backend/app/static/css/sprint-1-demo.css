@@ -1,0 +1,26 @@
+/*
+=============================================================================
+Project: RE:Flow
+Sprint: 1
+File: backend/app/static/css/sprint-1-demo.css
+
+Primary Owner: Sumit
+Role: Documentation and Demo Guide
+
+Purpose:
+Styling for the Sprint 1 static visualization demo.
+
+Responsibilities:
+- Define layout styles for the 4 supply chain tiers (Suppliers, Parts, Products, Orders).
+- Define visual hierarchy, color palette, node states (normal, hovered, impacted).
+- Define transition effects for traversal highlights.
+
+Dependencies:
+- Sumit: HTML structure (backend/app/static/sprint-1-demo.html).
+
+Deliverables:
+- Clean, responsive CSS stylesheet.
+
+Status: NOT STARTED
+=============================================================================
+*/

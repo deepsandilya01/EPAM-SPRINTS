@@ -1,26 +1,50 @@
-[project]
-name = "epam-sprints-supply-chain"
-version = "1.0.0"
-requires-python = ">=3.12"
+# =============================================================================
+# Project: RE:Flow
+# Sprint: 1
+# File: pyproject.toml
+#
+# Primary Owner: Deep
+# Role: Graph Domain Models and Data Contracts (Lead Architect)
+#
+# Purpose:
+# Python project metadata, dependencies, and tool configurations.
+#
+# Responsibilities:
+# - Define project name, version, and Python runtime requirements (>=3.11).
+# - Specify core dependencies: flask, networkx, pydantic.
+# - Configure Ruff linter rules and pytest settings.
+#
+# Deliverables:
+# - Production-ready pyproject.toml configuration.
+#
+# Status: NOT STARTED
+# =============================================================================
 
+[project]
+name = "reflow"
+version = "0.1.0"
+description = "RE:Flow - Supply Chain Graph & Scenario Generator"
+requires-python = ">=3.11"
+dependencies = [
+    "flask",
+    "networkx",
+    "pydantic",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["backend/tests"]
+pythonpath = ["backend"]
 
 [tool.ruff]
-target-version = "py312"
+target-version = "py311"
 line-length = 100
 exclude = [
     ".venv",
-    ".python",
     "__pycache__",
     ".pytest_cache",
     ".git",
-    "reports",
 ]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "W", "UP"]
 ignore = ["E501", "UP042", "W293"]
-
-[tool.pyright]
-extraPaths = ["backend"]
-venvPath = "."
-venv = ".venv"

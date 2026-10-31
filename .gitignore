@@ -1,3 +1,12 @@
+# =============================================================================
+# Project: RE:Flow
+# Sprint: 1
+# File: .gitignore
+#
+# Primary Owner: Deep
+# Role: Graph Domain Models and Data Contracts (Lead Architect)
+# =============================================================================
+
 # Virtual environments
 .venv/
 venv/
