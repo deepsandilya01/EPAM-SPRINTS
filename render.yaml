@@ -2,10 +2,10 @@ services:
   - type: web
     name: reflow
     env: python
-    buildCommand: "pip install -e ."
-    startCommand: "python backend/app/main.py"
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "python -m backend.app.main"
     envVars:
       - key: PORT
         value: 10000
-      - key: FLASK_ENV
+      - key: ENVIRONMENT
         value: production

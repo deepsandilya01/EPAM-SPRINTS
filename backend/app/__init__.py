@@ -4,7 +4,6 @@ from backend.app.data.loader import _load_raw_data, load_scenario_dataset
 from backend.app.graph.builder import _build_graph, build_graph
 from backend.app.graph.operations import _graph_to_json, _restore, _snapshot
 from backend.app.graph.traversal import _downstream, get_downstream
-from backend.app.main import app, create_app
 from backend.app.services.graph_service import (
     HISTORY,
     RAW,
@@ -38,3 +37,12 @@ __all__ = [
     "_apply_delete",
     "_rebuild_from_history",
 ]
+
+
+def __getattr__(name: str):
+    """Lazy-load app and create_app to avoid circular import warnings when running main.py."""
+    if name in ("app", "create_app"):
+        from backend.app.main import app, create_app
+
+        return app if name == "app" else create_app
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

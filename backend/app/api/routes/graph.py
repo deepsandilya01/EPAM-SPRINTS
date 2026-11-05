@@ -1,20 +1,22 @@
 from __future__ import annotations
 
-from flask import Blueprint, jsonify
+from fastapi import APIRouter
+from fastapi.responses import JSONResponse
 
 from backend.app.services.graph_service import service_instance
 
-graph_bp = Blueprint("graph", __name__)
+router = APIRouter()
+graph_bp = router
 graph_service = service_instance
 
 
-@graph_bp.route("/graph", methods=["GET"])
+@router.get("/graph")
 def api_graph():
     """Return active graph structure formatted for UI visualization."""
-    return jsonify(graph_service.get_graph_json())
+    return graph_service.get_graph_json()
 
 
-@graph_bp.route("/node/<node_id>", methods=["DELETE"])
+@router.delete("/node/{node_id}")
 def api_delete_node(node_id: str):
     """
     Simulate supplier disruption or component deletion.
@@ -22,24 +24,24 @@ def api_delete_node(node_id: str):
     """
     graph = graph_service.get_graph()
     if node_id not in graph:
-        return jsonify({"error": f"Node '{node_id}' not found"}), 404
+        return JSONResponse(status_code=404, content={"error": f"Node '{node_id}' not found"})
 
     result = graph_service.apply_delete(node_id)
-    return jsonify(result)
+    return result
 
 
-@graph_bp.route("/undo", methods=["POST"])
+@router.post("/undo")
 def api_undo():
     """Undo the last deletion by restoring the previous graph snapshot."""
     restored = graph_service.undo()
     if restored is None:
-        return jsonify({"error": "Nothing to undo"}), 400
+        return JSONResponse(status_code=400, content={"error": "Nothing to undo"})
 
-    return jsonify(restored)
+    return restored
 
 
-@graph_bp.route("/reset", methods=["POST"])
+@router.post("/reset")
 def api_reset():
     """Reset graph to the canonical baseline dataset."""
     result = graph_service.reset()
-    return jsonify(result)
+    return result

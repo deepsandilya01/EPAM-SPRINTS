@@ -8,7 +8,6 @@ import time
 from typing import Any
 
 import networkx as nx
-from flask import request
 
 from backend.app.data.loader import load_scenario_dataset
 from backend.app.graph.builder import build_graph
@@ -243,9 +242,8 @@ class GraphService:
             if node_id in self.graph:
                 self.apply_delete(node_id)
 
-    def sync_state_from_cookie(self) -> None:
+    def sync_state_from_cookie(self, cookie_val: str | None = None) -> None:
         """Synchronize in-memory graph state from HTTP cookie."""
-        cookie_val = request.cookies.get(STATE_COOKIE)
         if not cookie_val:
             return
         try:

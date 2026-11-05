@@ -5,12 +5,53 @@ from typing import Any
 
 import networkx as nx
 import pytest
+from fastapi.testclient import TestClient
 
 from backend.app.data.loader import get_data_file_path, load_scenario_dataset
 from backend.app.graph.builder import build_graph
 from backend.app.main import app
 from backend.app.services.graph_service import GRAPH, UNDO_STACK
 from backend.app.validation import ValidationPolicy
+
+
+class FastAPITestResponseWrapper:
+    """Compatibility wrapper providing both Flask and FastAPI response interfaces."""
+
+    def __init__(self, response):
+        self._response = response
+        self.status_code = response.status_code
+        self.content = response.content
+        self.data = response.content
+        self.headers = response.headers
+
+    def get_json(self):
+        return self._response.json()
+
+    def json(self):
+        return self._response.json()
+
+
+class FastAPITestClientWrapper:
+    """Client wrapper providing seamless test API access."""
+
+    def __init__(self, client: TestClient):
+        self._client = client
+
+    def get(self, *args, **kwargs):
+        res = self._client.get(*args, **kwargs)
+        return FastAPITestResponseWrapper(res)
+
+    def post(self, *args, **kwargs):
+        res = self._client.post(*args, **kwargs)
+        return FastAPITestResponseWrapper(res)
+
+    def delete(self, *args, **kwargs):
+        res = self._client.delete(*args, **kwargs)
+        return FastAPITestResponseWrapper(res)
+
+    def put(self, *args, **kwargs):
+        res = self._client.put(*args, **kwargs)
+        return FastAPITestResponseWrapper(res)
 
 
 @pytest.fixture(scope="session")
@@ -48,16 +89,16 @@ def integrity_policy() -> ValidationPolicy:
 @pytest.fixture
 def app_client():
     """
-    Provide an isolated Flask test client with automatic graph state cleanup.
+    Provide an isolated FastAPI test client with automatic graph state cleanup.
     Ensures mutations (deletion, undo, reset) in one test do not leak into another.
     """
     orig_nodes = copy.deepcopy(dict(GRAPH.nodes(data=True)))
     orig_edges = copy.deepcopy(list(GRAPH.edges(data=True)))
     orig_undo = copy.deepcopy(UNDO_STACK)
 
-    app.config["TESTING"] = True
-    with app.test_client() as client:
-        yield client
+    with TestClient(app) as client:
+        wrapped_client = FastAPITestClientWrapper(client)
+        yield wrapped_client
 
     # Restore global state after test
     GRAPH.clear()

@@ -1,39 +1,42 @@
 from __future__ import annotations
 
-from flask import Blueprint, jsonify, request
+from typing import Any, Dict
+
+from fastapi import APIRouter, Body
+from fastapi.responses import JSONResponse
 
 from backend.app.schemas.traversal import TraversalRequestSchema
 from backend.app.services.graph_service import service_instance
 
-traversal_bp = Blueprint("traversal", __name__)
+router = APIRouter()
+traversal_bp = router
 graph_service = service_instance
 
 
-@traversal_bp.route("/downstream/<node_id>", methods=["GET"])
+@router.get("/downstream/{node_id}")
 def api_downstream(node_id: str):
     """Return all downstream reachable node IDs from starting node using BFS."""
     result = graph_service.get_downstream_reachability(node_id)
     if result is None:
-        return jsonify({"error": f"Node '{node_id}' not found"}), 404
-    return jsonify(result)
+        return JSONResponse(status_code=404, content={"error": f"Node '{node_id}' not found"})
+    return result
 
 
-@traversal_bp.route("/impact/<node_id>", methods=["GET"])
+@router.get("/impact/{node_id}")
 def api_impact(node_id: str):
     """Return cascading blast radius impact details for node_id."""
     result = graph_service.get_downstream_impact(node_id)
     if result is None:
-        return jsonify({"error": f"Node '{node_id}' not found"}), 404
-    return jsonify(result)
+        return JSONResponse(status_code=404, content={"error": f"Node '{node_id}' not found"})
+    return result
 
 
-@traversal_bp.route("/traversal", methods=["POST"])
-def api_traversal():
+@router.post("/traversal")
+def api_traversal(payload: Dict[str, Any] = Body(default_factory=dict)):
     """Execute downstream reachability trace from POST payload."""
-    payload = request.get_json(silent=True) or {}
     node_id = payload.get("node_id", payload.get("start_node_id", ""))
     if not node_id:
-        return jsonify({"error": "node_id or start_node_id is required"}), 400
+        return JSONResponse(status_code=400, content={"error": "node_id or start_node_id is required"})
 
     try:
         req_schema = TraversalRequestSchema(node_id=str(node_id))
@@ -43,5 +46,5 @@ def api_traversal():
 
     result = graph_service.get_downstream_reachability(node_id)
     if result is None:
-        return jsonify({"error": f"Node '{node_id}' not found"}), 404
-    return jsonify(result)
+        return JSONResponse(status_code=404, content={"error": f"Node '{node_id}' not found"})
+    return result

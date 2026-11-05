@@ -1,37 +1,21 @@
 from __future__ import annotations
 
-from flask import Blueprint
+from fastapi import APIRouter
 
-from backend.app.api.routes.benchmarks import benchmarks_bp
-from backend.app.api.routes.graph import graph_bp
-from backend.app.api.routes.health import health_bp
-from backend.app.api.routes.traversal import traversal_bp
-from backend.app.api.routes.validation import validation_bp
-from backend.app.services.graph_service import (
-    _persist_state_cookie,
-    _sync_state_from_cookie,
-)
+from backend.app.api.routes.benchmarks import router as benchmarks_router
+from backend.app.api.routes.graph import router as graph_router
+from backend.app.api.routes.health import router as health_router
+from backend.app.api.routes.traversal import router as traversal_router
+from backend.app.api.routes.validation import router as validation_router
 
-api_bp = Blueprint("api", __name__, url_prefix="/api")
+api_router = APIRouter(prefix="/api")
+api_bp = api_router
 
-# Register sub-blueprints directly on api_bp
-api_bp.register_blueprint(graph_bp)
-api_bp.register_blueprint(traversal_bp)
-api_bp.register_blueprint(validation_bp)
-api_bp.register_blueprint(benchmarks_bp)
-api_bp.register_blueprint(health_bp)
+# Register sub-routers onto api_router
+api_router.include_router(graph_router, tags=["Graph"])
+api_router.include_router(traversal_router, tags=["Traversal"])
+api_router.include_router(validation_router, tags=["Validation"])
+api_router.include_router(benchmarks_router, tags=["Benchmarks"])
+api_router.include_router(health_router, tags=["Health"])
 
-
-@api_bp.before_request
-def sync_client_state():
-    """Synchronize in-memory graph state from cookie history before handling API request."""
-    _sync_state_from_cookie()
-
-
-@api_bp.after_request
-def persist_client_state(response):
-    """Persist updated graph history into client cookie."""
-    return _persist_state_cookie(response)
-
-
-__all__ = ["api_bp"]
+__all__ = ["api_router"]
