@@ -1,0 +1,34 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "reflow"
+version = "0.1.0"
+description = "RE:Flow - Supply Chain Graph & Scenario Generator"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi>=0.110.0",
+    "uvicorn[standard]>=0.28.0",
+    "httpx>=0.27.0",
+    "networkx>=3.2.1",
+    "pydantic>=2.6.0",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["backend/tests"]
+pythonpath = ["backend"]
+
+[tool.ruff]
+target-version = "py39"
+line-length = 100
+exclude = [
+    ".venv",
+    "__pycache__",
+    ".pytest_cache",
+    ".git",
+]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W", "UP"]
+ignore = ["E501", "UP006", "UP007", "UP035", "UP042", "UP045", "W293"]

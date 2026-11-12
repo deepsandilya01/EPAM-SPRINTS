@@ -1,217 +1,277 @@
-# IntelliTwin — Supply Chain Graph & Scenario Generator
-### Team PHOTON • Sprint 1 Delivery
+# RE:Flow — Supply Chain Graph & Scenario Generator
 
-IntelliTwin is a production-grade enterprise digital twin and supply chain graph visualization application. It provides interactive multi-tier dependency tracing, BFS graph traversal, impact propagation analysis, and scenario simulation for complex manufacturing networks.
-
-![IntelliTwin Graph Explorer Architecture](https://img.shields.io/badge/Architecture-Clean%20Hexagonal-blue)
-![React](https://img.shields.io/badge/React-19.3-blue)
-![TypeScript](https://img.shields.io/badge/TypeScript-6.0-blue)
-![Vite](https://img.shields.io/badge/Vite-8.3-purple)
-![TailwindCSS](https://img.shields.io/badge/TailwindCSS-3.4-teal)
-![XYFlow](https://img.shields.io/badge/@xyflow/react-12.12-orange)
-![Tests](https://img.shields.io/badge/Tests-27%20Passing-brightgreen)
+RE:Flow is a high-performance supply chain dependency mapping and impact analysis platform. It models multi-tier supply chain networks as directed acyclic graphs (DAGs) using NetworkX, simulating disruption cascades, computing real-time blast radii, and executing topological validations.
 
 ---
 
-## 📸 Overview & Key Capabilities
+## 1. Project Overview & Technology Stack
 
-- **Dynamic Supply Chain Graph Generator**:
-  - Configure quantity of **Suppliers (1–20)**, **BOM Parts (1–50)**, **Finished Products (1–20)**, and **Customer Orders (1–100)** via sidebar inputs.
-  - Generates realistic, unique entity IDs (`SUP-XX`, `PART-XX`, `PROD-XX`, `ORD-XX`) and valid directed relationships (`SUPPLIES`, `USED_IN`, `FULFILLS`).
-  - Automatic non-overlapping vertical column layout calculation.
-  - Validates positive integers and prevents empty/negative/decimal inputs.
-- **Interactive Direction-Aware Hover Path Highlighting**:
-  - Hovering on any node triggers real-time graph traversal discovering its entire upstream and downstream supply-chain connections.
-  - Animates connected edges with flowing dashes (`@keyframes edge-flow`) in relationship category colors.
-  - Dims unrelated nodes and edges to 25% opacity.
-  - Displays contextual floating tooltips with direct and total upstream/downstream connection counts without overwriting selected node details.
-  - Respects user accessibility preferences (`prefers-reduced-motion`).
-- **Left Sidebar (275px fixed)**:
-  - Input parameters: Supplier selector (`SUP-01`...`SUP-N`), Trace Type (Downstream / Upstream), Highlight Depth (`All Levels`, `Direct Parts`, `Parts + Products`), Node Filter chips, Unaffected Nodes toggle switch.
-  - Primary **Generate Graph** action triggering reactive updates across the canvas, metrics, summary, and order reachability.
-  - Quick Actions: **Reset View**, **Fit to Screen**, **Download Graph (PNG)**, **Export Data (CSV)**.
-- **Top Header**:
-  - Breadcrumb (`Supply Chain > Graph Explorer > Downstream Trace`).
-  - Date selector (`Feb 5, 2025`).
-  - **Run Simulation** trigger with local propagation feedback.
-  - User avatar.
-- **Summary Cards**:
-  - 4 Pastel KPI cards: **Suppliers (2)**, **BOM Parts (5)**, **Finished Products (2)**, **Customer Orders (10)**.
-- **Main Graph Visualization (`@xyflow/react`)**:
-  - 4-column horizontal dependency layout:
-    - **Column 1: Suppliers** (`SUP-01`, `SUP-02`)
-    - **Column 2: BOM Parts** (`PART-01` to `PART-05`)
-    - **Column 3: Finished Products** (`PROD-01`, `PROD-02`)
-    - **Column 4: Customer Orders** (`ORD-01` to `ORD-10`)
-  - 19 nodes, 21 directed edges (6 `SUPPLIES`, 5 `USED_IN`, 10 `FULFILLS`).
-  - Category-specific pastel and active badge styling with glow rings and relationship-colored cubic bezier curves.
-  - Floating graph controls toolbar: search filter, zoom in/out, percentage display, fit view, and fullscreen toggle.
-- **Right Sidebar (300px)**:
-  - **Node Details**: Displays dynamic, type-discriminated attributes (Suppliers, BOM parts, Finished products, Customer orders).
-  - **Traversal Summary**: Displays source supplier, total entities reached, BOM parts reached, products reached, and customer orders reached.
-  - **Legend**: Color-coded category markers and arrow relationship guide.
-- **Bottom Traversal & Benchmark Panels**:
-  - **Traversal Performance**: Total Traversal Time (measured in ms via `performance.now()`), Visited Nodes, Traversed Edges, Algorithm (`BFS`, $O(V + E)$).
-  - **Step-wise Traversal Timing Table**: Step, From Node, To Node, Relation, Traversal Time (ms), Cumulative Time (ms) for the path to `ORD-01`.
-  - **Reachable Customer Orders**: Color-coded active blue pills (`ORD-01`–`ORD-06` for `SUP-01`; `ORD-01`–`ORD-10` for `SUP-02`) and inactive grey pills.
+- **Backend Framework**: Python 3.11+ with Flask
+- **Graph Processing Engine**: NetworkX (`DiGraph`)
+- **Domain Modeling & Contracts**: Dataclasses and Pydantic v2
+- **Frontend Visualization**: Interactive D3.js (v7) with SVG force-directed layout, zoom, drag, and live blast-radius preview
+- **Static Asset Serving**: Native Flask static serving directly from `backend/app/static/`
+- **Deployment Platform**: **Render** (unified web service, zero database dependencies, zero Vercel configuration)
+- **Data Architecture**: Self-contained JSON datasets inside `backend/app/data/` (no root-level `data/` directory)
 
 ---
 
-## 🛠️ Mandatory Technology Stack
+## 2. Core Functional Capabilities
 
-| Layer | Library | Purpose |
-|---|---|---|
-| **Core Framework** | React 19 + TypeScript | Type-safe UI architecture |
-| **Build Tooling** | Vite | Ultra-fast HMR and bundling |
-| **Styling** | Tailwind CSS | Utility-first design system matching screenshot palette |
-| **Graph Engine** | `@xyflow/react` (React Flow) | Horizontal DAG layout, custom nodes, bezier edges |
-| **Client UI State** | Redux Toolkit (`@reduxjs/toolkit`) | Filter states, depth, selections, and viewport triggers |
-| **Server State** | TanStack Query (`@tanstack/react-query`) | Asynchronous data fetching cache & future API hydration |
-| **HTTP Client** | Axios | Configured client ready for FastAPI integration |
-| **Routing** | React Router v7 | Seamless page routing (`/`, `/graph-explorer`, `/validation`, `/performance`) |
-| **Charts** | Recharts | Traversal latency & benchmark distribution charts |
-| **Icons** | Lucide React | Consistent enterprise icons |
-| **Testing** | Vitest + React Testing Library | 19 automated tests verifying scenario oracles and UI |
+### Graph Construction & 4-Tier Topology
+- Loads canonical baseline scenario with **19 nodes** and **21 directed edges**:
+  - **Tier 1 (Suppliers)**: 2 primary component & material vendors (`SUP-01`, `SUP-02`)
+  - **Tier 2 (BOM Parts)**: 5 bill of materials items (`PART-01` through `PART-05`)
+  - **Tier 3 (Finished Products)**: 2 manufactured assemblies (`PROD-01`, `PROD-02`)
+  - **Tier 4 (Customer Orders)**: 10 customer demand orders (`ORD-01` through `ORD-10`)
+- Validates 3 strict relationship types:
+  - `SUPPLIES`: Supplier $\rightarrow$ BOM Part
+  - `USED_IN`: BOM Part $\rightarrow$ Finished Product
+  - `FULFILLS`: Finished Product $\rightarrow$ Customer Order
+
+### Real-Time Traversal & Blast-Radius Impact Analysis
+- High-performance Breadth-First Search (BFS) reachability traversal (`< 10ms` SLA verified, typical runtime `< 0.05ms`).
+- Blast radius calculations displaying direct downstream dependencies, affected orders, and complexity metrics ($O(V + E)$).
+
+### Mutation Operations & State Preservation
+- **Cascading Deletion**: Deleting a node automatically cascades through all downstream dependent parts, assemblies, and customer orders.
+- **Undo Operation**: Restores previously deleted nodes and edges with attribute integrity in under 0.1ms.
+- **Reset Operation**: Idempotently resets graph topology back to the canonical 19-node baseline.
+- **Session State Synchronization**: Seamless state preservation across HTTP sessions via client state cookies.
+
+### Multi-Level Graph & Schema Validation
+- Pre-construction JSON schema and unique ID validation.
+- Live graph DAG acyclicity verification with exact cycle path detection.
+- Baseline entity count verification against SLA metrics.
 
 ---
 
-## 🗂️ Application Structure
+## 3. Final Repository Architecture
 
 ```text
-frontend/
-├── src/
-│   ├── api/                     # Decoupled repository layer ready for FastAPI
-│   │   ├── client.ts            # Axios instance with VITE_DATA_MODE & interceptors
-│   │   ├── graph.api.ts         # Graph data query hooks
-│   │   ├── traversal.api.ts     # Traversal execution query hooks
-│   │   ├── validation.api.ts    # Graph integrity audit hooks
-│   │   └── benchmark.api.ts    # Algorithmic benchmark query hooks
-│   ├── components/
-│   │   ├── dashboard/           # Summary cards, performance metrics, tables, pills
-│   │   ├── graph/               # React Flow custom nodes, custom edges, canvas toolbar
-│   │   └── layout/              # Sidebar, Header, Right details panel
-│   ├── mocks/                   # Canonical scenario datasets and algorithms
-│   │   ├── scenario.ts          # 19 nodes, 21 directed edges, entity attributes
-│   │   ├── graph.ts             # Deterministic coordinates and graph topology
-│   │   ├── validation.ts        # Invariant checks: DAG cycles, endpoints, IDs
-│   │   └── benchmark.ts         # Empirical latency profiler (BFS vs DFS)
-│   ├── pages/                   # Application routes
-│   │   ├── GraphExplorerPage.tsx # Primary screenshot recreation
-│   │   ├── OverviewPage.tsx     # System overview and entry portal
-│   │   ├── ValidationPage.tsx   # Integrity audit findings
-│   │   └── PerformancePage.tsx  # Benchmark latency charts & complexity
-│   ├── services/
-│   │   ├── traversal.service.ts # Pure BFS traversal with depth & filters
-│   │   └── export.service.ts    # CSV data export & PNG canvas download
-│   ├── store/                   # Redux Toolkit store and slices
-│   │   ├── slices/graphUiSlice.ts   # Active supplier, filters, depth, direction
-│   │   ├── slices/graphViewSlice.ts # Zoom, search, fullscreen, reset triggers
-│   │   └── index.ts
-│   ├── test/                    # Automated Vitest test suite
-│   │   ├── scenario.test.ts     # Edge/node count and direction verification
-│   │   ├── traversal.test.ts    # Oracle reachability (SUP-01 & SUP-02)
-│   │   ├── validation.test.ts   # Integrity checks and cycle detection
-│   │   ├── export.test.ts       # CSV and PNG export handling
-│   │   └── components.test.tsx  # React component and Redux store tests
-│   └── types/                   # Unified domain & graph TypeScript definitions
+EPAM-SPRINTS/
+├── backend/
+│   ├── app/
+│   │   ├── __init__.py                 # Application package initializer
+│   │   ├── main.py                     # Flask entry point, error handlers & static serving
+│   │   │
+│   │   ├── api/
+│   │   │   ├── __init__.py             # Unified API blueprint (`api_bp`) & session state hooks
+│   │   │   └── routes/
+│   │   │       ├── __init__.py         # Routes package initializer
+│   │   │       ├── graph.py            # GET /api/graph, DELETE /api/node/<id>, POST /undo, POST /reset
+│   │   │       ├── traversal.py        # GET /api/downstream/<id>, GET /api/impact/<id>, POST /api/traversal
+│   │   │       ├── validation.py       # GET /api/validation (baseline & integrity modes)
+│   │   │       ├── benchmarks.py       # GET /api/benchmark/tracing (SLA performance telemetry)
+│   │   │       └── health.py           # GET /api/health (service health & entity counts)
+│   │   │
+│   │   ├── core/
+│   │   │   ├── __init__.py             # Core package initializer
+│   │   │   ├── config.py               # Type-safe Settings dataclass
+│   │   │   ├── constants.py            # TierType, EdgeType, ALLOWED_TRANSITIONS, baseline counts
+│   │   │   └── exceptions.py           # ReflowException domain exception hierarchy
+│   │   │
+│   │   ├── data/
+│   │   │   ├── __init__.py             # Data package initializer
+│   │   │   ├── loader.py               # Canonical JSON dataset loader & path resolver
+│   │   │   ├── datasets/
+│   │   │   │   └── scenario_dataset.json  # Authoritative canonical 19-node dataset
+│   │   │   └── schemas/
+│   │   │       └── graph_schema.json      # Formal JSON Schema specification
+│   │   │
+│   │   ├── graph/
+│   │   │   ├── __init__.py             # Graph package initializer
+│   │   │   ├── builder.py              # NetworkX DiGraph construction from domain aggregate
+│   │   │   ├── operations.py           # graph_to_json, snapshot_graph, restore_graph
+│   │   │   └── traversal.py            # High-resolution BFS traversal & monotonic timer
+│   │   │
+│   │   ├── models/
+│   │   │   ├── __init__.py             # Domain models initializer
+│   │   │   ├── nodes.py                # SupplierNode, BOMPartNode, FinishedProductNode, CustomerOrderNode
+│   │   │   ├── edges.py                # SuppliesEdge, UsedInEdge, FulfillsEdge
+│   │   │   └── graph.py                # SupplyChainGraph domain aggregate container
+│   │   │
+│   │   ├── schemas/
+│   │   │   ├── __init__.py             # Pydantic schemas initializer
+│   │   │   ├── graph.py                # GraphResponseSchema, NodeResponseSchema, EdgeResponseSchema
+│   │   │   ├── traversal.py            # TraversalRequestSchema, TraversalResponseSchema
+│   │   │   └── validation.py           # ValidationRequestSchema, ValidationResponseSchema
+│   │   │
+│   │   ├── services/
+│   │   │   ├── __init__.py             # Services package initializer
+│   │   │   ├── graph_service.py        # Graph lifecycle, reachability, blast-radius & undo stack
+│   │   │   ├── validation_service.py   # Connects API routes to validation engine
+│   │   │   └── benchmark_service.py    # Traversal & graph construction telemetry
+│   │   │
+│   │   ├── static/
+│   │   │   ├── sprint-1-demo.html      # Responsive HTML5 UI application shell
+│   │   │   ├── css/
+│   │   │   │   └── sprint-1-demo.css   # Dark glassmorphism stylesheet & animations
+│   │   │   └── js/
+│   │   │       └── sprint-1-demo.js    # D3.js force layout, drag/zoom, interactive demo
+│   │   │
+│   │   └── validation/
+│   │       ├── __init__.py             # Clean public validation exports
+│   │       ├── models.py               # Validation dataclasses, policies, and enums
+│   │       ├── cycles.py               # Pure cycle detection and DAG acyclicity evaluation
+│   │       ├── nodes.py                # Node records, category, and field validation
+│   │       ├── edges.py                # Edge records, endpoint references, and direction rules
+│   │       ├── validator.py            # High-level validation orchestrator
+│   │       └── reporting.py            # ASCII console & JSON file report formatters
+│   │
+│   ├── reports/                        # Local output directory for benchmark & validation reports
+│   ├── tests/
+│   │   ├── __init__.py
+│   │   ├── conftest.py                 # Pytest fixtures and test graph instances
+│   │   ├── fixtures/
+│   │   │   └── sample_scenario.json    # Isolated unit test fixture
+│   │   ├── unit/
+│   │   │   ├── __init__.py
+│   │   │   ├── test_domain_models.py   # Domain model unit tests
+│   │   │   ├── test_api_schemas.py     # Pydantic schema unit tests
+│   │   │   ├── test_graph.py           # Graph construction & count unit tests
+│   │   │   ├── test_traversal.py       # BFS reachability & cycle tests
+│   │   │   ├── test_validation.py      # DAG & topological audit tests
+│   │   │   └── test_edge_cases.py      # Boundary, malformed JSON & error tests
+│   │   └── integration/
+│   │       ├── __init__.py
+│   │       └── test_api.py             # 25 end-to-end Flask API integration tests
+│   └── pytest.ini                      # Pytest runner configuration
+│
+├── docs/                               # Comprehensive project documentation
+│   ├── README.md                       # Documentation index
+│   ├── team-guide.md                   # Complete team architecture & codebase guide (Hinglish)
+│   ├── team-responsibilities.md        # 12-member individual study and role assignment guide
+│   ├── architecture.md                 # System architecture and Mermaid flow diagram
+│   ├── project-structure.md            # Detailed file and directory inventory
+│   ├── installation-and-setup.md       # Setup, prerequisites, and repository guide
+│   ├── running-locally.md              # Local execution options and server commands
+│   ├── configuration.md                # Environment variables and configuration
+│   ├── graph-model.md                  # 4-tier DAG domain model and invariants
+│   ├── validation.md                   # Modular validation engine guide
+│   ├── api-reference.md                # Exhaustive REST API endpoint documentation
+│   ├── frontend.md                     # D3.js frontend visualization architecture
+│   ├── testing.md                      # Pytest test suite architecture and execution
+│   ├── benchmarking.md                 # Traversal latency benchmarks and SLA
+│   └── troubleshooting.md              # Debugging procedures and common issues
+│
+├── scripts/
+│   ├── run_local.py                    # Local development server launcher
+│   ├── validate_graph.py               # Standalone graph validation CLI
+│   └── run_benchmarks.py               # Performance benchmarking CLI harness
+├── .env.example                        # Template environment variables
+├── .gitignore                          # Standard git ignore specification
+├── pyproject.toml                      # Build system, package metadata & linter configuration
+├── render.yaml                         # Production Render cloud deployment blueprint
+└── README.md                           # Main repository documentation
 ```
 
 ---
 
-## 🚀 Getting Started
+## 4. Getting Started Locally
 
 ### Prerequisites
-- **Node.js**: v18.0.0 or higher (v24+ tested)
-- **npm**: v9.0.0 or higher
+- Python 3.11+
+- pip
 
-### Installation
-
-Clone the repository and install dependencies:
-
+### Installation & Environment Setup
 ```bash
-cd frontend
-npm install
+# 1. Clone repository
+git clone https://github.com/deepsandilya01/EPAM-SPRINTS.git
+cd EPAM-SPRINTS
+
+# 2. Create and activate virtual environment
+python3 -m venv .venv
+source .venv/bin/activate
+
+# 3. Install dependencies in editable mode
+pip install -e .
 ```
 
-Or from the workspace root:
-
+### Running the Application
+Launch the local development server:
 ```bash
-npm install --prefix frontend
+python scripts/run_local.py
 ```
-
-### Running Locally (Development Mode)
-
-Start the local Vite development server:
-
+Or run directly through the Flask application module:
 ```bash
-npm run dev
+python backend/app/main.py
 ```
-
-Open [http://localhost:5173/graph-explorer](http://localhost:5173/graph-explorer) (or the port indicated in the terminal) in your browser.
+Access the application:
+- **Interactive UI Demo**: [http://127.0.0.1:5050/](http://127.0.0.1:5050/)
+- **Health Diagnostic Endpoint**: [http://127.0.0.1:5050/api/health](http://127.0.0.1:5050/api/health)
+- **Graph Topology API**: [http://127.0.0.1:5050/api/graph](http://127.0.0.1:5050/api/graph)
 
 ---
 
-## 🧪 Running Automated Tests
+## 5. Testing & Quality Verification
 
-Run the Vitest test suite:
-
+### Run Full Test Suite (129 Tests)
+Execute all unit and integration tests via pytest:
 ```bash
-npm test
+pytest backend/tests -v
 ```
 
-To run in watch mode:
+### Run Static Analysis (Ruff)
+Validate formatting and linting:
 ```bash
-npm run test:watch
+ruff check backend/ scripts/
 ```
 
-### Verified Scenario Test Matrix
-
-All 19 automated tests execute cleanly against the canonical scenario:
-- ✅ **19 Nodes Total**: 2 Suppliers, 5 BOM Parts, 2 Finished Products, 10 Customer Orders.
-- ✅ **21 Directed Edges Total**: 6 `SUPPLIES`, 5 `USED_IN`, 10 `FULFILLS`.
-- ✅ **SUP-01 Reachability Oracle**:
-  - 3 BOM Parts (`PART-01`, `PART-02`, `PART-05`).
-  - 1 Finished Product (`PROD-01`).
-  - 6 Customer Orders (`ORD-01` through `ORD-06`).
-  - 10 Total Reached Entities.
-- ✅ **SUP-02 Reachability Oracle**:
-  - 3 BOM Parts (`PART-03`, `PART-04`, `PART-05`).
-  - 2 Finished Products (`PROD-01`, `PROD-02`).
-  - 10 Customer Orders (`ORD-01` through `ORD-10`).
-  - 15 Total Reached Target Entities.
-- ✅ **Deduplication**: 0 duplicate entities in BFS traversal results.
-- ✅ **Highlight Depth**: Accurately bounds exploration to Level 1 (Direct Parts) and Level 2 (Parts + Products).
-- ✅ **Upstream Traversal**: Traverses backwards from order to products, parts, and suppliers.
-- ✅ **Topology Invariants**: Validates DAG acyclic property, flags missing endpoints, and verifies identifier uniqueness.
-
----
-
-## 🏗️ Production Build & Verification
-
-To create an optimized production build:
-
+### Run Standalone Graph Validation CLI
+Validate dataset schema, DAG acyclicity, and baseline counts from the terminal:
 ```bash
-npm run build
+python scripts/validate_graph.py
 ```
 
-This compiles TypeScript with strict type checking and bundles assets with Vite into `frontend/dist/`.
-
-To preview the production bundle locally:
-
+### Run Traversal Benchmark CLI
+Execute performance benchmarking across iterations:
 ```bash
-npm run preview
+python scripts/run_benchmarks.py --iterations 100 --warmup 10
 ```
 
 ---
 
-## 🔌 Future FastAPI Backend Integration
+## 6. REST API Endpoints Overview
 
-The frontend is architected for drop-in FastAPI integration:
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/` | Serves the interactive D3.js visualization UI (`sprint-1-demo.html`). |
+| `GET` | `/api/health` | Service health status, version, and live node/edge counts. |
+| `GET` | `/api/graph` | Active NetworkX graph formatted for UI rendering (`nodes`, `edges`, `links`). |
+| `GET` | `/api/downstream/<id>` | Downstream reachable node IDs computed via BFS traversal. |
+| `GET` | `/api/impact/<id>` | Blast-radius preview, affected categories, and complexity details. |
+| `POST` | `/api/traversal` | JSON request-body driven downstream reachability traversal. |
+| `DELETE` | `/api/node/<id>` | Deletes node and triggers cascading removal of dependent downstream entities. |
+| `POST` | `/api/undo` | Restores the previous graph state from the undo stack. |
+| `POST` | `/api/reset` | Resets graph state back to the canonical 19-node baseline dataset. |
+| `GET` | `/api/validation` | Runs structural validation audit (`mode=baseline` or `mode=integrity`). |
+| `GET` | `/api/benchmark/tracing` | Measures traversal latency for a given node against the 10ms SLA. |
+| `GET` | `/api/benchmarks` | Micro-benchmark alias for performance telemetry. |
 
-1. Data fetching is isolated in `src/api/*` behind TanStack Query hooks.
-2. An environment variable controls the operational mode in `.env`:
-   ```bash
-   VITE_DATA_MODE=mock      # Options: 'mock' | 'live'
-   VITE_API_BASE_URL=http://localhost:8000
-   ```
-3. In `live` mode, all calls route through the configured `Axios` client (`src/api/client.ts`). Real network and status errors are propagated directly without synthetic fallback masking.
+---
+
+## 7. Render Cloud Deployment
+
+The application is configured for deployment exclusively on **Render** via `render.yaml`.
+
+### Render Deployment Configuration (`render.yaml`)
+```yaml
+services:
+  - type: web
+    name: reflow
+    env: python
+    buildCommand: "pip install -e ."
+    startCommand: "python backend/app/main.py"
+    envVars:
+      - key: PORT
+        value: 10000
+      - key: FLASK_ENV
+        value: production
+```
+
+### Render Deployment Steps
+1. Push repository changes to GitHub (`main` branch).
+2. Connect repository to Render dashboard as a **Blueprint** or **Web Service**.
+3. Render automatically executes `pip install -e .` and starts `python backend/app/main.py`.
+4. The service will bind to the assigned port and serve both the REST API and the interactive D3 frontend with zero external database dependencies.
