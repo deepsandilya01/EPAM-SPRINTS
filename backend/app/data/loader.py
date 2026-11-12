@@ -42,7 +42,15 @@ def load_scenario_dataset(data_path: str | pathlib.Path | None = None) -> dict[s
 
     try:
         with open(file_path, encoding="utf-8") as f:
-            return json.load(f)
+            data = json.load(f)
+        if "simulation" not in data:
+                raise ValueError(
+                    "Simulation pipeline initialization failed: Missing required 'simulation' "
+                    "configuration block from dataset schema! Re-run oracle data integration."
+                )
+        
+        return data
+
     except json.JSONDecodeError as e:
         logger.error(f"Failed to decode JSON from {file_path}: {e}")
         raise
