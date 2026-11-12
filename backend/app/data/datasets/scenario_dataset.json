@@ -34,7 +34,9 @@
         "supplier_id": "SUP-01",
         "name": "Apex Components",
         "location": "Pune",
-        "note": "Primary supplier, electronics"
+        "note": "Primary supplier, electronics",
+        
+        "recovery_lead_time_hours":5.0
       },
       {
         "id": "SUP-02",
@@ -43,7 +45,9 @@
         "supplier_id": "SUP-02",
         "name": "Bharat Precision Parts",
         "location": "Indore",
-        "note": "Primary supplier, mechanical"
+        "note": "Primary supplier, mechanical",
+        
+        "recovery_lead_time_hours":6.0
       }
     ],
     "parts": [
@@ -55,7 +59,10 @@
         "name": "Control Board",
         "stock_on_hand": 120,
         "daily_consumption": 20,
-        "days_of_supply": 6.0
+        "days_of_supply": 6.0,
+
+        "initial_stock_units":120.0,
+        "hourly_consumption_units":0.8333
       },
       {
         "id": "PART-02",
@@ -65,7 +72,10 @@
         "name": "Battery Cell Pack",
         "stock_on_hand": 200,
         "daily_consumption": 25,
-        "days_of_supply": 8.0
+        "days_of_supply": 8,
+
+        "initial_stock_units":200.0,
+        "hourly_consumption_units":1.0417
       },
       {
         "id": "PART-03",
@@ -75,7 +85,10 @@
         "name": "Motor Assembly",
         "stock_on_hand": 80,
         "daily_consumption": 10,
-        "days_of_supply": 8.0
+        "days_of_supply": 8.0,
+
+        "initial_stock_units":80.0,
+        "hourly_consumption_units":0.4167
       },
       {
         "id": "PART-04",
@@ -85,7 +98,10 @@
         "name": "Casing",
         "stock_on_hand": 150,
         "daily_consumption": 15,
-        "days_of_supply": 10.0
+        "days_of_supply": 10.0,
+
+        "initial_stock_units":150.0,
+        "hourly_consumption_units":0.625
       },
       {
         "id": "PART-05",
@@ -95,7 +111,10 @@
         "name": "Wiring Harness",
         "stock_on_hand": 60,
         "daily_consumption": 30,
-        "days_of_supply": 2.0
+        "days_of_supply": 2.0,
+        
+        "initial_stock_units":10.0,
+        "hourly_consumption_units":1.25
       }
     ],
     "products": [
@@ -125,7 +144,9 @@
         "customer": "Meridian Retail",
         "product_id": "PROD-01",
         "quantity": 40,
-        "deadline": "2026-11-05"
+        "deadline": "2026-11-05",
+
+        "delivery_deadline_hours":10.0
       },
       {
         "id": "ORD-02",
@@ -135,7 +156,9 @@
         "customer": "Zenith Electronics",
         "product_id": "PROD-01",
         "quantity": 25,
-        "deadline": "2026-11-07"
+        "deadline": "2026-11-07",
+
+        "delivery_deadline_hours":12.0
       },
       {
         "id": "ORD-03",
@@ -145,7 +168,9 @@
         "customer": "Northwind Traders",
         "product_id": "PROD-01",
         "quantity": 60,
-        "deadline": "2026-11-10"
+        "deadline": "2026-11-10",
+
+        "delivery_deadline_hours":36.0
       },
       {
         "id": "ORD-04",
@@ -155,7 +180,9 @@
         "customer": "Orbit Logistics",
         "product_id": "PROD-01",
         "quantity": 15,
-        "deadline": "2026-11-12"
+        "deadline": "2026-11-12",
+
+        "delivery_deadline_hours":48.0
       },
       {
         "id": "ORD-05",
@@ -165,7 +192,9 @@
         "customer": "Meridian Retail",
         "product_id": "PROD-01",
         "quantity": 30,
-        "deadline": "2026-11-15"
+        "deadline": "2026-11-15",
+
+        "delivery_deadline_hours":72.0
       },
       {
         "id": "ORD-06",
@@ -175,7 +204,9 @@
         "customer": "Lumen Systems",
         "product_id": "PROD-01",
         "quantity": 50,
-        "deadline": "2026-11-20"
+        "deadline": "2026-11-20",
+
+        "delivery_deadline_hours":96.0
       },
       {
         "id": "ORD-07",
@@ -185,7 +216,9 @@
         "customer": "Atlas Industries",
         "product_id": "PROD-02",
         "quantity": 20,
-        "deadline": "2026-11-06"
+        "deadline": "2026-11-06",
+
+        "delivery_deadline_hours":14.0
       },
       {
         "id": "ORD-08",
@@ -195,7 +228,9 @@
         "customer": "Kestrel Automation",
         "product_id": "PROD-02",
         "quantity": 35,
-        "deadline": "2026-11-09"
+        "deadline": "2026-11-09",
+
+        "delivery_deadline_hours":24.0
       },
       {
         "id": "ORD-09",
@@ -205,7 +240,9 @@
         "customer": "Northwind Traders",
         "product_id": "PROD-02",
         "quantity": 10,
-        "deadline": "2026-11-14"
+        "deadline": "2026-11-14",
+
+        "delivery_deadline_hours":50.0
       },
       {
         "id": "ORD-10",
@@ -215,7 +252,9 @@
         "customer": "Orbit Logistics",
         "product_id": "PROD-02",
         "quantity": 25,
-        "deadline": "2026-11-18"
+        "deadline": "2026-11-18",
+
+        "delivery_deadline_hours":120.0
       }
     ]
   },
@@ -395,5 +434,13 @@
         "to_order": "ORD-10"
       }
     ]
-  }
+  },
+
+  "simulation": {
+  "disruption_duration_hours": 8.0,
+  "simulation_horizon_hours": 72,
+  "expected_stockout_hour": 8.0,
+  "expected_failing_orders": ["ORD-01", "ORD-02"],
+  "expected_intervention_window_hours": 3.0
+}
 }
