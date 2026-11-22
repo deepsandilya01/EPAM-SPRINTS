@@ -7,6 +7,10 @@ from backend.app.models.edges import (
     create_edge,
 )
 from backend.app.models.graph import SupplyChainGraph
+from backend.app.models.inventory import (
+    HourlyStockPoint,
+    InventoryDepletionTimeline,
+)
 from backend.app.models.nodes import (
     BaseNode,
     BOMPartNode,
@@ -35,4 +39,7 @@ __all__ = [
     "create_edge",
     # Graph
     "SupplyChainGraph",
+    # Inventory Simulation (Feature 3)
+    "HourlyStockPoint",
+    "InventoryDepletionTimeline",
 ]
