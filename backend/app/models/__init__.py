@@ -20,6 +20,10 @@ from backend.app.models.nodes import (
     SupplierNode,
     create_node,
 )
+from backend.app.models.stockout import (
+    BreachedOrder,
+    StockoutPredictionResult,
+)
 
 __all__ = [
     # Nodes
@@ -42,4 +46,7 @@ __all__ = [
     # Inventory Simulation (Feature 3)
     "HourlyStockPoint",
     "InventoryDepletionTimeline",
+    # Stockout Prediction (Feature 4 - Anushka)
+    "BreachedOrder",
+    "StockoutPredictionResult",
 ]
