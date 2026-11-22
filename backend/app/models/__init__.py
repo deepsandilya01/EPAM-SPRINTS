@@ -7,6 +7,10 @@ from backend.app.models.edges import (
     create_edge,
 )
 from backend.app.models.graph import SupplyChainGraph
+from backend.app.models.inventory import (
+    HourlyStockPoint,
+    InventoryDepletionTimeline,
+)
 from backend.app.models.nodes import (
     BaseNode,
     BOMPartNode,
@@ -15,6 +19,10 @@ from backend.app.models.nodes import (
     NodeUnion,
     SupplierNode,
     create_node,
+)
+from backend.app.models.stockout import (
+    BreachedOrder,
+    StockoutPredictionResult,
 )
 
 __all__ = [
@@ -35,4 +43,10 @@ __all__ = [
     "create_edge",
     # Graph
     "SupplyChainGraph",
+    # Inventory Simulation (Feature 3)
+    "HourlyStockPoint",
+    "InventoryDepletionTimeline",
+    # Stockout Prediction (Feature 4 - Anushka)
+    "BreachedOrder",
+    "StockoutPredictionResult",
 ]
