@@ -1,20 +1,3 @@
-"""
-Project: RE:Flow
-Sprint: 2
-File: backend/app/api/routes/disruptions.py
-
-Primary Owner: Preetam
-Role: REST API Architect & OpenAPI Documentation Lead
-Supporting: Ansh (SimulationService), Deep (schemas)
-
-Purpose:
-FastAPI router exposing disruption simulation endpoints:
-- POST /api/v1/simulation/disrupt (official Sprint 2 benchmark route)
-- GET  /api/v1/simulation/benchmark
-- POST /api/disruptions (convenience alias)
-- GET  /api/disruptions/benchmark (convenience alias)
-"""
-
 from __future__ import annotations
 
 from typing import Any, Dict
