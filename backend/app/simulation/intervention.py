@@ -1,34 +1,5 @@
-"""
-Project: RE:Flow
-Sprint: 2
-File: backend/app/simulation/intervention.py
+"""Sprint 2 Feature 5: Intervention Window Calculator."""
 
-Primary Owner: Mishti
-Role: Decision-Intelligence & ΔT Formula Engineer
-
-Purpose:
-Calculates the intervention window (ΔT) to evaluate whether a supply disruption
-can be mitigated before critical stockout occurs and customer orders fail.
-
-Official Formula:
-    ΔT_intervention = T_stockout - T_current - t_recovery_lead_time
-
-Thresholds:
-    ΔT > 0  → FEASIBLE  (action window still open)
-    ΔT == 0 → CRITICAL  (last moment to act)
-    ΔT < 0  → BREACHED  (too late, irreversible damage)
-
-Benchmark Oracle Validation:
-    T_stockout       = 8.0 hours
-    T_current        = 0.0 hours
-    t_recovery       = 5.0 hours
-    ΔT = 8.0 - 0.0 - 5.0 = +3.0 hours
-    Status = FEASIBLE  (AC-09)
-"""
-
-from __future__ import annotations
-
-from typing import Optional
 from backend.app.models.intervention import InterventionWindowResult
 from backend.app.models.stockout import StockoutPredictionResult
 
@@ -38,21 +9,17 @@ def calculate_intervention_window(
     current_hour: float = 0.0,
     recovery_lead_time_hours: float = 5.0,
 ) -> InterventionWindowResult:
-    """Calculate the actionable intervention window ΔT.
+    """Calculate ΔT = T_stockout - T_current - t_recovery_lead_time.
 
-    Parameters
-    ----------
-    stockout_result : StockoutPredictionResult
-        Result from Anushka's stockout predictor.
-    current_hour : float
-        Current simulation reference hour (default: 0.0).
-    recovery_lead_time_hours : float
-        Supplier recovery lead time in hours (default: 5.0 for SUP-01).
+    Status rules from the Team Photon Sprint 2 responsibilities:
+    - ΔT > 0: FEASIBLE
+    - ΔT == 0: CRITICAL
+    - ΔT < 0: BREACHED
 
-    Returns
-    -------
-    InterventionWindowResult
-        Structured calculation with delta_t_hours, feasibility flag, and advice.
+    The calculator consumes Anushka's StockoutPredictionResult and copies
+    its breached order IDs. It does not recalculate order impact or choose a
+    supplier; the selected supplier's recovery lead time is supplied by the
+    caller (default 5.0 hours for the official benchmark).
     """
     t_stockout = stockout_result.stockout_hour
 
@@ -83,7 +50,7 @@ def calculate_intervention_window(
         is_feasible = False
         message = f"Intervention window BREACHED by {abs(delta_t):.1f} hours."
 
-    affected_ids = [o.order_id for o in stockout_result.breached_orders]
+    affected_ids = [order.order_id for order in stockout_result.breached_orders]
 
     return InterventionWindowResult(
         stockout_hour=t_stockout,
