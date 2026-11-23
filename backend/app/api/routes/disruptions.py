@@ -1,3 +1,15 @@
+"""
+Project: RE:Flow
+Sprint: 2
+File: backend/app/api/routes/disruptions.py
+
+Primary Owner: Preetam
+Role: REST API Architect & OpenAPI Documentation Lead
+
+Purpose:
+FastAPI REST endpoints for triggering disruption simulation and benchmark execution.
+"""
+
 from __future__ import annotations
 
 from typing import Any, Dict
