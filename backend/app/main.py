@@ -21,6 +21,10 @@ from backend.app.services.graph_service import (  # noqa: E402
     service_instance,
 )
 
+# Sprint 2: Eagerly initialize the simulation service so the
+# /api/disruptions endpoints are ready on first request.
+from backend.app.services.simulation_service import simulation_service  # noqa: E402, F401
+
 # Initialize FastAPI application
 app = FastAPI(
     title="RE:Flow — Team PHOTON Decision Intelligence",
