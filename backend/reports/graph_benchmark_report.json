@@ -1,14 +1,14 @@
 {
-  "timestamp": "2026-10-31T17:02:46.661550+00:00",
+  "timestamp": "2026-11-01T10:29:49.227454+00:00",
   "environment": {
-    "python_version": "3.9.6",
+    "python_version": "3.14.2",
     "python_implementation": "CPython",
-    "os_system": "Darwin",
-    "os_release": "27.2.0",
-    "os_version": "Darwin Kernel Version 27.2.0: Wed Oct 14 23:48:06 PDT 2026; root:xnu-13432.41.4~25/RELEASE_ARM64_T8142",
-    "machine": "arm64",
-    "processor": "arm",
-    "networkx_version": "3.2.1"
+    "os_system": "Windows",
+    "os_release": "11",
+    "os_version": "10.0.26300",
+    "machine": "AMD64",
+    "processor": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
+    "networkx_version": "3.7"
   },
   "workload": {
     "graph_nodes": 19,
@@ -24,13 +24,13 @@
     "threshold_ms": 10.0
   },
   "aggregate_metrics": {
-    "min_ms": 0.003,
-    "max_ms": 0.038,
-    "mean_ms": 0.003584,
-    "median_ms": 0.003833,
-    "p90_ms": 0.003959,
-    "p95_ms": 0.004,
-    "p99_ms": 0.004166
+    "min_ms": 0.0051,
+    "max_ms": 0.0252,
+    "mean_ms": 0.006525,
+    "median_ms": 0.0066,
+    "p90_ms": 0.0076,
+    "p95_ms": 0.0086,
+    "p99_ms": 0.011102
   },
   "node_benchmarks": {
     "SUP-01": {
@@ -45,14 +45,14 @@
         "ORD-06"
       ],
       "iterations": 1000,
-      "min_ms": 0.003,
-      "max_ms": 0.038,
-      "mean_ms": 0.003249,
-      "median_ms": 0.003125,
-      "p90_ms": 0.003375,
-      "p95_ms": 0.003461,
-      "p99_ms": 0.004208,
-      "std_dev_ms": 0.001148,
+      "min_ms": 0.0051,
+      "max_ms": 0.024,
+      "mean_ms": 0.005903,
+      "median_ms": 0.0056,
+      "p90_ms": 0.00691,
+      "p95_ms": 0.0081,
+      "p99_ms": 0.009602,
+      "std_dev_ms": 0.001131,
       "threshold_ms": 10.0,
       "passed_threshold": true
     },
@@ -68,14 +68,14 @@
         "ORD-06"
       ],
       "iterations": 1000,
-      "min_ms": 0.003791,
-      "max_ms": 0.007958,
-      "mean_ms": 0.00392,
-      "median_ms": 0.003917,
-      "p90_ms": 0.004,
-      "p95_ms": 0.004,
-      "p99_ms": 0.004083,
-      "std_dev_ms": 0.000145,
+      "min_ms": 0.0063,
+      "max_ms": 0.0252,
+      "mean_ms": 0.007148,
+      "median_ms": 0.0068,
+      "p90_ms": 0.0078,
+      "p95_ms": 0.0099,
+      "p99_ms": 0.0116,
+      "std_dev_ms": 0.001192,
       "threshold_ms": 10.0,
       "passed_threshold": true
     }

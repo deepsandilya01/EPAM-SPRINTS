@@ -1,3 +1,7 @@
+from backend.app.schemas.disruption import (
+    DisruptionRequest,
+    SimulationResponse,
+)
 from backend.app.schemas.graph import (
     EdgeResponseSchema,
     GraphFilterParamsSchema,
@@ -19,6 +23,9 @@ from backend.app.schemas.validation import (
 )
 
 __all__ = [
+    # Disruption Schemas (Sprint 2)
+    "DisruptionRequest",
+    "SimulationResponse",
     # Graph Schemas
     "NodeResponseSchema",
     "EdgeResponseSchema",

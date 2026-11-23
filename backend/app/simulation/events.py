@@ -2,7 +2,10 @@
 from datetime import datetime, timezone
 from uuid import uuid4
 
-from app.models.disruption import DisruptionEvent, DisruptionType
+try:
+    from backend.app.models.disruption import DisruptionEvent, DisruptionType
+except ImportError:
+    from app.models.disruption import DisruptionEvent, DisruptionType
 
 
 VALID_TIER1_SUPPLIERS = {"SUP-01", "SUP-02"}

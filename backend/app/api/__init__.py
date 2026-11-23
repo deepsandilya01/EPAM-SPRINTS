@@ -3,6 +3,7 @@ from __future__ import annotations
 from fastapi import APIRouter
 
 from backend.app.api.routes.benchmarks import router as benchmarks_router
+from backend.app.api.routes.disruptions import router as disruptions_router
 from backend.app.api.routes.graph import router as graph_router
 from backend.app.api.routes.health import router as health_router
 from backend.app.api.routes.traversal import router as traversal_router
@@ -17,5 +18,6 @@ api_router.include_router(traversal_router, tags=["Traversal"])
 api_router.include_router(validation_router, tags=["Validation"])
 api_router.include_router(benchmarks_router, tags=["Benchmarks"])
 api_router.include_router(health_router, tags=["Health"])
+api_router.include_router(disruptions_router, tags=["Disruptions"])
 
 __all__ = ["api_router"]

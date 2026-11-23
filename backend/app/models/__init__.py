@@ -1,3 +1,7 @@
+from backend.app.models.disruption import (
+    DisruptionEvent,
+    DisruptionType,
+)
 from backend.app.models.edges import (
     BaseEdge,
     EdgeUnion,
@@ -7,6 +11,8 @@ from backend.app.models.edges import (
     create_edge,
 )
 from backend.app.models.graph import SupplyChainGraph
+from backend.app.models.impact import RippleImpactSummary
+from backend.app.models.intervention import InterventionWindowResult
 from backend.app.models.inventory import (
     HourlyStockPoint,
     InventoryDepletionTimeline,
@@ -43,10 +49,13 @@ __all__ = [
     "create_edge",
     # Graph
     "SupplyChainGraph",
-    # Inventory Simulation (Feature 3)
+    # Sprint 2 Disruption Models
+    "DisruptionType",
+    "DisruptionEvent",
+    "RippleImpactSummary",
     "HourlyStockPoint",
     "InventoryDepletionTimeline",
-    # Stockout Prediction (Feature 4 - Anushka)
     "BreachedOrder",
     "StockoutPredictionResult",
+    "InterventionWindowResult",
 ]
