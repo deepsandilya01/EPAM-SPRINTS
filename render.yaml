@@ -1,11 +1,32 @@
 services:
   - type: web
-    name: reflow
-    env: python
+    name: reflow-backend
+    runtime: python
     buildCommand: "pip install -r requirements.txt"
-    startCommand: "python -m backend.app.main"
+    startCommand: "uvicorn backend.app.main:app --host 0.0.0.0 --port $PORT"
+    healthCheckPath: /health
     envVars:
-      - key: PORT
-        value: 10000
       - key: ENVIRONMENT
         value: production
+      - key: PYTHON_VERSION
+        value: "3.11.9"
+      - key: FRONTEND_HOST
+        fromService:
+          type: web
+          name: reflow-frontend
+          property: host
+
+  - type: web
+    name: reflow-frontend
+    runtime: node
+    rootDir: frontend
+    buildCommand: "npm ci && npm run build"
+    startCommand: "npm run start"
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: BACKEND_HOST
+        fromService:
+          type: web
+          name: reflow-backend
+          property: host
