@@ -6,8 +6,7 @@ import sys
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, JSONResponse
-from fastapi.staticfiles import StaticFiles
+from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 BASE_DIR = pathlib.Path(__file__).resolve().parent
@@ -34,13 +33,29 @@ app = FastAPI(
     redoc_url="/redoc",
 )
 
-# CORS Middleware
+# CORS Middleware — explicit origins for development and configured production hosts
+_default_dev_origins = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+]
+_cors_env = os.getenv("CORS_ORIGINS", "")
+_configured_origins = [o.strip().rstrip("/") for o in _cors_env.split(",") if o.strip()]
+_frontend_host = os.getenv("FRONTEND_HOST", "").strip().rstrip("/")
+if _frontend_host:
+    if not _frontend_host.startswith(("http://", "https://")):
+        _frontend_host = f"https://{_frontend_host}"
+    if _frontend_host not in _configured_origins:
+        _configured_origins.append(_frontend_host)
+
+_is_production = os.getenv("ENVIRONMENT", os.getenv("FLASK_ENV", "development")).lower() == "production"
+_allowed_origins = _configured_origins if _configured_origins else ([] if _is_production else _default_dev_origins)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=_allowed_origins,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "DELETE", "OPTIONS"],
+    allow_headers=["Content-Type", "Authorization", "Accept"],
 )
 
 
@@ -59,17 +74,17 @@ async def cookie_state_middleware(request: Request, call_next):
 # Include unified API router (endpoints prefixed with /api)
 app.include_router(api_router)
 
-# Mount static folder
-static_dir = BASE_DIR / "static"
-if static_dir.exists():
-    app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
-
 
 @app.get("/")
 def index():
-    """Serve the interactive supply chain dependency graph visualization demo."""
-    demo_file = static_dir / "sprint-1-demo.html"
-    return FileResponse(demo_file)
+    """Return RE:Flow API service metadata (frontend is decoupled in frontend/)."""
+    return {
+        "status": "online",
+        "service": "RE:Flow — Team PHOTON Decision Intelligence",
+        "version": "2.0.0",
+        "docs": "/docs",
+        "health": "/api/health",
+    }
 
 
 @app.get("/health")
@@ -92,14 +107,6 @@ def root_health():
 @app.exception_handler(StarletteHTTPException)
 async def custom_http_exception_handler(request: Request, exc: StarletteHTTPException):
     if exc.status_code == 404:
-        if request.url.path.startswith("/api/"):
-            return JSONResponse(
-                status_code=404,
-                content={"error": "Resource not found", "status": 404},
-            )
-        demo_file = static_dir / "sprint-1-demo.html"
-        if demo_file.exists():
-            return FileResponse(demo_file, status_code=404)
         return JSONResponse(
             status_code=404,
             content={"error": "Resource not found", "status": 404},
@@ -162,4 +169,4 @@ if __name__ == "__main__":
     import uvicorn
 
     port = int(os.environ.get("PORT", 5001))
-    uvicorn.run("backend.app.main:app", host="0.0.0.0", port=port, reload=True)
+    uvicorn.run("backend.app.main:app", host="0.0.0.0", port=port, reload=not _is_production)

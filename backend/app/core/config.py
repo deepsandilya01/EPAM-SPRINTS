@@ -24,9 +24,6 @@ class Settings:
         default_factory=lambda: BASE_DIR / "data" / "datasets" / "scenario_dataset.json"
     )
 
-    # Static assets path
-    static_dir: pathlib.Path = field(default_factory=lambda: BASE_DIR / "static")
-
     # SLA Performance Thresholds
     max_traversal_latency_ms: float = 10.0
 
