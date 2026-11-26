@@ -6,24 +6,24 @@ import pytest
 
 
 @pytest.mark.integration
-def test_root_serves_html(app_client):
-    """GET / should serve the interactive frontend HTML."""
+def test_root_returns_service_metadata(app_client):
+    """GET / should return API service metadata for the decoupled backend."""
     res = app_client.get("/")
     assert res.status_code == 200
-    assert b"Photon Sprint 1" in res.data
-    assert b"Supply-Chain Graph" in res.data
+    data = res.get_json()
+    assert "RE:Flow" in data["service"]
+    assert data["docs"] == "/docs"
 
 
 @pytest.mark.integration
-def test_static_assets_serve_successfully(app_client):
-    """Verify Flask natively serves both CSS and JavaScript assets with 200 OK."""
-    css_res = app_client.get("/static/css/sprint-1-demo.css")
-    assert css_res.status_code == 200
-    assert b"Photon Sprint 1" in css_res.data or b"glassmorphism" in css_res.data or len(css_res.data) > 100
+def test_openapi_docs_serve_successfully(app_client):
+    """Verify FastAPI OpenAPI schema and Swagger UI serve with 200 OK."""
+    docs_res = app_client.get("/docs")
+    assert docs_res.status_code == 200
 
-    js_res = app_client.get("/static/js/sprint-1-demo.js")
-    assert js_res.status_code == 200
-    assert b"fetchGraph" in js_res.data or b"/api/graph" in js_res.data
+    openapi_res = app_client.get("/openapi.json")
+    assert openapi_res.status_code == 200
+    assert "paths" in openapi_res.get_json()
 
 
 @pytest.mark.integration
