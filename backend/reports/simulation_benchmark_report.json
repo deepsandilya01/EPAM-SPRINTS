@@ -1,0 +1,106 @@
+{
+  "timestamp": "2026-11-26T17:36:21.236511+00:00",
+  "benchmark_name": "RE:Flow Sprint 2 Disruption Simulation Pipeline SLA Benchmark",
+  "owner": "Shanu (Feature 11)",
+  "environment": {
+    "python_version": "3.14.2",
+    "python_implementation": "CPython",
+    "os_system": "Windows",
+    "os_release": "11",
+    "os_version": "10.0.26300",
+    "machine": "AMD64",
+    "processor": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
+    "networkx_version": "3.7"
+  },
+  "workload": {
+    "supplier_id": "SUP-01",
+    "disruption_type": "SUPPLIER_DELAY",
+    "delay_duration_hours": 8.0,
+    "simulation_horizon_hours": 72,
+    "graph_nodes": 19,
+    "graph_edges": 21,
+    "warmup_runs": 50,
+    "iterations": 1000,
+    "sla_target_ms": 25.0,
+    "acceptance_criterion": "100% of runs & P99 latency < 25.0 ms"
+  },
+  "metrics": {
+    "min_ms": 0.1332,
+    "max_ms": 1.1341,
+    "mean_ms": 0.178109,
+    "median_ms": 0.1516,
+    "p90_ms": 0.25005,
+    "p95_ms": 0.316545,
+    "p99_ms": 0.556793,
+    "std_dev_ms": 0.088142
+  },
+  "p50_ms": 0.1516,
+  "p90_ms": 0.25005,
+  "p95_ms": 0.316545,
+  "p99_ms": 0.556793,
+  "mean_ms": 0.178109,
+  "min_ms": 0.1332,
+  "max_ms": 1.1341,
+  "std_dev_ms": 0.088142,
+  "sla_target_ms": 25.0,
+  "iterations": 1000,
+  "under_sla_count": 1000,
+  "sla_compliance_pct": 100.0,
+  "sla_met": true,
+  "overall_status": "PASS",
+  "oracle_verification": {
+    "verified": true,
+    "graph_unmutated": true,
+    "critical_part": "PART-05",
+    "stockout_hour": 8.0,
+    "total_breached": 2,
+    "breached_order_ids": [
+      "ORD-01",
+      "ORD-02"
+    ],
+    "delta_t_hours": 3.0,
+    "intervention_status": "FEASIBLE"
+  },
+  "stage_breakdown": {
+    "ripple_ms": {
+      "min_ms": 0.0097,
+      "max_ms": 0.7128,
+      "mean_ms": 0.016608,
+      "median_ms": 0.0117,
+      "p90_ms": 0.0212,
+      "p95_ms": 0.029155,
+      "p99_ms": 0.083554,
+      "std_dev_ms": 0.027292
+    },
+    "inventory_ms": {
+      "min_ms": 0.0827,
+      "max_ms": 0.9937,
+      "mean_ms": 0.105179,
+      "median_ms": 0.0908,
+      "p90_ms": 0.12751,
+      "p95_ms": 0.17306,
+      "p99_ms": 0.356507,
+      "std_dev_ms": 0.055307
+    },
+    "stockout_ms": {
+      "min_ms": 0.0076,
+      "max_ms": 0.1261,
+      "mean_ms": 0.011864,
+      "median_ms": 0.0093,
+      "p90_ms": 0.01631,
+      "p95_ms": 0.019705,
+      "p99_ms": 0.072601,
+      "std_dev_ms": 0.009928
+    },
+    "intervention_ms": {
+      "min_ms": 0.0044,
+      "max_ms": 0.2129,
+      "mean_ms": 0.008147,
+      "median_ms": 0.0058,
+      "p90_ms": 0.01181,
+      "p95_ms": 0.015105,
+      "p99_ms": 0.038814,
+      "std_dev_ms": 0.01191
+    }
+  }
+}
